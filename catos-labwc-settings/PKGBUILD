@@ -1,0 +1,54 @@
+pkgname=catos-labwc-settings
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="CatOS ready-to-use Labwc session preset"
+arch=('any')
+url='https://www.catos.info/'
+license=('GPL-3.0-or-later')
+depends=(
+  'labwc'
+  'swaybg'
+  'waybar'
+  'mako'
+  'wdisplays'
+  'wlopm'
+  'catos-branding'
+  'catos-gtk-settings'
+  'catos-bibata-cursor'
+  'catos-tela-icon-theme-blue'
+  'fuzzel'
+  'foot'
+  'swayidle'
+  'swaylock'
+  'grim'
+  'slurp'
+  'swappy'
+  'wl-clipboard'
+  'brightnessctl'
+  'playerctl'
+  'wireplumber'
+  'network-manager-applet'
+  'blueman'
+  'pavucontrol'
+  'polkit-gnome'
+  'xdg-desktop-portal-wlr'
+  'xdg-desktop-portal-gtk'
+  'xorg-xwayland'
+  'thunar'
+  'xdg-user-dirs'
+  'dbus'
+)
+makedepends=('git')
+source=("https://bdd.invalid/${pkgname}.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/etc" "${pkgdir}/usr"
+  cp -a etc/. "${pkgdir}/etc/"
+  cp -a usr/. "${pkgdir}/usr/"
+
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
