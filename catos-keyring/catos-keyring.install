@@ -1,0 +1,17 @@
+#!/bin/sh
+
+populate_catos() {
+  if usr/bin/pacman-key -l >/dev/null 2>&1; then
+    usr/bin/pacman-key --populate catos
+  fi
+}
+
+post_install() {
+  if [ -x usr/bin/pacman-key ]; then
+    populate_catos
+  fi
+}
+
+post_upgrade() {
+  populate_catos
+}

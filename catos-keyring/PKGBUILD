@@ -1,0 +1,30 @@
+# Maintainer: Aromatic <symwww@outlook.com>
+
+pkgname=catos-keyring
+pkgver=20260717
+pkgrel=1
+pkgdesc='CatOS PGP keyring'
+arch=('any')
+url='https://catos.info'
+license=('GPL-3.0-or-later')
+depends=('pacman')
+install=catos-keyring.install
+source=(
+  'catos.gpg'
+  'catos-trusted'
+  'catos-revoked'
+)
+sha256sums=(
+  'bdbd070a6657567ca3a07ca42acf11bca4b13d9b1ee9ef39e7be52d488921dfe'
+  '6b1ed269ec1fd94fff436412cc064f3af4b9ba0240fddcd15a8b9c6e893cac4d'
+  'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+)
+
+package() {
+  install -Dm644 catos.gpg \
+    "$pkgdir/usr/share/pacman/keyrings/catos.gpg"
+  install -Dm644 catos-trusted \
+    "$pkgdir/usr/share/pacman/keyrings/catos-trusted"
+  install -Dm644 catos-revoked \
+    "$pkgdir/usr/share/pacman/keyrings/catos-revoked"
+}
