@@ -1,7 +1,7 @@
 # Maintainer: Aromatic <symwww@outlook.com>
 pkgname=catos-hello
 pkgver=0.1.0
-pkgrel=8
+pkgrel=9
 pkgdesc="CatOS Hello - welcome application"
 arch=('x86_64')
 url="https://github.com/Aromatic05/catos-hello"
@@ -15,6 +15,7 @@ sha256sums=('SKIP')
 prepare() {
     cd catos-hello
     sed -i 's/COMMAND lupdate /COMMAND Qt6::lupdate /' CMakeLists.txt
+    sed -i '/add_dependencies(${APP_TARGET} update_translations)/d' CMakeLists.txt
 }
 
 build() {
