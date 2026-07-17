@@ -1,0 +1,59 @@
+pkgname=catos-hyprland-dms
+pkgver=1.0
+pkgrel=2
+pkgdesc="CatOS preset: Hyprland + DMS + Ghostty"
+arch=('any')
+url="https://www.catos.info/"
+license=('GPL')
+depends=(
+  'hyprland'
+  'ghostty'
+  'dms-shell'
+  'quickshell'
+  'accountsservice'
+  'dgop'
+  'xwayland-satellite'
+  'matugen'
+  'xdg-desktop-portal'
+  'xdg-desktop-portal-gtk'
+  'xdg-desktop-portal-hyprland'
+)
+source=(
+  90-dms.conf
+  hyprland.conf
+  hypr-colors.conf
+  hypr-layout.conf
+  hypr-binds.conf
+  ghostty.conf
+  ghostty-colors.conf
+)
+sha256sums=(
+  'dde57e33ad9d9c713440b2f0411c0c42a09ed46c2ee549c4f91627dc374a5661'
+  '3deddd98e5c64127bab5a88f3427589206a857df1387912029cbffccd593509d'
+  '1b1accebafe5bdc90cfc843e967633c6f4704aead890a6bc0313283f386b6ec4'
+  '40f0ddf5d765e667de762a33d455937e20c971e743fb2f801ef90059a52fc23c'
+  'cd4dbc57747de7f35f8483c490d02ae3fb36d624349b885df9b0eb56b83979ca'
+  '0bc0961a586bc37c91b26b28f549f7e8be02c602c105bcb66f1d295544fc4908'
+  '67a2587d2bf6f564f1b6f7889d4579ea8a7d9e73ed61654e935af3ef75180399'
+)
+
+prepare() {
+  sed -i 's/{{TERMINAL_COMMAND}}/ghostty/g' "$srcdir/hyprland.conf"
+  sed -i 's/{{TERMINAL_COMMAND}}/ghostty/g' "$srcdir/hypr-binds.conf"
+}
+
+package() {
+  install -d -m755 "$pkgdir/etc/skel/.config/environment.d"
+  install -d -m755 "$pkgdir/etc/skel/.config/hypr/dms"
+  install -d -m755 "$pkgdir/etc/skel/.config/ghostty/themes"
+  install -Dm644 "$srcdir/90-dms.conf" "$pkgdir/etc/skel/.config/environment.d/90-dms.conf"
+  install -Dm644 "$srcdir/hyprland.conf" "$pkgdir/etc/skel/.config/hypr/hyprland.conf"
+  install -Dm644 "$srcdir/hypr-colors.conf" "$pkgdir/etc/skel/.config/hypr/dms/colors.conf"
+  install -Dm644 "$srcdir/hypr-layout.conf" "$pkgdir/etc/skel/.config/hypr/dms/layout.conf"
+  install -Dm644 "$srcdir/hypr-binds.conf" "$pkgdir/etc/skel/.config/hypr/dms/binds.conf"
+  install -Dm644 "$srcdir/ghostty.conf" "$pkgdir/etc/skel/.config/ghostty/config"
+  install -Dm644 "$srcdir/ghostty-colors.conf" "$pkgdir/etc/skel/.config/ghostty/themes/dankcolors"
+  install -Dm644 /dev/null "$pkgdir/etc/skel/.config/hypr/dms/outputs.conf"
+  install -Dm644 /dev/null "$pkgdir/etc/skel/.config/hypr/dms/cursor.conf"
+  install -Dm644 /dev/null "$pkgdir/etc/skel/.config/hypr/dms/windowrules.conf"
+}

@@ -1,0 +1,18 @@
+pkgname=catos-wallpaper-effects
+pkgver=25.03
+pkgrel=2
+pkgdesc='Wallpaper effects widget for KDE Plasma'
+arch=('any')
+url='https://github.com/luisbocanegra/plasma-wallpaper-effects'
+license=('GPL-3.0-only')
+depends=('plasma-workspace')
+makedepends=('git')
+source=("https://bdd.invalid/catos-wallpaper-effects.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/usr"
+  cp -a usr/. "${pkgdir}/usr/"
+}

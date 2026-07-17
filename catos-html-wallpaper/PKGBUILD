@@ -1,0 +1,18 @@
+pkgname=catos-html-wallpaper
+pkgver=24.04
+pkgrel=3
+pkgdesc='HTML wallpaper plugin for KDE Plasma'
+arch=('any')
+url='https://github.com/Marcel1202/HTMLWallpaper'
+license=('LGPL-2.1-or-later')
+depends=('kdeplasma-addons' 'qt6-webengine')
+makedepends=('git')
+source=("https://bdd.invalid/catos-html-wallpaper.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/usr"
+  cp -a usr/. "${pkgdir}/usr/"
+}

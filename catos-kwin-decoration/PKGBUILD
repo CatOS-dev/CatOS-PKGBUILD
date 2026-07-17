@@ -1,0 +1,40 @@
+pkgname=catos-kwin-decoration
+pkgver=2.1.0
+pkgrel=1
+pkgdesc='Sierra Breeze Enhanced window decoration for KWin'
+arch=('x86_64')
+url='https://github.com/kupiqu/SierraBreezeEnhanced'
+license=('GPL-3.0-only')
+depends=('kwin')
+makedepends=('cmake' 'extra-cmake-modules')
+provides=('kwin-decoration-sierra-breeze-enhanced'
+          'kwin-decoration-sierra-breeze-enhanced-for-catos')
+conflicts=('kwin-decoration-sierra-breeze-enhanced'
+           'kwin-decoration-sierra-breeze-enhanced-git'
+           'kwin-decoration-sierra-breeze-enhanced-for-catos')
+replaces=('kwin-decoration-sierra-breeze-enhanced-for-catos')
+_source_name=SierraBreezeEnhanced
+source=("${_source_name}-${pkgver}.tar.gz::${url}/archive/refs/tags/V.${pkgver}.tar.gz"
+        'fix-qt6-gui-private.patch')
+sha256sums=('f0565c89cccdcc99a4ccf993afd551419fd75dc41544ba2d558850edfb554ae5'
+            'ba223b72325804504c59bbf2efa61880a273c955d65c693cd51c1dfc749588df')
+
+prepare() {
+  patch -d "${_source_name}-V.${pkgver}" -Np1 \
+    -i "${srcdir}/fix-qt6-gui-private.patch"
+}
+
+build() {
+  cmake -B build -S "${_source_name}-V.${pkgver}" \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DKDE_INSTALL_LIBDIR=lib \
+    -DBUILD_TESTING=OFF \
+    -Wno-dev
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}

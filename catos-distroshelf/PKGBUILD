@@ -1,7 +1,7 @@
 # Maintainer: Mark Wagie <mark dot wagie at proton dot me>
 pkgname=catos-distroshelf
 pkgver=1.3.0
-pkgrel=3
+pkgrel=4
 pkgdesc="A GUI for Distrobox containers"
 arch=('x86_64')
 url='https://github.com/Aromatic05/DistroShelf'
@@ -13,13 +13,20 @@ source=("DistroShelf-${pkgver}.tar.gz::${url}/archive/refs/tags/${pkgver}.tar.gz
 sha256sums=('836d2cb94d6b7932ac715ec2ab57f8c4a36263ff96845af677479f45c62cff2e'
             'abe871bac17c4a384b631f517db57d1b28da43e9fb56fec13d22a89eecce3f52')
 
+prepare() {
+  cd "DistroShelf-${pkgver}"
+  export CARGO_HOME="${srcdir}/DistroShelf-${pkgver}/.cargo-home"
+  cargo fetch --locked --manifest-path Cargo.toml
+  sed -i "s|meson.project_build_root()  / 'cargo-home'|meson.project_source_root() / '.cargo-home'|" src/meson.build
+  sed -i "/cargo_opt  =/a cargo_opt += [ '--frozen' ]" src/meson.build
+}
+
 build() {
   export RUSTUP_TOOLCHAIN=stable
-  arch-meson "DistroShelf-${pkgver}" build
-  CARGO_HOME="${srcdir}/build/cargo-home" \
-    cargo fetch --locked --manifest-path "${srcdir}/DistroShelf-${pkgver}/Cargo.toml"
-  CARGO_NET_OFFLINE=true meson compile -C build
+  arch-meson "DistroShelf-${pkgver}" build -Doffline=true
+  meson compile -C build
 }
+
 package() {
   meson install -C build --no-rebuild --destdir "${pkgdir}"
   install -Dm644 "${srcdir}/linuxbox.menu" \

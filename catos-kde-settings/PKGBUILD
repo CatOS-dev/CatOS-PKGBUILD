@@ -1,0 +1,15 @@
+pkgname=catos-kde-settings
+pkgver=2.0
+pkgrel=1
+pkgdesc="CatOS KDE Settings"
+arch=('any')
+url="https://www.catos.info/"
+license=('GPL')
+install="${pkgname}.install"
+makedepends=('git')
+source=("https://bdd.invalid/catos-kde-settings.git")
+sha256sums=('SKIP')
+
+package() {
+  cp -a "$srcdir/etc" "$pkgdir/"
+}
