@@ -1,0 +1,20 @@
+pkgname=catos-plymouth-theme
+pkgver=2.0
+pkgrel=2
+pkgdesc="CatOS Plymouth theme"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('plymouth')
+makedepends=('git')
+source=('https://bdd.invalid/catos-plymouth-theme.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d usr ]]; then
+    install -d "${pkgdir}/usr"
+    cp -a usr/. "${pkgdir}/usr/"
+  fi
+}

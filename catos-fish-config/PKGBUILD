@@ -1,0 +1,34 @@
+pkgname=catos-fish-config
+pkgver=2.1
+pkgrel=2
+pkgdesc="Fish configuration for CatOS"
+arch=('any')
+url="https://github.com/CatOS/${pkgname}"
+license=('GPL')
+depends=(
+  'bat'
+  'expac'
+  'eza'
+  'fastfetch'
+  'fish'
+  'fisher'
+  'fzf'
+  'pkgfile'
+  'tealdeer'
+)
+source=('fish_frozen_theme.fish' 'config.fish' 'catos-config.fish' 'done.fish')
+sha256sums=('67eba76b9437916d47c3cdf39710f53ca4f1593630f05ca7ba2be9a75e677ebb'
+            '8c1101724836a05204e058d94a9f33cba2a73695b66ed0b1de57abfd39b12ddb'
+            '8923233ea224da70c9ae8acaee829043a6169f6e9b22a7c01cdaeae7c7133ae8'
+            '87501c393bef7819224efeec7e886ff1497df7877a6ec8f9f2b063741406bab3')
+
+package() {
+  install -Dm644 "${srcdir}/done.fish" \
+    "${pkgdir}/usr/share/catos-fish-config/conf.d/done.fish"
+  install -Dm644 "${srcdir}/catos-config.fish" \
+    "${pkgdir}/usr/share/catos-fish-config/catos-config.fish"
+  install -Dm644 "${srcdir}/fish_frozen_theme.fish" \
+    "${pkgdir}/etc/skel/.config/fish/conf.d/fish_frozen_theme.fish"
+  install -Dm644 "${srcdir}/config.fish" \
+    "${pkgdir}/etc/skel/.config/fish/config.fish"
+}

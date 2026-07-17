@@ -1,0 +1,14 @@
+pkgbase = catos-mate-settings
+	pkgdesc = CatOS MATE settings
+	pkgver = 2.0
+	pkgrel = 3
+	url = https://catos.info
+	arch = any
+	license = GPL
+	depends = catos-branding
+	source = 99_catos-mate.gschema.override
+	source = catos.layout
+	sha256sums = e50de55a2330ea4d012e7d8279fb9e771f04ccd685d277328cc613e3fa226846
+	sha256sums = 6880e79f10b70c70e27691582513774d718b98fb53a6e8eed360c9ec9c7393df
+
+pkgname = catos-mate-settings

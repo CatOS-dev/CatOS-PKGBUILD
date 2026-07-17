@@ -1,0 +1,17 @@
+pkgbase = catos-tela-icon-theme-blue
+	pkgdesc = Blue color variants of the Tela icon theme
+	pkgver = 2026.07.07
+	pkgrel = 1
+	url = https://github.com/vinceliuice/Tela-icon-theme
+	arch = any
+	license = GPL-3.0-or-later
+	depends = gtk-update-icon-cache
+	depends = hicolor-icon-theme
+	provides = tela-icon-theme-blue
+	conflicts = tela-icon-theme
+	conflicts = tela-icon-theme-git
+	options = !strip
+	source = Tela-icon-theme-2026-07-07.tar.gz::https://github.com/vinceliuice/Tela-icon-theme/archive/refs/tags/2026-07-07.tar.gz
+	sha256sums = 6b8c28f637067a15551459ab90e6720c5aba1215b777b6f1f506fea188a1ddf9
+
+pkgname = catos-tela-icon-theme-blue

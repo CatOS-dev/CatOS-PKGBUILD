@@ -1,0 +1,30 @@
+pkgname=catos-gnome-settings
+pkgver=2.0
+pkgrel=6
+pkgdesc="CatOS GNOME settings"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('catos-branding')
+makedepends=('git')
+source=('https://bdd.invalid/catos-gnome-settings.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d etc ]]; then
+    install -d "${pkgdir}/etc"
+    cp -a etc/. "${pkgdir}/etc/"
+  fi
+  if [[ -d usr ]]; then
+    install -d "${pkgdir}/usr"
+    cp -a usr/. "${pkgdir}/usr/"
+  fi
+
+  install -d "${pkgdir}/usr/share/backgrounds/gnome"
+  ln -s /usr/share/backgrounds/catos.png \
+    "${pkgdir}/usr/share/backgrounds/gnome/catos.png"
+  ln -s /usr/share/backgrounds/catos_dark.png \
+    "${pkgdir}/usr/share/backgrounds/gnome/catos_dark.png"
+}

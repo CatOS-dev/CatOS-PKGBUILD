@@ -1,0 +1,12 @@
+pkgbase = catos-cinnamon-settings
+	pkgdesc = CatOS Cinnamon settings
+	pkgver = 2.0
+	pkgrel = 3
+	url = https://catos.info
+	arch = any
+	license = GPL3
+	depends = catos-branding
+	source = 99_catos-cinnamon.gschema.override
+	sha256sums = 3d5ce1aeed2d6212bd8663867f36ac0f0777f8bf17ec51a701a23877e8216fba
+
+pkgname = catos-cinnamon-settings

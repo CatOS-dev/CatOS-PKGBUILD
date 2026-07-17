@@ -1,0 +1,24 @@
+pkgname=catos-branding
+pkgver=1.0
+pkgrel=4
+pkgdesc="CatOS branding"
+arch=('any')
+url='https://github.com/CatOS-Home/CatOS'
+license=('GPL')
+makedepends=('git')
+install="${pkgname}.install"
+source=('https://bdd.invalid/catos-branding.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d etc ]]; then
+    install -d "${pkgdir}/etc"
+    cp -a etc/. "${pkgdir}/etc/"
+  fi
+  if [[ -d usr ]]; then
+    install -d "${pkgdir}/usr"
+    cp -a usr/. "${pkgdir}/usr/"
+  fi
+}

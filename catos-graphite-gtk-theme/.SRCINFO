@@ -1,0 +1,20 @@
+pkgbase = catos-graphite-gtk-theme
+	pkgdesc = CatOS Graphite GTK theme
+	pkgver = 1.0
+	pkgrel = 2
+	url = https://github.com/vinceliuice/Graphite-gtk-theme
+	arch = any
+	license = GPL2
+	makedepends = git
+	makedepends = sassc
+	depends = gnome-themes-extra
+	optdepends = gtk-engine-murrine: GTK2 theme support
+	provides = graphite-gtk-theme
+	conflicts = graphite-gtk-theme
+	options = !strip
+	source = https://bdd.invalid/Graphite-gtk-theme.git
+	source = Graphite-backgrounds.xml
+	sha256sums = SKIP
+	sha256sums = fa9375e5e5e1ea3e0591cfb72373510e3727ee753f9dc3c997eeec1f43eb0526
+
+pkgname = catos-graphite-gtk-theme

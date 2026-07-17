@@ -1,10 +1,10 @@
 pkgbase = chwd
-	pkgdesc = CachyOS Hardware Detection Tool
+	pkgdesc = CatOS hardware detection tool
 	pkgver = 1.21.0.r9.g8ee72f5
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/Aromatic05/chwd
 	arch = x86_64
-	groups = cachyos
+	groups = catos
 	license = GPL-3.0-or-later
 	makedepends = git
 	makedepends = cargo

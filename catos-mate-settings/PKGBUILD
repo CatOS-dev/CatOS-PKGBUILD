@@ -1,0 +1,18 @@
+pkgname=catos-mate-settings
+pkgver=2.0
+pkgrel=3
+pkgdesc="CatOS MATE settings"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('catos-branding')
+source=('99_catos-mate.gschema.override' 'catos.layout')
+sha256sums=('e50de55a2330ea4d012e7d8279fb9e771f04ccd685d277328cc613e3fa226846'
+            '6880e79f10b70c70e27691582513774d718b98fb53a6e8eed360c9ec9c7393df')
+
+package() {
+  install -Dm644 "${srcdir}/99_catos-mate.gschema.override" \
+    "${pkgdir}/usr/share/glib-2.0/schemas/99_catos-mate.gschema.override"
+  install -Dm644 "${srcdir}/catos.layout" \
+    "${pkgdir}/usr/share/mate-panel/layouts/catos.layout"
+}

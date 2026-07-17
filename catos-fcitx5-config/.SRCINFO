@@ -1,0 +1,26 @@
+pkgbase = catos-fcitx5-config
+	pkgdesc = CatOS Fcitx5 settings
+	pkgver = 2.0
+	pkgrel = 3
+	url = https://catos.info
+	install = catos-fcitx5-config.install
+	arch = any
+	license = GPL
+	depends = fcitx5
+	depends = fcitx5-configtool
+	depends = fcitx5-gtk
+	depends = fcitx5-qt
+	depends = fcitx5-chinese-addons
+	depends = fcitx5-pinyin-moegirl
+	depends = fcitx5-pinyin-zhwiki
+	depends = fcitx5-material-color
+	source = config
+	source = classicui.conf
+	source = im-env.desktop
+	source = im-env.sh
+	sha256sums = d7496e7746c1c326d58e8679fd721369d8e90eb4821806b1d9e9a281981cb680
+	sha256sums = c6f19f0dff6a09447cf13dd9c9d54790b917321cd42a58d73534e03dc572d6f2
+	sha256sums = b81acbba84ef57037227466cecc27c77d6eda9bf81862214f136f08589ce612a
+	sha256sums = 38f451701d4fbd50dbc681902ac5d723b17aa3be9389c7ee8d76554d06fbd9c5
+
+pkgname = catos-fcitx5-config

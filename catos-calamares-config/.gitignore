@@ -1,0 +1,10 @@
+*.iso
+*.zst
+pkg/**
+src/**
+catos-calamares-config/**
+.DS_Store
+__pycache__/
+*.pyc
+.vscode/
+.venv/

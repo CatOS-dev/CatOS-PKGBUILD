@@ -1,0 +1,26 @@
+pkgbase = catos-fish-config
+	pkgdesc = Fish configuration for CatOS
+	pkgver = 2.1
+	pkgrel = 2
+	url = https://github.com/CatOS/catos-fish-config
+	arch = any
+	license = GPL
+	depends = bat
+	depends = expac
+	depends = eza
+	depends = fastfetch
+	depends = fish
+	depends = fisher
+	depends = fzf
+	depends = pkgfile
+	depends = tealdeer
+	source = fish_frozen_theme.fish
+	source = config.fish
+	source = catos-config.fish
+	source = done.fish
+	sha256sums = 67eba76b9437916d47c3cdf39710f53ca4f1593630f05ca7ba2be9a75e677ebb
+	sha256sums = 8c1101724836a05204e058d94a9f33cba2a73695b66ed0b1de57abfd39b12ddb
+	sha256sums = 8923233ea224da70c9ae8acaee829043a6169f6e9b22a7c01cdaeae7c7133ae8
+	sha256sums = 87501c393bef7819224efeec7e886ff1497df7877a6ec8f9f2b063741406bab3
+
+pkgname = catos-fish-config

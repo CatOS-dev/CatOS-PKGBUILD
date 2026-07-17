@@ -1,0 +1,28 @@
+pkgname=catos-calamares-config
+pkgver=26.05
+pkgrel=3
+pkgdesc="Calamares configuration for CatOS"
+arch=('any')
+url='https://github.com/Aromatic05/catos-calamares-config'
+license=('GPL3')
+depends=('catos-branding')
+makedepends=('git')
+conflicts=('alci-calamares-config'
+           'alci-calamares-config-dev'
+           'alci-calamares-config-pure'
+           'alci-calamares-config-btrfs')
+source=('https://bdd.invalid/catos-calamares-config.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d etc ]]; then
+    install -d "${pkgdir}/etc"
+    cp -a etc/. "${pkgdir}/etc/"
+  fi
+  if [[ -d usr ]]; then
+    install -d "${pkgdir}/usr"
+    cp -a usr/. "${pkgdir}/usr/"
+  fi
+}

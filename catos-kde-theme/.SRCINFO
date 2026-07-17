@@ -1,0 +1,13 @@
+pkgbase = catos-kde-theme
+	pkgdesc = CatOS KDE theme
+	pkgver = 1.0
+	pkgrel = 5
+	url = https://catos.info
+	arch = any
+	license = GPL
+	makedepends = git
+	depends = catos-branding
+	source = https://bdd.invalid/catos-kde-theme.git
+	sha256sums = SKIP
+
+pkgname = catos-kde-theme

@@ -1,0 +1,17 @@
+pkgbase = catos-calamares-config
+	pkgdesc = Calamares configuration for CatOS
+	pkgver = 26.05
+	pkgrel = 3
+	url = https://github.com/Aromatic05/catos-calamares-config
+	arch = any
+	license = GPL3
+	makedepends = git
+	depends = catos-branding
+	conflicts = alci-calamares-config
+	conflicts = alci-calamares-config-dev
+	conflicts = alci-calamares-config-pure
+	conflicts = alci-calamares-config-btrfs
+	source = https://bdd.invalid/catos-calamares-config.git
+	sha256sums = SKIP
+
+pkgname = catos-calamares-config

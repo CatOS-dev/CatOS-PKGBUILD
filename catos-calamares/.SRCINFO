@@ -1,7 +1,7 @@
 pkgbase = catos-calamares
 	pkgdesc = Distribution-independent installer framework
 	pkgver = 26.07
-	pkgrel = 1
+	pkgrel = 2
 	url = https://codeberg.org/Aromatic/calamares
 	arch = x86_64
 	license = BSD-2-Clause
@@ -23,7 +23,6 @@ pkgbase = catos-calamares
 	depends = yaml-cpp
 	depends = qt6-base
 	depends = kcoreaddons
-	depends = qt6-base
 	depends = qt6-svg
 	depends = kirigami
 	depends = python

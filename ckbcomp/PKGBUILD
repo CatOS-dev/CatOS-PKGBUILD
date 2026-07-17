@@ -1,0 +1,20 @@
+# Maintainer: aur.chaotic.cx
+# Contributor: Nissar Chababy <funilrys at outlook dot com>
+# Contributor: Jeroen Bollen <jbinero at gmail dot comau>
+
+pkgname=ckbcomp
+pkgver=1.248
+pkgrel=2
+pkgdesc="Compile an XKB keyboard description to a keymap suitable for loadkeys or kbdcontrol"
+arch=('any')
+url='https://salsa.debian.org/installer-team/console-setup'
+license=('GPL-2.0-or-later')
+depends=('perl')
+_pkgsrc="console-setup-${pkgver}"
+source=("${_pkgsrc}.tar.gz::${url}/-/archive/${pkgver}/${_pkgsrc}.tar.gz")
+sha256sums=('55b27b3da435b43fc4dda66140fe7729bd47a6424829e78a9b4ec85ced532eac')
+
+package() {
+  cd "${_pkgsrc}"
+  install -Dm755 Keyboard/ckbcomp -t "${pkgdir}/usr/bin/"
+}

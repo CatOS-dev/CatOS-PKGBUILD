@@ -1,0 +1,34 @@
+pkgname=catos-fcitx5-config
+pkgver=2.0
+pkgrel=3
+pkgdesc="CatOS Fcitx5 settings"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+install="${pkgname}.install"
+depends=(
+  'fcitx5'
+  'fcitx5-configtool'
+  'fcitx5-gtk'
+  'fcitx5-qt'
+  'fcitx5-chinese-addons'
+  'fcitx5-pinyin-moegirl'
+  'fcitx5-pinyin-zhwiki'
+  'fcitx5-material-color'
+)
+source=('config' 'classicui.conf' 'im-env.desktop' 'im-env.sh')
+sha256sums=('d7496e7746c1c326d58e8679fd721369d8e90eb4821806b1d9e9a281981cb680'
+            'c6f19f0dff6a09447cf13dd9c9d54790b917321cd42a58d73534e03dc572d6f2'
+            'b81acbba84ef57037227466cecc27c77d6eda9bf81862214f136f08589ce612a'
+            '38f451701d4fbd50dbc681902ac5d723b17aa3be9389c7ee8d76554d06fbd9c5')
+
+package() {
+  install -Dm644 "${srcdir}/config" \
+    "${pkgdir}/etc/skel/.config/fcitx5/config"
+  install -Dm644 "${srcdir}/classicui.conf" \
+    "${pkgdir}/etc/skel/.config/fcitx5/conf/classicui.conf"
+  install -Dm644 "${srcdir}/im-env.desktop" \
+    "${pkgdir}/etc/skel/.config/autostart/im-env.desktop"
+  install -Dm755 "${srcdir}/im-env.sh" \
+    "${pkgdir}/etc/skel/.local/bin/im-env.sh"
+}

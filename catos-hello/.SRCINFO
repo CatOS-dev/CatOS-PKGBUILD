@@ -1,0 +1,22 @@
+pkgbase = catos-hello
+	pkgdesc = CatOS Hello - welcome application
+	pkgver = 0.1.0
+	pkgrel = 6
+	url = https://github.com/Aromatic05/catos-hello
+	arch = x86_64
+	license = GPL
+	makedepends = git
+	makedepends = cmake
+	makedepends = gcc
+	makedepends = make
+	makedepends = qt6-tools
+	makedepends = qt5-translations
+	depends = qt6-base
+	depends = rate-mirrors
+	depends = lshw
+	depends = inxi
+	depends = lsb-release
+	source = https://bdd.invalid/catos-hello.git
+	sha256sums = SKIP
+
+pkgname = catos-hello

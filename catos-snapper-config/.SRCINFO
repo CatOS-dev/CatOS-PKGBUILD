@@ -1,0 +1,15 @@
+pkgbase = catos-snapper-config
+	pkgdesc = CatOS Snapper configuration template
+	pkgver = 1.0
+	pkgrel = 2
+	url = https://github.com/CatOS/catos-snapper-support
+	install = catos-snapper-config.install
+	arch = any
+	license = GPL-3.0-or-later
+	depends = snapper
+	depends = snap-pac
+	conflicts = timeshift
+	source = snapper-template-root-catos
+	sha512sums = 5257ffd4af68da66fa3b29bba06967dac1a71eb66cba71fa402ec36339f845567af14a07f34972a9e67fa78a83a6864bb656d8ebc3efd809a3b8e4ba9663e10f
+
+pkgname = catos-snapper-config

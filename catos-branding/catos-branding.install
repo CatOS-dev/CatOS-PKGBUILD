@@ -1,0 +1,19 @@
+post_install() {
+    # 检查文件是否存在
+    if [ -f "/etc/issue" ]; then
+        rm /etc/issue
+    fi
+    ln -s /etc/catos-issue /etc/issue
+    if [ -f "/etc/os-release" ]; then
+        rm /etc/os-release
+    fi
+    ln -s /etc/catos-os-release /etc/os-release
+    if [ -f "/etc/lsb-release" ]; then
+        rm /etc/lsb-release
+    fi
+    ln -s /etc/catos-lsb-release /etc/lsb-release
+}
+
+post_upgrade() {
+    post_install
+}

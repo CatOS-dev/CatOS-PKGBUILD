@@ -3,7 +3,7 @@
 
 pkgname=('catos-calamares')
 pkgver=26.07
-pkgrel=1
+pkgrel=2
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
 url="https://codeberg.org/Aromatic/calamares"
@@ -24,7 +24,6 @@ depends=('sh'
   'yaml-cpp'
   'qt6-base'
   'kcoreaddons'
-  'qt6-base'
   'qt6-svg'
   'kirigami'
   'python'

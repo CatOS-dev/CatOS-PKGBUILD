@@ -1,0 +1,18 @@
+# Maintainer: dalto <dalto at fastmail.com>
+# Co-Maintainer: joekamprad <joekamprad at endeavouros.com>
+
+pkgname=catos-cinnamon-settings
+pkgver=2.0
+pkgrel=3
+pkgdesc="CatOS Cinnamon settings"
+arch=('any')
+url='https://catos.info'
+license=('GPL3')
+depends=('catos-branding')
+source=('99_catos-cinnamon.gschema.override')
+sha256sums=('3d5ce1aeed2d6212bd8663867f36ac0f0777f8bf17ec51a701a23877e8216fba')
+
+package() {
+  install -Dm644 "${srcdir}/99_catos-cinnamon.gschema.override" \
+    "${pkgdir}/usr/share/glib-2.0/schemas/99_catos-cinnamon.gschema.override"
+}

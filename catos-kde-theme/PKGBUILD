@@ -1,0 +1,20 @@
+pkgname=catos-kde-theme
+pkgver=1.0
+pkgrel=5
+pkgdesc="CatOS KDE theme"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('catos-branding')
+makedepends=('git')
+source=('https://bdd.invalid/catos-kde-theme.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d usr ]]; then
+    install -d "${pkgdir}/usr"
+    cp -a usr/. "${pkgdir}/usr/"
+  fi
+}

@@ -1,0 +1,39 @@
+# Maintainer: Mark Wagie <mark dot wagie at proton dot me>
+pkgname=catos-orchis-gtk-theme
+pkgver=2.0
+pkgrel=2
+pkgdesc="A Material Design theme for GNOME/GTK based desktop environments"
+arch=('any')
+url='https://github.com/vinceliuice/Orchis-theme'
+license=('GPL-3.0-or-later')
+makedepends=('git' 'sassc')
+optdepends=('gnome-themes-extra: GTK2 theme support'
+            'gtk-engine-murrine: GTK2 theme support'
+            'kvantum-theme-orchis: matching Kvantum theme'
+            'tela-circle-icon-theme: recommended icon theme'
+            'vimix-cursors: recommended cursor theme')
+options=('!strip')
+install="${pkgname}.install"
+source=('https://bdd.invalid/Orchis-theme.git'
+        'Graphite-gtk-theme::git+https://github.com/vinceliuice/Graphite-gtk-theme.git#commit=4791d68e4dc90724b1e400fe0514defffe1381cc')
+sha256sums=('SKIP' 'SKIP')
+
+prepare() {
+  rm -rf Orchis-theme/Graphite-gtk-theme
+  cp -a Graphite-gtk-theme Orchis-theme/Graphite-gtk-theme
+
+  sed -i '/\$float:/s/false/true/' Orchis-theme/Graphite-gtk-theme/src/sass/_tweaks.scss
+  sed -i '/\$colorful:/s/false/true/' Orchis-theme/Graphite-gtk-theme/src/sass/_tweaks.scss
+}
+
+package() {
+  cd Orchis-theme
+  install -d "${pkgdir}/usr/share/themes"
+  ./install.sh --graphite-shell -t all --round 6px \
+    --tweaks primary submenu macos dock nord \
+    -d "${pkgdir}/usr/share/themes"
+
+  install -Dm644 wallpaper/*.jpg -t "${pkgdir}/usr/share/backgrounds/orchis/"
+  install -d "${pkgdir}/usr/share/doc/${pkgname}"
+  cp -a src/firefox "${pkgdir}/usr/share/doc/${pkgname}/"
+}

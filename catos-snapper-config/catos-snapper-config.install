@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+post_install() {
+    systemctl enable snapper-cleanup.timer
+
+    if [[ -e /etc/snapper/configs/root ]]; then
+        echo "Snapper root configuration already exists; leaving it unchanged"
+        return
+    fi
+
+    echo "Creating Snapper configuration for the root subvolume"
+    if [[ "$(stat -c %d:%i /)" != "$(stat -c %d:%i /proc/1/root/.)" ]]; then
+        snapper --no-dbus -c root create-config --template catos-root /
+    else
+        snapper -c root create-config --template catos-root /
+    fi
+}

@@ -1,0 +1,13 @@
+pkgbase = catos-plymouth-theme
+	pkgdesc = CatOS Plymouth theme
+	pkgver = 2.0
+	pkgrel = 2
+	url = https://catos.info
+	arch = any
+	license = GPL
+	makedepends = git
+	depends = plymouth
+	source = https://bdd.invalid/catos-plymouth-theme.git
+	sha256sums = SKIP
+
+pkgname = catos-plymouth-theme

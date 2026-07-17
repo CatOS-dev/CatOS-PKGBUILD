@@ -1,0 +1,20 @@
+pkgname=catos-gtk-settings
+pkgver=1.0
+pkgrel=3
+pkgdesc="Default GTK settings for CatOS"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('catos-branding' 'catos-graphite-gtk-theme')
+makedepends=('git')
+source=('https://bdd.invalid/catos-gtk-settings.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d etc ]]; then
+    install -d "${pkgdir}/etc"
+    cp -a etc/. "${pkgdir}/etc/"
+  fi
+}

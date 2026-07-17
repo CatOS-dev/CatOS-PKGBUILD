@@ -1,0 +1,13 @@
+pkgbase = catos-gnome-settings
+	pkgdesc = CatOS GNOME settings
+	pkgver = 2.0
+	pkgrel = 6
+	url = https://catos.info
+	arch = any
+	license = GPL
+	makedepends = git
+	depends = catos-branding
+	source = https://bdd.invalid/catos-gnome-settings.git
+	sha256sums = SKIP
+
+pkgname = catos-gnome-settings

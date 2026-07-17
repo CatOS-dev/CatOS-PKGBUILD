@@ -1,0 +1,12 @@
+[org.cinnamon.desktop.background]
+picture-uri='file:///usr/share/backgrounds/catos.png'
+
+[org.cinnamon.desktop.interface]
+cursor-theme='Bibata-Modern-Classic'
+gtk-theme='Graphite-blue-Dark-nord'
+
+[org.cinnamon.theme]
+name='Graphite-blue-Dark-nord'
+
+[org.cinnamon.desktop.interface]
+icon-theme='Tela-circle-blue-dark'

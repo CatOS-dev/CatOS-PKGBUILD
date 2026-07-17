@@ -1,0 +1,26 @@
+pkgname=catos-xfce-settings
+pkgver=2.0
+pkgrel=3
+pkgdesc="Default Xfce settings for CatOS"
+arch=('any')
+url='https://catos.info'
+license=('GPL')
+depends=('catos-branding')
+makedepends=('git')
+source=('https://bdd.invalid/catos-xfce-settings.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  if [[ -d etc ]]; then
+    install -d "${pkgdir}/etc"
+    cp -a etc/. "${pkgdir}/etc/"
+  fi
+
+  install -d "${pkgdir}/usr/share/backgrounds/xfce"
+  ln -s /usr/share/backgrounds/catos.png \
+    "${pkgdir}/usr/share/backgrounds/xfce/catos.png"
+  ln -s /usr/share/backgrounds/catos_dark.png \
+    "${pkgdir}/usr/share/backgrounds/xfce/catos_dark.png"
+}

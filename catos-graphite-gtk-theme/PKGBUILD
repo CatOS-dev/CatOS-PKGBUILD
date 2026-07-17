@@ -1,0 +1,34 @@
+pkgname=catos-graphite-gtk-theme
+_pkgname='Graphite-gtk-theme'
+pkgver=1.0
+pkgrel=2
+pkgdesc="CatOS Graphite GTK theme"
+arch=('any')
+url="https://github.com/vinceliuice/${_pkgname}"
+license=('GPL2')
+depends=('gnome-themes-extra')
+makedepends=('git' 'sassc')
+optdepends=('gtk-engine-murrine: GTK2 theme support')
+provides=('graphite-gtk-theme')
+conflicts=('graphite-gtk-theme')
+options=('!strip')
+source=('https://bdd.invalid/Graphite-gtk-theme.git' 'Graphite-backgrounds.xml')
+sha256sums=('SKIP'
+            'fa9375e5e5e1ea3e0591cfb72373510e3727ee753f9dc3c997eeec1f43eb0526')
+
+package() {
+  local theme_dir="${pkgdir}/usr/share/themes"
+  local properties_dir="${pkgdir}/usr/share/gnome-background-properties"
+  local wallpaper_dir="${pkgdir}/usr/share/backgrounds/Graphite"
+
+  install -Dm644 "${srcdir}/Graphite-backgrounds.xml" \
+    "${properties_dir}/Graphite-backgrounds.xml"
+  install -d "${theme_dir}" "${wallpaper_dir}"
+  cp -a "${srcdir}/${_pkgname}/wallpaper/wallpapers-nord/." "${wallpaper_dir}/"
+  cp -a "${srcdir}/${_pkgname}/wallpaper/wallpapers/." "${wallpaper_dir}/"
+
+  cd "${srcdir}/${_pkgname}"
+  ./install.sh -t all -d "${theme_dir}" --tweaks macos float colorful darker
+  ./install.sh -t all -d "${theme_dir}" --tweaks macos nord float colorful darker
+  ./install.sh -t all -d "${theme_dir}" --tweaks macos nord float colorful darker -s compact
+}

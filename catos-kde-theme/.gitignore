@@ -1,0 +1,5 @@
+*.iso
+*.zst
+pkg/**
+src/**
+catos-kde-theme/

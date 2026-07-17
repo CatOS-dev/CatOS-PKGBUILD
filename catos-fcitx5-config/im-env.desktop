@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Import IM environment
+Comment=Import input method environment into systemd user manager
+Exec=/bin/bash -c '. ~/.local/bin/im-env.sh && systemctl --user import-environment GTK_IM_MODULE QT_IM_MODULE XMODIFIERS SDL_IM_MODULE'
+Terminal=false
+NoDisplay=true

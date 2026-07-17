@@ -1,0 +1,33 @@
+# Maintainer: Mark Wagie <mark dot wagie at proton dot me>
+pkgname=catos-distroshelf
+pkgver=1.3.0
+pkgrel=2
+pkgdesc="A GUI for Distrobox containers"
+arch=('x86_64')
+url='https://github.com/Aromatic05/DistroShelf'
+license=('GPL-3.0-or-later')
+depends=('distrobox' 'gtk4' 'libadwaita' 'vte4' 'which')
+makedepends=('cargo' 'meson')
+source=("DistroShelf-${pkgver}.tar.gz::${url}/archive/refs/tags/${pkgver}.tar.gz"
+        'linuxbox.menu')
+sha256sums=('836d2cb94d6b7932ac715ec2ab57f8c4a36263ff96845af677479f45c62cff2e'
+            'abe871bac17c4a384b631f517db57d1b28da43e9fb56fec13d22a89eecce3f52')
+
+prepare() {
+  cd "DistroShelf-${pkgver}"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  export RUSTUP_TOOLCHAIN=stable
+  export CARGO_NET_OFFLINE=true
+  arch-meson "DistroShelf-${pkgver}" build
+  meson compile -C build
+}
+
+package() {
+  meson install -C build --no-rebuild --destdir "${pkgdir}"
+  install -Dm644 "${srcdir}/linuxbox.menu" \
+    "${pkgdir}/etc/xdg/menus/applications-merged/linuxbox.menu"
+}
