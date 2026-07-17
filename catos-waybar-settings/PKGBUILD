@@ -1,6 +1,6 @@
 pkgname=catos-waybar-settings
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Shared compositor-aware Waybar profiles for CatOS"
 arch=('any')
 url='https://www.catos.info/'
@@ -8,14 +8,16 @@ license=('GPL-3.0-or-later')
 depends=(
   'waybar'
   'fuzzel'
-  'foot'
   'ttf-jetbrains-mono-nerd'
-  'network-manager-applet'
-  'blueman'
-  'pavucontrol'
-  'wireplumber'
   'procps-ng'
   'systemd'
+)
+optdepends=(
+  'foot: default terminal used by the launcher shortcut'
+  'network-manager-applet: graphical network connection editor'
+  'blueman: graphical Bluetooth manager'
+  'pavucontrol: graphical audio mixer'
+  'wireplumber: PipeWire session manager and audio status'
 )
 makedepends=('git')
 source=("https://bdd.invalid/catos-waybar-settings.git")

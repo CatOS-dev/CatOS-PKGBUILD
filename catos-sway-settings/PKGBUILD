@@ -1,6 +1,6 @@
 pkgname=catos-sway-settings
 pkgver=1.0.0
-pkgrel=1
+pkgrel=2
 pkgdesc="CatOS ready-to-use Sway session preset"
 arch=('any')
 url='https://www.catos.info/'
@@ -9,33 +9,35 @@ depends=(
   'sway'
   'swaybg'
   'catos-waybar-settings'
-  'mako'
-  'wdisplays'
   'catos-branding'
-  'catos-gtk-settings'
-  'catos-bibata-cursor'
-  'catos-tela-icon-theme-blue'
+  'mako'
   'fuzzel'
   'foot'
   'swayidle'
   'swaylock'
-  'grim'
-  'slurp'
-  'swappy'
-  'wl-clipboard'
-  'brightnessctl'
-  'playerctl'
-  'wireplumber'
-  'network-manager-applet'
-  'blueman'
-  'pavucontrol'
   'polkit-gnome'
   'xdg-desktop-portal-wlr'
   'xdg-desktop-portal-gtk'
-  'xorg-xwayland'
-  'thunar'
-  'xdg-user-dirs'
   'dbus'
+)
+optdepends=(
+  'wdisplays: graphical output configuration'
+  'thunar: default file manager shortcut'
+  'grim: screenshot capture'
+  'slurp: interactive screenshot region selection'
+  'swappy: screenshot annotation'
+  'wl-clipboard: Wayland clipboard tools'
+  'brightnessctl: hardware brightness shortcuts'
+  'playerctl: media key support'
+  'wireplumber: wpctl audio shortcuts and Waybar audio status'
+  'network-manager-applet: network tray applet and connection editor'
+  'blueman: Bluetooth tray applet and manager'
+  'pavucontrol: graphical audio mixer'
+  'xorg-xwayland: X11 application support'
+  'xdg-user-dirs: standard user directory discovery'
+  'catos-gtk-settings: CatOS GTK appearance'
+  'catos-bibata-cursor: CatOS cursor theme'
+  'catos-tela-icon-theme-blue: CatOS icon theme'
 )
 makedepends=('git')
 source=("https://bdd.invalid/catos-sway-settings.git")
