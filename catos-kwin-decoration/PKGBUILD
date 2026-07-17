@@ -17,7 +17,7 @@ _source_name=SierraBreezeEnhanced
 source=("${_source_name}-${pkgver}.tar.gz::${url}/archive/refs/tags/V.${pkgver}.tar.gz"
         'fix-qt6-gui-private.patch')
 sha256sums=('f0565c89cccdcc99a4ccf993afd551419fd75dc41544ba2d558850edfb554ae5'
-            'ba223b72325804504c59bbf2efa61880a273c955d65c693cd51c1dfc749588df')
+            '62407b2148978ccd615f2d17d7b1bff5b22a769c21f3d2ba1d1476122d267649')
 
 prepare() {
   patch -d "${_source_name}-V.${pkgver}" -Np1 \
