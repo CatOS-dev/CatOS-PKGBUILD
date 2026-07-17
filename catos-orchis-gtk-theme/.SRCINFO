@@ -1,7 +1,7 @@
 pkgbase = catos-orchis-gtk-theme
 	pkgdesc = A Material Design theme for GNOME/GTK based desktop environments
 	pkgver = 2.0
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/vinceliuice/Orchis-theme
 	install = catos-orchis-gtk-theme.install
 	arch = any
@@ -15,7 +15,7 @@ pkgbase = catos-orchis-gtk-theme
 	optdepends = vimix-cursors: recommended cursor theme
 	options = !strip
 	source = https://bdd.invalid/Orchis-theme.git
-	source = Graphite-gtk-theme::git+https://github.com/vinceliuice/Graphite-gtk-theme.git#commit=4791d68e4dc90724b1e400fe0514defffe1381cc
+	source = orchis-graphite::git+https://github.com/vinceliuice/Graphite-gtk-theme.git#commit=4791d68e4dc90724b1e400fe0514defffe1381cc
 	sha256sums = SKIP
 	sha256sums = SKIP
 

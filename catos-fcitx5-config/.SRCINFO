@@ -1,7 +1,7 @@
 pkgbase = catos-fcitx5-config
 	pkgdesc = CatOS Fcitx5 settings
 	pkgver = 2.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://catos.info
 	install = catos-fcitx5-config.install
 	arch = any
@@ -18,8 +18,8 @@ pkgbase = catos-fcitx5-config
 	source = classicui.conf
 	source = im-env.desktop
 	source = im-env.sh
-	sha256sums = d7496e7746c1c326d58e8679fd721369d8e90eb4821806b1d9e9a281981cb680
-	sha256sums = c6f19f0dff6a09447cf13dd9c9d54790b917321cd42a58d73534e03dc572d6f2
+	sha256sums = 174a77914bbe3c52ce8322a7a0010475a2496678d00df6d5074fbb0260157852
+	sha256sums = a8f6a968540db4316b933e60a26cb0c79eaa5bd7ee0774b8dde573612138c124
 	sha256sums = b81acbba84ef57037227466cecc27c77d6eda9bf81862214f136f08589ce612a
 	sha256sums = 38f451701d4fbd50dbc681902ac5d723b17aa3be9389c7ee8d76554d06fbd9c5
 

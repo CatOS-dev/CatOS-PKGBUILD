@@ -1,7 +1,7 @@
 # Maintainer: Mark Wagie <mark dot wagie at proton dot me>
 pkgname=catos-orchis-gtk-theme
 pkgver=2.0
-pkgrel=2
+pkgrel=3
 pkgdesc="A Material Design theme for GNOME/GTK based desktop environments"
 arch=('any')
 url='https://github.com/vinceliuice/Orchis-theme'
@@ -15,12 +15,12 @@ optdepends=('gnome-themes-extra: GTK2 theme support'
 options=('!strip')
 install="${pkgname}.install"
 source=('https://bdd.invalid/Orchis-theme.git'
-        'Graphite-gtk-theme::git+https://github.com/vinceliuice/Graphite-gtk-theme.git#commit=4791d68e4dc90724b1e400fe0514defffe1381cc')
+        'orchis-graphite::git+https://github.com/vinceliuice/Graphite-gtk-theme.git#commit=4791d68e4dc90724b1e400fe0514defffe1381cc')
 sha256sums=('SKIP' 'SKIP')
 
 prepare() {
   rm -rf Orchis-theme/Graphite-gtk-theme
-  cp -a Graphite-gtk-theme Orchis-theme/Graphite-gtk-theme
+  cp -a orchis-graphite Orchis-theme/Graphite-gtk-theme
 
   sed -i '/\$float:/s/false/true/' Orchis-theme/Graphite-gtk-theme/src/sass/_tweaks.scss
   sed -i '/\$colorful:/s/false/true/' Orchis-theme/Graphite-gtk-theme/src/sass/_tweaks.scss
