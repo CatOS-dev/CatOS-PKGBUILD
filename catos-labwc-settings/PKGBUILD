@@ -8,7 +8,7 @@ license=('GPL-3.0-or-later')
 depends=(
   'labwc'
   'swaybg'
-  'waybar'
+  'catos-waybar-settings'
   'mako'
   'wdisplays'
   'wlopm'

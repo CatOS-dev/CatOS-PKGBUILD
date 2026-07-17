@@ -1,0 +1,22 @@
+pkgbase = catos-waybar-settings
+	pkgdesc = Shared compositor-aware Waybar profiles for CatOS
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://www.catos.info/
+	arch = any
+	license = GPL-3.0-or-later
+	makedepends = git
+	depends = waybar
+	depends = fuzzel
+	depends = foot
+	depends = ttf-jetbrains-mono-nerd
+	depends = network-manager-applet
+	depends = blueman
+	depends = pavucontrol
+	depends = wireplumber
+	depends = procps-ng
+	depends = systemd
+	source = https://bdd.invalid/catos-waybar-settings.git
+	sha256sums = SKIP
+
+pkgname = catos-waybar-settings

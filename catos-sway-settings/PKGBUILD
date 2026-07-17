@@ -8,7 +8,7 @@ license=('GPL-3.0-or-later')
 depends=(
   'sway'
   'swaybg'
-  'waybar'
+  'catos-waybar-settings'
   'mako'
   'wdisplays'
   'catos-branding'

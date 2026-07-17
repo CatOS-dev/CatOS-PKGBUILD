@@ -1,0 +1,32 @@
+pkgname=catos-waybar-settings
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Shared compositor-aware Waybar profiles for CatOS"
+arch=('any')
+url='https://www.catos.info/'
+license=('GPL-3.0-or-later')
+depends=(
+  'waybar'
+  'fuzzel'
+  'foot'
+  'ttf-jetbrains-mono-nerd'
+  'network-manager-applet'
+  'blueman'
+  'pavucontrol'
+  'wireplumber'
+  'procps-ng'
+  'systemd'
+)
+makedepends=('git')
+source=("https://bdd.invalid/${pkgname}.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/usr"
+  cp -a usr/. "${pkgdir}/usr/"
+
+  install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"
+  install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}
