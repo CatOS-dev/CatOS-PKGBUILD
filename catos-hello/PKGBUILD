@@ -1,16 +1,21 @@
 # Maintainer: Aromatic <symwww@outlook.com>
 pkgname=catos-hello
 pkgver=0.1.0
-pkgrel=7
+pkgrel=8
 pkgdesc="CatOS Hello - welcome application"
 arch=('x86_64')
 url="https://github.com/Aromatic05/catos-hello"
 license=('GPL')
 depends=('qt6-base' 'rate-mirrors' 'lshw' 'inxi')
 optdepends=('lsb-release: include LSB information in collected logs')
-makedepends=('git' 'cmake' 'gcc' 'make' 'qt6-tools' 'qt5-translations')
+makedepends=('git' 'cmake' 'gcc' 'make' 'qt6-tools')
 source=("https://bdd.invalid/catos-hello.git")
 sha256sums=('SKIP')
+
+prepare() {
+    cd catos-hello
+    sed -i 's/COMMAND lupdate /COMMAND Qt6::lupdate /' CMakeLists.txt
+}
 
 build() {
     cd catos-hello

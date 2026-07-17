@@ -1,7 +1,7 @@
 pkgbase = catos-hello
 	pkgdesc = CatOS Hello - welcome application
 	pkgver = 0.1.0
-	pkgrel = 7
+	pkgrel = 8
 	url = https://github.com/Aromatic05/catos-hello
 	arch = x86_64
 	license = GPL
@@ -10,7 +10,6 @@ pkgbase = catos-hello
 	makedepends = gcc
 	makedepends = make
 	makedepends = qt6-tools
-	makedepends = qt5-translations
 	depends = qt6-base
 	depends = rate-mirrors
 	depends = lshw
