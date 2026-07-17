@@ -37,11 +37,11 @@ depends=(
   'dbus'
 )
 makedepends=('git')
-source=("https://bdd.invalid/${pkgname}.git")
+source=("https://bdd.invalid/catos-wayfire-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cd "${srcdir}/${pkgname}"
+  cd "${srcdir}"
 
   install -d "${pkgdir}/etc" "${pkgdir}/usr"
   cp -a etc/. "${pkgdir}/etc/"

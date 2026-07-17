@@ -18,11 +18,11 @@ depends=(
   'systemd'
 )
 makedepends=('git')
-source=("https://bdd.invalid/${pkgname}.git")
+source=("https://bdd.invalid/catos-waybar-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cd "${srcdir}/${pkgname}"
+  cd "${srcdir}"
 
   install -d "${pkgdir}/usr"
   cp -a usr/. "${pkgdir}/usr/"
