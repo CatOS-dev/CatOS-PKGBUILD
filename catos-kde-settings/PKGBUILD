@@ -1,6 +1,6 @@
 pkgname=catos-kde-settings
 pkgver=2.0
-pkgrel=1
+pkgrel=2
 pkgdesc="CatOS KDE Settings"
 arch=('any')
 url="https://www.catos.info/"
@@ -11,5 +11,6 @@ source=("https://bdd.invalid/catos-kde-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cp -a "$srcdir/etc" "$pkgdir/"
+  cd "$srcdir/$pkgname"
+  cp -a etc "$pkgdir/"
 }
