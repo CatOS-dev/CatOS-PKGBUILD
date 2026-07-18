@@ -1,6 +1,6 @@
 pkgname=catos-wayfire-settings
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc="CatOS ready-to-use Wayfire session preset"
 arch=('any')
 url='https://www.catos.info/'
@@ -43,7 +43,7 @@ source=("https://bdd.invalid/catos-wayfire-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cd "${srcdir}"
+  cd "${srcdir}/${pkgname}"
 
   install -d "${pkgdir}/etc" "${pkgdir}/usr"
   cp -a etc/. "${pkgdir}/etc/"

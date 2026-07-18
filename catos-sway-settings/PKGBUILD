@@ -1,6 +1,6 @@
 pkgname=catos-sway-settings
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc="CatOS ready-to-use Sway session preset"
 arch=('any')
 url='https://www.catos.info/'
@@ -44,7 +44,7 @@ source=("https://bdd.invalid/catos-sway-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cd "${srcdir}"
+  cd "${srcdir}/${pkgname}"
 
   install -d "${pkgdir}/etc" "${pkgdir}/usr"
   cp -a etc/. "${pkgdir}/etc/"

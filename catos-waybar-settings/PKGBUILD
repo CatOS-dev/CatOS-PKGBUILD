@@ -1,6 +1,6 @@
 pkgname=catos-waybar-settings
 pkgver=1.0.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Shared compositor-aware Waybar profiles for CatOS"
 arch=('any')
 url='https://www.catos.info/'
@@ -24,7 +24,7 @@ source=("https://bdd.invalid/catos-waybar-settings.git")
 sha256sums=('SKIP')
 
 package() {
-  cd "${srcdir}"
+  cd "${srcdir}/${pkgname}"
 
   install -d "${pkgdir}/usr"
   cp -a usr/. "${pkgdir}/usr/"
