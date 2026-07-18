@@ -1,6 +1,6 @@
 pkgbase = catos-kwin-decoration
-	pkgdesc = Sierra Breeze Enhanced window decoration for KWin
-	pkgver = 2.1.0
+	pkgdesc = Sierra Breeze Enhanced window decoration for KWin with CatOS defaults
+	pkgver = 2.1.1
 	pkgrel = 1
 	url = https://github.com/kupiqu/SierraBreezeEnhanced
 	arch = x86_64
@@ -14,9 +14,11 @@ pkgbase = catos-kwin-decoration
 	conflicts = kwin-decoration-sierra-breeze-enhanced-git
 	conflicts = kwin-decoration-sierra-breeze-enhanced-for-catos
 	replaces = kwin-decoration-sierra-breeze-enhanced-for-catos
-	source = SierraBreezeEnhanced-2.1.0.tar.gz::https://github.com/kupiqu/SierraBreezeEnhanced/archive/refs/tags/V.2.1.0.tar.gz
+	source = SierraBreezeEnhanced-2.1.1.tar.gz::https://github.com/kupiqu/SierraBreezeEnhanced/archive/refs/tags/V.2.1.1.tar.gz
 	source = fix-qt6-gui-private.patch
-	sha256sums = f0565c89cccdcc99a4ccf993afd551419fd75dc41544ba2d558850edfb554ae5
+	source = catos-defaults.patch
+	sha256sums = ec0f151134520b9221ac60d6477c131e91b8646f98207df0d0f0f367a1f6efc5
 	sha256sums = 62407b2148978ccd615f2d17d7b1bff5b22a769c21f3d2ba1d1476122d267649
+	sha256sums = b8594c10300dc51d4c810268e3455949a8c50dc8b88a92680498e84f8e0aa12a
 
 pkgname = catos-kwin-decoration
