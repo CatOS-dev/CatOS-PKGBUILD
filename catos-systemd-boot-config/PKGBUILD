@@ -1,26 +1,34 @@
 pkgname=catos-systemd-boot-config
 pkgver=0.1.0
-pkgrel=1
+pkgrel=3
 pkgdesc="Pacman hooks for kernel-install and systemd-boot."
 url='https://man.archlinux.org/man/kernel-install.8'
 arch=('any')
 license=('GPL')
-depends=('bash' 'systemd')
+depends=('bash' 'systemd' 'util-linux')
 source=(
 	'90-kernel-install-add.hook'
 	'40-kernel-install-remove.hook'
 	'kernel-install.sh'
 	'95-systemd-boot.hook'
+	'systemd-boot-update.sh'
+	'10-catos-systemd-boot.conf'
 )
 
 package() {
 	install -Dm644 '90-kernel-install-add.hook' '40-kernel-install-remove.hook' \
-		'95-systemd-boot.hook' -t"${pkgdir}/usr/share/libalpm/hooks"
-	install -Dm755 'kernel-install.sh' "${pkgdir}/usr/share/libalpm/scripts/kernel-install"
+		'95-systemd-boot.hook' -t "${pkgdir}/usr/share/libalpm/hooks"
+	install -Dm755 'kernel-install.sh' \
+		"${pkgdir}/usr/share/libalpm/scripts/kernel-install"
+	install -Dm755 'systemd-boot-update.sh' \
+		"${pkgdir}/usr/share/libalpm/scripts/systemd-boot-update"
+	install -Dm644 '10-catos-systemd-boot.conf' \
+		"${pkgdir}/usr/lib/kernel/install.conf.d/10-catos-systemd-boot.conf"
 }
 
-# sums
-sha256sums=('e4c08f21a599e299f16df5be6c47436be459786ad471ccd4f5cd55bda5e90f81'
-            '37c0ef6d0a38f526645234de6f35bcd6bab5496412c1a151cb3162f89cebdff8'
-            '0ace09a2fe4a4d49bb1767545740297cd03c803ce52bb48b2d72913b6013d49f'
-			'3a34dce24e469e9aba154fed30208df105a4b945584782649be050a7cd606b56')
+sha256sums=('965bbe969ab1baf162d08ff7225163c1a0b0e9a120e818647b247078cc07b331'
+            '52cd316a02e086848226b3b26ce05b6a652fce75cfa1b27303c9cbfb9998b01d'
+            'acc0087256ffd81cf0d36f5de69effba9c7918fa6a970c32be488a76000f25a5'
+            '683cc5d3bd724c4d8a8758f4bf76c541b8f0e1eac4289adba4d5e187cd8da330'
+            'c7c28475263f4d25604a9bdc9b83488639eacd031453464562a713212fb6a187'
+            'd1872bc18b96184abb29a21b1c0ff91decfb28be2cf5878f2bc50d30d3d337f2')

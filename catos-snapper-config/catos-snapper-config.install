@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 post_install() {
+    if [[ -e /run/calamares/bootloadu-installing ]]; then
+        echo "Snapper initialization deferred to bootloadu"
+        return
+    fi
+
     systemctl enable snapper-cleanup.timer
 
     if [[ -e /etc/snapper/configs/root ]]; then

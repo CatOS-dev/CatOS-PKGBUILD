@@ -2,7 +2,7 @@
 
 pkgname=catos-snapper-config
 pkgver=1.0
-pkgrel=2
+pkgrel=3
 pkgdesc='CatOS Snapper configuration template'
 arch=('any')
 url='https://github.com/CatOS/catos-snapper-support'

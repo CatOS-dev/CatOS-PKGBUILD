@@ -1,0 +1,17 @@
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Target = usr/lib/modules/*/vmlinuz
+Target = usr/lib/initcpio/*
+Target = usr/lib/initcpio/*/*
+Target = usr/lib/firmware/*
+Target = boot/*-ucode.img
+Target = usr/lib/systemd/ukify
+
+[Action]
+Description = Updating CatOS direct firmware boot entries...
+When = PostTransaction
+Exec = /usr/bin/catos-firmware-boot-update --hook
+NeedsTargets

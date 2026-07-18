@@ -2,7 +2,7 @@
 
 pkgname=limine-tool
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Rust multicall Limine entry, install, and mkinitcpio integration tool'
 arch=('x86_64')
 url='https://github.com/Aromatic05/limine-tool'

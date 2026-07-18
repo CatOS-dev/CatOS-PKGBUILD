@@ -1,0 +1,23 @@
+pkgname=catos-firmware-boot
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Maintain CatOS UKI and Linux EFI stub direct firmware boot entries'
+arch=('any')
+url='https://github.com/Aromatic05/CatOS-PKGBUILD'
+license=('GPL-3.0-or-later')
+depends=('efibootmgr' 'mkinitcpio' 'python')
+optdepends=('systemd-ukify: Unified Kernel Image provider')
+backup=('etc/catos/firmware-boot.conf')
+source=('catos-firmware-boot-update'
+        '95-catos-firmware-boot.hook'
+        'catos-firmware-boot.conf')
+sha256sums=('SKIP' 'SKIP' 'SKIP')
+
+package() {
+  install -Dm755 'catos-firmware-boot-update' \
+    "${pkgdir}/usr/bin/catos-firmware-boot-update"
+  install -Dm644 '95-catos-firmware-boot.hook' \
+    "${pkgdir}/usr/share/libalpm/hooks/95-catos-firmware-boot.hook"
+  install -Dm644 'catos-firmware-boot.conf' \
+    "${pkgdir}/etc/catos/firmware-boot.conf"
+}

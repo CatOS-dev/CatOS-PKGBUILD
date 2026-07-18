@@ -1,0 +1,66 @@
+# Maintainer: Aromatic05
+
+pkgname=sdboot-btrfs
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Generate systemd-boot entries for Btrfs snapshots'
+arch=('x86_64')
+url='https://github.com/Aromatic05/sdboot-btrfs'
+license=('GPL-3.0-only')
+depends=(
+  'btrfs-progs'
+  'gcc-libs'
+  'glibc'
+  'systemd'
+  'util-linux'
+)
+makedepends=('git' 'rust')
+optdepends=(
+  'doas: privilege escalation when run as a user'
+  'snapper: Snapper catalog compatibility and event plugin'
+  'sudo: privilege escalation when run as a user'
+)
+backup=('etc/sdboot-btrfs.conf')
+options=('!debug')
+source=('https://bdd.invalid/sdboot-btrfs.git')
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release --target "$CARCH-unknown-linux-gnu"
+}
+
+check() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen --target "$CARCH-unknown-linux-gnu"
+}
+
+package() {
+  cd "$pkgname"
+
+  cp -a packaging/arch/rootfs/. "$pkgdir/"
+  install -Dm755 "target/$CARCH-unknown-linux-gnu/release/sdboot-btrfs" \
+    "$pkgdir/usr/lib/sdboot-btrfs/sdboot-btrfs"
+  install -Dm644 LICENSE \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md \
+    "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+  install -d "$pkgdir/usr/bin"
+  ln -s ../lib/sdboot-btrfs/sdboot-btrfs \
+    "$pkgdir/usr/bin/sdboot-btrfs"
+
+  install -d "$pkgdir/usr/lib/snapper/plugins"
+  ln -s /usr/lib/sdboot-btrfs/sdboot-btrfs \
+    "$pkgdir/usr/lib/snapper/plugins/10-sdboot-btrfs"
+}

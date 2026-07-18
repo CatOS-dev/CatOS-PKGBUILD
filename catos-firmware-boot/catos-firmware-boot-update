@@ -1,0 +1,349 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import configparser
+from dataclasses import dataclass
+import fcntl
+import os
+from pathlib import Path
+import re
+import shutil
+import shlex
+import subprocess
+import sys
+import tempfile
+
+CONFIG_PATH = Path("/etc/catos/firmware-boot.conf")
+CMDLINE_PATH = Path("/etc/kernel/cmdline")
+INSTALL_MARKER = Path("/run/calamares/bootloadu-installing")
+LOCK_PATH = Path("/run/lock/boot-partition.lock")
+
+
+class FirmwareBootError(RuntimeError):
+    pass
+
+
+@dataclass(frozen=True)
+class Configuration:
+    method: str
+    esp_path: Path
+    efi_disk: str
+    efi_partition: int
+    label_prefix: str
+    default_kernel: str
+
+
+@dataclass(frozen=True)
+class Kernel:
+    version: str
+    package: str
+    image: Path
+    initramfs: Path
+
+
+def run(arguments: list[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        arguments,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.PIPE if capture else None,
+    )
+
+
+def load_configuration(path: Path = CONFIG_PATH) -> Configuration:
+    parser = configparser.ConfigParser(interpolation=None)
+    if not parser.read(path):
+        raise FirmwareBootError(f"configuration is missing: {path}")
+    section = parser["boot"]
+    method = section.get("method", "disabled").strip().lower()
+    if method not in {"disabled", "uki", "efistub"}:
+        raise FirmwareBootError(f"unsupported firmware boot method: {method}")
+    try:
+        partition = section.getint("efi_partition", fallback=0)
+    except ValueError as error:
+        raise FirmwareBootError("efi_partition must be an integer") from error
+    return Configuration(
+        method=method,
+        esp_path=Path(section.get("esp_path", "/boot/efi")),
+        efi_disk=section.get("efi_disk", "").strip(),
+        efi_partition=partition,
+        label_prefix=section.get("label_prefix", "CatOS").strip() or "CatOS",
+        default_kernel=section.get("default_kernel", "linux").strip() or "linux",
+    )
+
+
+def discover_kernels() -> list[Kernel]:
+    modules = Path("/usr/lib/modules")
+    kernels: list[Kernel] = []
+    if not modules.is_dir():
+        raise FirmwareBootError("/usr/lib/modules is missing")
+    for directory in sorted(modules.iterdir(), key=lambda item: item.name):
+        pkgbase = directory / "pkgbase"
+        image = directory / "vmlinuz"
+        if not pkgbase.is_file() or not image.is_file():
+            continue
+        package = pkgbase.read_text(encoding="utf-8").strip()
+        initramfs = Path(f"/boot/initramfs-{package}.img")
+        if package and initramfs.is_file():
+            kernels.append(Kernel(directory.name, package, image, initramfs))
+    if not kernels:
+        raise FirmwareBootError("no installed kernels with initramfs were found")
+    return kernels
+
+
+def loader_path(path: str | Path) -> str:
+    return "\\" + str(path).strip("/").replace("/", "\\")
+
+
+def mkinitcpio_embeds_microcode(config_path: Path = Path("/etc/mkinitcpio.conf")) -> bool:
+    if not config_path.is_file():
+        return False
+    for line in config_path.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"\s*HOOKS=\((.*)\)\s*$", line)
+        if not match:
+            continue
+        try:
+            return "microcode" in shlex.split(match.group(1))
+        except ValueError as error:
+            raise FirmwareBootError(f"cannot parse HOOKS in {config_path}: {error}") from error
+    return False
+
+
+def microcode_images(
+    config_path: Path = Path("/etc/mkinitcpio.conf"),
+    boot_path: Path = Path("/boot"),
+) -> list[Path]:
+    if mkinitcpio_embeds_microcode(config_path):
+        return []
+    return [
+        path
+        for path in (boot_path / "amd-ucode.img", boot_path / "intel-ucode.img")
+        if path.is_file()
+    ]
+
+
+def efi_entries() -> list[tuple[str, str]]:
+    output = run(["efibootmgr"], capture=True).stdout
+    entries: list[tuple[str, str]] = []
+    for line in output.splitlines():
+        match = re.match(r"^Boot([0-9A-Fa-f]{4})\*?\s+(.+)$", line)
+        if match:
+            entries.append((match.group(1), match.group(2)))
+    return entries
+
+
+def entry_matches(details: str, label: str) -> bool:
+    return details == label or details.startswith(label + " ") or details.startswith(label + "\t")
+
+
+def delete_entry(number: str) -> None:
+    run(["efibootmgr", "--bootnum", number, "--delete-bootnum"])
+
+
+def replace_entry(configuration: Configuration, label: str, loader: str, options: str | None = None) -> None:
+    for number, details in efi_entries():
+        if entry_matches(details, label):
+            delete_entry(number)
+    command = [
+        "efibootmgr",
+        "--create",
+        "--disk",
+        configuration.efi_disk,
+        "--part",
+        str(configuration.efi_partition),
+        "--label",
+        label,
+        "--loader",
+        loader,
+    ]
+    if options:
+        command.extend(["--unicode", options])
+    run(command)
+
+
+def atomic_copy(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(dir=destination.parent, prefix=destination.name + ".", delete=False) as temporary:
+        temporary_path = Path(temporary.name)
+    try:
+        shutil.copy2(source, temporary_path)
+        os.replace(temporary_path, destination)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
+def uki_output_path(configuration: Configuration, kernel: Kernel) -> Path:
+    return configuration.esp_path / "EFI/Linux" / f"catos-{kernel.package}.efi"
+
+
+def efistub_directory(configuration: Configuration, kernel: Kernel) -> Path:
+    return configuration.esp_path / "EFI/CatOS" / kernel.package
+
+
+def build_uki(configuration: Configuration, kernel: Kernel, cmdline: str) -> Path:
+    output = uki_output_path(configuration, kernel)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_name(output.name + ".new")
+    command = ["ukify", "build", "--linux", str(kernel.image)]
+    for image in microcode_images():
+        command.extend(["--initrd", str(image)])
+    command.extend(
+        [
+            "--initrd",
+            str(kernel.initramfs),
+            "--cmdline",
+            cmdline,
+            "--os-release",
+            "@/etc/os-release",
+            "--uname",
+            kernel.version,
+            "--output",
+            str(temporary),
+        ]
+    )
+    try:
+        run(command)
+        os.replace(temporary, output)
+    finally:
+        temporary.unlink(missing_ok=True)
+    replace_entry(configuration, f"{configuration.label_prefix} {kernel.package}", loader_path(output.relative_to(configuration.esp_path)))
+    return output
+
+
+def build_efistub(configuration: Configuration, kernel: Kernel, cmdline: str) -> tuple[Path, Path]:
+    directory = efistub_directory(configuration, kernel)
+    kernel_output = directory / "vmlinuz.efi"
+    initrd_output = directory / "initramfs.img"
+    atomic_copy(kernel.image, kernel_output)
+    directory.mkdir(parents=True, exist_ok=True)
+    temporary = initrd_output.with_name(initrd_output.name + ".new")
+    try:
+        with temporary.open("wb") as output:
+            for image in microcode_images():
+                output.write(image.read_bytes())
+            output.write(kernel.initramfs.read_bytes())
+        os.replace(temporary, initrd_output)
+    finally:
+        temporary.unlink(missing_ok=True)
+    relative_kernel = kernel_output.relative_to(configuration.esp_path)
+    relative_initrd = initrd_output.relative_to(configuration.esp_path)
+    options = f"initrd={loader_path(relative_initrd)} {cmdline}"
+    replace_entry(
+        configuration,
+        f"{configuration.label_prefix} {kernel.package}",
+        loader_path(relative_kernel),
+        options,
+    )
+    return kernel_output, initrd_output
+
+
+def selected_default(kernels: list[Kernel], package: str) -> Kernel:
+    return next((kernel for kernel in kernels if kernel.package == package), kernels[0])
+
+
+def prune_files(configuration: Configuration, kernels: list[Kernel]) -> None:
+    packages = {kernel.package for kernel in kernels}
+    if configuration.method == "uki":
+        directory = configuration.esp_path / "EFI/Linux"
+        prefix = "catos-"
+        for path in directory.glob("catos-*.efi") if directory.is_dir() else []:
+            package = path.name.removeprefix(prefix).removesuffix(".efi")
+            if package not in packages:
+                path.unlink()
+    elif configuration.method == "efistub":
+        directory = configuration.esp_path / "EFI/CatOS"
+        for path in directory.iterdir() if directory.is_dir() else []:
+            if path.is_dir() and path.name not in packages:
+                shutil.rmtree(path)
+
+
+def prune_entries(configuration: Configuration, desired_labels: set[str]) -> None:
+    prefix = configuration.label_prefix + " "
+    for number, details in efi_entries():
+        if not details.startswith(prefix):
+            continue
+        if not any(entry_matches(details, label) for label in desired_labels):
+            delete_entry(number)
+
+
+def verify(configuration: Configuration, kernels: list[Kernel]) -> None:
+    labels = {f"{configuration.label_prefix} {kernel.package}" for kernel in kernels}
+    entries = efi_entries()
+    for label in labels:
+        if not any(entry_matches(details, label) for _, details in entries):
+            raise FirmwareBootError(f"EFI entry is missing: {label}")
+    if configuration.method == "uki":
+        for kernel in kernels:
+            output = uki_output_path(configuration, kernel)
+            if not output.is_file() or output.stat().st_size == 0:
+                raise FirmwareBootError(f"UKI is missing: {output}")
+    elif configuration.method == "efistub":
+        for kernel in kernels:
+            directory = efistub_directory(configuration, kernel)
+            for output in (directory / "vmlinuz.efi", directory / "initramfs.img"):
+                if not output.is_file() or output.stat().st_size == 0:
+                    raise FirmwareBootError(f"EFI stub artifact is missing: {output}")
+
+
+def update(configuration: Configuration) -> None:
+    if not configuration.efi_disk or configuration.efi_partition <= 0:
+        raise FirmwareBootError("EFI disk and partition must be configured")
+    if not configuration.esp_path.is_dir():
+        raise FirmwareBootError(f"ESP is not mounted: {configuration.esp_path}")
+    if not CMDLINE_PATH.is_file():
+        raise FirmwareBootError(f"kernel command line is missing: {CMDLINE_PATH}")
+    run(["mkinitcpio", "-P"])
+    kernels = discover_kernels()
+    cmdline = CMDLINE_PATH.read_text(encoding="utf-8").strip()
+    desired_labels = {f"{configuration.label_prefix} {kernel.package}" for kernel in kernels}
+    outputs: dict[str, Path] = {}
+    for kernel in kernels:
+        if configuration.method == "uki":
+            outputs[kernel.package] = build_uki(configuration, kernel, cmdline)
+        else:
+            outputs[kernel.package] = build_efistub(configuration, kernel, cmdline)[0]
+    prune_files(configuration, kernels)
+    prune_entries(configuration, desired_labels)
+    if configuration.method == "uki":
+        default = selected_default(kernels, configuration.default_kernel)
+        fallback_name = "BOOTAA64.EFI" if os.uname().machine in {"aarch64", "arm64"} else "BOOTX64.EFI"
+        atomic_copy(outputs[default.package], configuration.esp_path / "EFI/BOOT" / fallback_name)
+    verify(configuration, kernels)
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Maintain CatOS direct UEFI boot artifacts")
+    parser.add_argument("--force", action="store_true", help="run even during Calamares installation")
+    parser.add_argument("--hook", action="store_true", help="consume pacman hook targets from stdin")
+    parser.add_argument("--verify", action="store_true", help="verify without rebuilding")
+    return parser.parse_args()
+
+
+def main() -> int:
+    arguments = parse_arguments()
+    if arguments.hook:
+        sys.stdin.read()
+    if INSTALL_MARKER.exists() and not arguments.force:
+        print("catos-firmware-boot: deferred while bootloadu is preparing the installed system")
+        return 0
+    configuration = load_configuration()
+    if configuration.method == "disabled":
+        return 0
+    LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with LOCK_PATH.open("a+") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if arguments.verify:
+            verify(configuration, discover_kernels())
+        else:
+            update(configuration)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (FirmwareBootError, OSError, subprocess.CalledProcessError) as error:
+        print(f"catos-firmware-boot: {error}", file=sys.stderr)
+        raise SystemExit(1)

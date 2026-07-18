@@ -1,0 +1,23 @@
+pkgbase = sdboot-btrfs
+	pkgdesc = Generate systemd-boot entries for Btrfs snapshots
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/Aromatic05/sdboot-btrfs
+	arch = x86_64
+	license = GPL-3.0-only
+	makedepends = git
+	makedepends = rust
+	depends = btrfs-progs
+	depends = gcc-libs
+	depends = glibc
+	depends = systemd
+	depends = util-linux
+	optdepends = doas: privilege escalation when run as a user
+	optdepends = snapper: Snapper catalog compatibility and event plugin
+	optdepends = sudo: privilege escalation when run as a user
+	options = !debug
+	backup = etc/sdboot-btrfs.conf
+	source = https://bdd.invalid/sdboot-btrfs.git
+	sha256sums = SKIP
+
+pkgname = sdboot-btrfs

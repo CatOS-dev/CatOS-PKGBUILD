@@ -1,11 +1,11 @@
 pkgname=catos-calamares-config
 pkgver=26.05
-pkgrel=3
+pkgrel=4
 pkgdesc="Calamares configuration for CatOS"
 arch=('any')
 url='https://github.com/Aromatic05/catos-calamares-config'
 license=('GPL3')
-depends=('catos-branding')
+depends=('catos-branding' 'catos-calamares' 'python-yaml')
 makedepends=('git')
 conflicts=('alci-calamares-config'
            'alci-calamares-config-dev'

@@ -1,0 +1,20 @@
+pkgbase = catos-firmware-boot
+	pkgdesc = Maintain CatOS UKI and Linux EFI stub direct firmware boot entries
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/Aromatic05/CatOS-PKGBUILD
+	arch = any
+	license = GPL-3.0-or-later
+	depends = efibootmgr
+	depends = mkinitcpio
+	depends = python
+	optdepends = systemd-ukify: Unified Kernel Image provider
+	backup = etc/catos/firmware-boot.conf
+	source = catos-firmware-boot-update
+	source = 95-catos-firmware-boot.hook
+	source = catos-firmware-boot.conf
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+
+pkgname = catos-firmware-boot

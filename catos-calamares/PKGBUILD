@@ -3,7 +3,7 @@
 
 pkgname=('catos-calamares')
 pkgver=26.07
-pkgrel=2
+pkgrel=3
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
 url="https://codeberg.org/Aromatic/calamares"

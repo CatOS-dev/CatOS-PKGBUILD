@@ -6,4 +6,4 @@ Target = systemd
 [Action]
 Description = Gracefully upgrading systemd-boot...
 When = PostTransaction
-Exec = /usr/bin/systemctl restart systemd-boot-update.service
+Exec = /usr/share/libalpm/scripts/systemd-boot-update

@@ -23,7 +23,7 @@ Target = usr/lib/kernel/*/*
 Target = boot/*-ucode.img
 
 [Action]
-Description = Installing kernel and initrd using kernel-install...
+Description = Installing systemd-boot kernel entries and initrds...
 When = PostTransaction
 Exec = /usr/share/libalpm/scripts/kernel-install add
 NeedsTargets
