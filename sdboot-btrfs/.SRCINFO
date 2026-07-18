@@ -1,6 +1,6 @@
 pkgbase = sdboot-btrfs
 	pkgdesc = Generate systemd-boot entries for Btrfs snapshots
-	pkgver = 0.1.0
+	pkgver = 0.1.1
 	pkgrel = 1
 	url = https://github.com/Aromatic05/sdboot-btrfs
 	arch = x86_64
