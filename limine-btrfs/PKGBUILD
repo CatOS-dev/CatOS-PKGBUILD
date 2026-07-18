@@ -1,0 +1,67 @@
+# Maintainer: Aromatic05
+
+pkgname=limine-btrfs
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Generate Limine boot entries for Btrfs snapshots'
+arch=('x86_64')
+url='https://github.com/Aromatic05/limine-btrfs'
+license=('GPL-3.0-only')
+depends=(
+  'btrfs-progs'
+  'gcc-libs'
+  'glibc'
+  'limine'
+  'util-linux'
+)
+makedepends=('cargo' 'git')
+optdepends=(
+  'doas: privilege escalation when run as a user'
+  'snapper: Snapper catalog compatibility and event plugin'
+  'sudo: privilege escalation when run as a user'
+  'systemd: transient units and optional watcher service'
+)
+conflicts=('limine-snapper' 'limine-snapper-sync')
+backup=('etc/limine-btrfs.conf')
+options=('!debug')
+source=("https://bdd.invalid/${pkgname}.git")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release --target "$CARCH-unknown-linux-gnu"
+}
+
+check() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen --target "$CARCH-unknown-linux-gnu"
+}
+
+package() {
+  cd "$pkgname"
+
+  cp -a packaging/arch/rootfs/. "$pkgdir/"
+  install -Dm755 "target/$CARCH-unknown-linux-gnu/release/limine-btrfs" \
+    "$pkgdir/usr/lib/limine/limine-btrfs"
+  install -Dm644 LICENSE \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md \
+    "$pkgdir/usr/share/doc/$pkgname/README.md"
+
+  install -d "$pkgdir/usr/bin"
+  ln -s ../lib/limine/limine-btrfs "$pkgdir/usr/bin/limine-btrfs"
+
+  install -d "$pkgdir/usr/lib/snapper/plugins"
+  ln -s /usr/lib/limine/limine-btrfs \
+    "$pkgdir/usr/lib/snapper/plugins/10-limine-btrfs"
+}

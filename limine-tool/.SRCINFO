@@ -1,0 +1,39 @@
+pkgbase = limine-tool
+	pkgdesc = Rust multicall Limine entry, install, and mkinitcpio integration tool
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/Aromatic05/limine-tool
+	arch = x86_64
+	license = GPL-3.0-only
+	makedepends = cargo
+	makedepends = git
+	depends = bash
+	depends = coreutils
+	depends = efibootmgr
+	depends = gcc-libs
+	depends = glibc
+	depends = limine
+	depends = mkinitcpio
+	depends = pacman
+	depends = systemd
+	depends = tar
+	depends = util-linux
+	optdepends = btrfs-progs: boot read-only Btrfs snapshots through the optional overlay hooks
+	optdepends = doas: privilege escalation when limine-entry-tool is run as a user
+	optdepends = journalctl-desktop-notification: desktop notifications for hook failures
+	optdepends = kernel-modules-hook: preserve a working kernel when an upgrade fails
+	optdepends = sbctl: sign EFI binaries for Secure Boot
+	optdepends = snapper: avoid embedding a fixed cmdline in signed UKIs used for snapshots
+	optdepends = sudo: privilege escalation when limine-entry-tool is run as a user
+	provides = limine-entry-tool=1.37.1
+	provides = limine-mkinitcpio-hook=1.37.1
+	conflicts = limine-entry-tool
+	conflicts = limine-mkinitcpio-hook
+	replaces = limine-entry-tool
+	replaces = limine-mkinitcpio-hook
+	options = !debug
+	backup = etc/limine-entry-tool.conf
+	source = https://bdd.invalid/limine-tool.git
+	sha256sums = SKIP
+
+pkgname = limine-tool

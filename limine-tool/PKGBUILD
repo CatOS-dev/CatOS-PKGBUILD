@@ -1,0 +1,101 @@
+# Maintainer: Aromatic05
+
+pkgname=limine-tool
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='Rust multicall Limine entry, install, and mkinitcpio integration tool'
+arch=('x86_64')
+url='https://github.com/Aromatic05/limine-tool'
+license=('GPL-3.0-only')
+depends=(
+  'bash'
+  'coreutils'
+  'efibootmgr'
+  'gcc-libs'
+  'glibc'
+  'limine'
+  'mkinitcpio'
+  'pacman'
+  'systemd'
+  'tar'
+  'util-linux'
+)
+makedepends=('cargo' 'git')
+optdepends=(
+  'btrfs-progs: boot read-only Btrfs snapshots through the optional overlay hooks'
+  'doas: privilege escalation when limine-entry-tool is run as a user'
+  'journalctl-desktop-notification: desktop notifications for hook failures'
+  'kernel-modules-hook: preserve a working kernel when an upgrade fails'
+  'sbctl: sign EFI binaries for Secure Boot'
+  'snapper: avoid embedding a fixed cmdline in signed UKIs used for snapshots'
+  'sudo: privilege escalation when limine-entry-tool is run as a user'
+)
+provides=(
+  'limine-entry-tool=1.37.1'
+  'limine-mkinitcpio-hook=1.37.1'
+)
+conflicts=('limine-entry-tool' 'limine-mkinitcpio-hook')
+replaces=('limine-entry-tool' 'limine-mkinitcpio-hook')
+backup=('etc/limine-entry-tool.conf')
+options=('!debug')
+source=("https://bdd.invalid/${pkgname}.git")
+sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  cargo fetch --locked --target "$CARCH-unknown-linux-gnu"
+}
+
+build() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo build --frozen --release --target "$CARCH-unknown-linux-gnu"
+}
+
+check() {
+  cd "$pkgname"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export RUSTUP_TOOLCHAIN=stable
+  cargo test --frozen --target "$CARCH-unknown-linux-gnu"
+}
+
+package() {
+  cd "$pkgname"
+
+  cp -a packaging/arch/rootfs/. "$pkgdir/"
+  install -Dm755 "target/$CARCH-unknown-linux-gnu/release/limine-tool" \
+    "$pkgdir/usr/lib/limine/limine-tool"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+  install -Dm644 packaging/arch/UPSTREAM.md \
+    "$pkgdir/usr/share/doc/$pkgname/UPSTREAM.md"
+
+  install -d "$pkgdir/usr/bin"
+  local applet
+  for applet in \
+    limine-tool \
+    limine-entry-tool \
+    limine-list \
+    limine-scan \
+    limine-remove-entry \
+    limine-install \
+    limine-update \
+    limine-mkinitcpio \
+    limine-enroll-config \
+    limine-reset-enroll; do
+    ln -s ../lib/limine/limine-tool "$pkgdir/usr/bin/$applet"
+  done
+  ln -s limine-tool "$pkgdir/usr/lib/limine/limine-entry-tool"
+
+  install -d "$pkgdir/usr/share/libalpm/scripts"
+  ln -s ../../../lib/limine/limine-tool \
+    "$pkgdir/usr/share/libalpm/scripts/limine-mkinitcpio-install"
+  ln -s ../../../lib/limine/limine-tool \
+    "$pkgdir/usr/share/libalpm/scripts/limine-mkinitcpio-remove"
+
+  install -d "$pkgdir/etc/boot/hooks/post.d"
+  ln -s /usr/lib/limine/limine-tool \
+    "$pkgdir/etc/boot/hooks/post.d/89-warn-missing-file-hashes"
+}
