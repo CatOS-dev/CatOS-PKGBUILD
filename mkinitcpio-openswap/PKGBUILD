@@ -1,0 +1,27 @@
+# Maintainer: CatOS maintainers
+# Based on AUR mkinitcpio-openswap commit a890604.
+pkgname=mkinitcpio-openswap
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="mkinitcpio hook to open encrypted swap at boot time"
+arch=('any')
+url='https://aur.archlinux.org/packages/mkinitcpio-openswap'
+license=('MIT')
+depends=('mkinitcpio' 'cryptsetup')
+backup=('etc/openswap.conf')
+install=usage.install
+source=('openswap.hook'
+        'openswap.install'
+        'openswap.conf'
+        'LICENSE')
+sha256sums=('9e836a588098f2811e651e60dae98096aa59db8a402bc9cb94c42000a5052e3a'
+            '2d60c98d4bd54134a5a4543848ecc7bce598e6faa7bd96a2df0a4767f6e9f3dd'
+            '71516c53543d7deca0fa25efcbf91ca0df869ec0a9fac1ec94e587b18e064c16'
+            '3a477726e39ee6cafcb09c442b0b8f57aabe2ec840fb13d9aeda879d3bf783c8')
+
+package() {
+    install -Dm644 openswap.hook "$pkgdir/usr/lib/initcpio/hooks/openswap"
+    install -Dm644 openswap.install "$pkgdir/usr/lib/initcpio/install/openswap"
+    install -Dm644 openswap.conf "$pkgdir/etc/openswap.conf"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
