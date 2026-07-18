@@ -2,8 +2,8 @@
 # Contributor: Rustmilian Rustmilian@proton.me
 
 pkgname=('catos-calamares')
-pkgver=26.07
-pkgrel=3
+pkgver=26.07.18
+pkgrel=1
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
 url="https://codeberg.org/Aromatic/calamares"
