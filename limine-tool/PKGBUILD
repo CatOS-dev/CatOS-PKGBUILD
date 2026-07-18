@@ -38,7 +38,7 @@ conflicts=('limine-entry-tool' 'limine-mkinitcpio-hook')
 replaces=('limine-entry-tool' 'limine-mkinitcpio-hook')
 backup=('etc/limine-entry-tool.conf')
 options=('!debug')
-source=("https://bdd.invalid/${pkgname}.git")
+source=('https://bdd.invalid/limine-tool.git')
 sha256sums=('SKIP')
 
 prepare() {

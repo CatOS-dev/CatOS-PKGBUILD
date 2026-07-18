@@ -24,7 +24,7 @@ optdepends=(
 conflicts=('limine-snapper' 'limine-snapper-sync')
 backup=('etc/limine-btrfs.conf')
 options=('!debug')
-source=("https://bdd.invalid/${pkgname}.git")
+source=('https://bdd.invalid/limine-btrfs.git')
 sha256sums=('SKIP')
 
 prepare() {
