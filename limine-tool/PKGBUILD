@@ -20,7 +20,7 @@ depends=(
   'tar'
   'util-linux'
 )
-makedepends=('cargo' 'git')
+makedepends=('git' 'rust')
 optdepends=(
   'btrfs-progs: boot read-only Btrfs snapshots through the optional overlay hooks'
   'doas: privilege escalation when limine-entry-tool is run as a user'

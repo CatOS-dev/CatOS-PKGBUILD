@@ -14,7 +14,7 @@ depends=(
   'limine'
   'util-linux'
 )
-makedepends=('cargo' 'git')
+makedepends=('git' 'rust')
 optdepends=(
   'doas: privilege escalation when run as a user'
   'snapper: Snapper catalog compatibility and event plugin'
