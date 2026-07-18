@@ -65,7 +65,10 @@ check() {
   install -Dm644 "$srcdir/hypr-cursor.lua" "$test_home/.config/hypr/dms/cursor.lua"
   install -Dm644 "$srcdir/hypr-windowrules.lua" "$test_home/.config/hypr/dms/windowrules.lua"
 
-  HOME="$test_home" XDG_CONFIG_HOME="$test_home/.config" \
+  install -d -m700 "$test_home/runtime"
+  HOME="$test_home" \
+    XDG_CONFIG_HOME="$test_home/.config" \
+    XDG_RUNTIME_DIR="$test_home/runtime" \
     Hyprland --verify-config --config "$test_home/.config/hypr/hyprland.lua"
 }
 
