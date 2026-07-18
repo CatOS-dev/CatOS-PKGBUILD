@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+config_file=${CATOS_SNAPPER_CONFIG_FILE:-/etc/catos-snapper.conf}
+snapper_bin=${CATOS_SNAPPER_BIN:-/usr/bin/snapper}
+install_marker=${CATOS_SNAPPER_INSTALL_MARKER:-/run/calamares/bootloadu-installing}
+
+# bootloadu creates the root Snapper configuration after package installation.
+# Do not let an intermediate installer transaction fail before that hand-off.
+[[ -e $install_marker ]] && exit 0
+
+ENABLED=yes
+PACKAGE_THRESHOLD=25
+SNAPPER_CONFIG=root
+
+if [[ -r $config_file ]]; then
+    # This file is installed root-owned and uses simple shell assignments.
+    # shellcheck disable=SC1090
+    source "$config_file"
+fi
+
+case $ENABLED in
+    yes) ;;
+    no) exit 0 ;;
+    *)
+        printf 'catos-snapper: ENABLED must be yes or no\n' >&2
+        exit 2
+        ;;
+esac
+
+if [[ ! $PACKAGE_THRESHOLD =~ ^[0-9]+$ ]]; then
+    printf 'catos-snapper: PACKAGE_THRESHOLD must be a non-negative integer\n' >&2
+    exit 2
+fi
+if [[ ! $SNAPPER_CONFIG =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    printf 'catos-snapper: invalid SNAPPER_CONFIG value\n' >&2
+    exit 2
+fi
+
+# libalpm merges and deduplicates NeedsTargets matches from all trigger
+# sections. Package targets contain no slash; every path target in the hook is
+# boot-critical by construction.
+declare -A packages=()
+critical=no
+while IFS= read -r target; do
+    [[ -n $target ]] || continue
+    if [[ $target == */* ]]; then
+        critical=yes
+    else
+        packages["$target"]=1
+    fi
+done
+
+package_count=${#packages[@]}
+package_word=packages
+(( package_count == 1 )) && package_word=package
+large=no
+if (( PACKAGE_THRESHOLD > 0 && package_count >= PACKAGE_THRESHOLD )); then
+    large=yes
+fi
+
+if [[ $critical != yes && $large != yes ]]; then
+    exit 0
+fi
+
+if [[ $critical == yes ]]; then
+    reason="boot-critical"
+    description="Before boot-critical package transaction (${package_count} ${package_word})"
+    userdata="catos_source=pacman,catos_reason=${reason},catos_package_count=${package_count},important=yes"
+else
+    reason="large-transaction"
+    description="Before large package transaction (${package_count} ${package_word})"
+    userdata="catos_source=pacman,catos_reason=${reason},catos_package_count=${package_count}"
+fi
+
+printf ':: Creating CatOS system snapshot: %s\n' "$description"
+exec "$snapper_bin" \
+    --no-dbus \
+    -c "$SNAPPER_CONFIG" \
+    create \
+    --type single \
+    --cleanup-algorithm number \
+    --description "$description" \
+    --userdata "$userdata"

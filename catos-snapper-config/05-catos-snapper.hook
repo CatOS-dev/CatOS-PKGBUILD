@@ -1,0 +1,39 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Package
+Target = *
+
+# Keep this path set aligned with the CatOS kernel/initramfs deployment hooks.
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Operation = Remove
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+Target = usr/lib/modules/*/pkgbase
+Target = usr/lib/modules/*/extramodules/
+Target = usr/lib/modules/*/extramodules/*
+Target = usr/lib/initcpio/*
+Target = usr/lib/initcpio/*/*
+Target = usr/lib/firmware/*
+Target = usr/src/*/dkms.conf
+Target = usr/lib/booster/*
+Target = usr/lib/dracut/*
+Target = usr/lib/dracut/*/*
+Target = usr/lib/dracut/*/*/*
+Target = usr/lib/kernel/*
+Target = usr/lib/kernel/*/*
+Target = usr/lib/systemd/systemd
+Target = usr/lib/systemd/ukify
+Target = usr/bin/cryptsetup
+Target = usr/bin/lvm
+Target = boot/*-ucode.img
+
+[Action]
+When = PreTransaction
+Exec = /usr/share/libalpm/scripts/catos-snapper
+Depends = snapper
+AbortOnFail
+NeedsTargets
