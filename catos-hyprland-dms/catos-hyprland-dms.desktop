@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=CatOS Hyprland (DMS)
+Comment=Hyprland session configured for Dank Material Shell
+Exec=/usr/bin/catos-hyprland-dms-session
+TryExec=/usr/bin/start-hyprland
+Type=Application
+DesktopNames=Hyprland
+Keywords=tiling;wayland;compositor;dms;

@@ -1,0 +1,88 @@
+pkgname=catos-niri-dms
+pkgver=1.0
+pkgrel=3
+pkgdesc="CatOS preset: Niri + DMS + Ghostty"
+arch=('any')
+url="https://www.catos.info/"
+license=('MIT')
+provides=('catos-dms-preset')
+conflicts=('catos-hyprland-dms')
+depends=(
+  'dms-shell-niri>=1.5.1'
+  'niri'
+  'ghostty'
+  'matugen'
+  'xwayland-satellite'
+  'xdg-desktop-portal-gtk'
+  'xdg-desktop-portal-gnome'
+)
+source=(
+  '90-dms.conf'
+  'niri.kdl'
+  'niri-colors.kdl'
+  'niri-layout.kdl'
+  'niri-alttab.kdl'
+  'niri-binds.kdl'
+  'niri-windowrules.kdl'
+  'ghostty.conf'
+  'ghostty-colors.conf'
+  'LICENSE-DMS'
+)
+sha256sums=('dde57e33ad9d9c713440b2f0411c0c42a09ed46c2ee549c4f91627dc374a5661'
+            '903174335c9ee75c5c2be5feed132a49d1aa15d77099b37c23766fb5c07e89fa'
+            'c7c47fb7baffe685d84db3f42ad498b68d4a592efa4ceff38b1c18c29a9796ba'
+            '2763377736dd59229ef0d563688cf4c50fabf87daf6a7117ab6990051afafbfd'
+            '220cbc69932f20e7c53f3f747078980e2a3381d1f844a43e73c5f0c2471bdc27'
+            '4e55fb0943a06058494e2ae4f1d62320a8dc90c356e0f211dca234c2e422894e'
+            '53f04695c2a7e1957b26a86cf5f5995f5696661ec746c09273465c229770501a'
+            'b069a527d4529a6021354ffdb2da420349995a11f68a4264f70df3ae52d28ff5'
+            '67a2587d2bf6f564f1b6f7889d4579ea8a7d9e73ed61654e935af3ef75180399'
+            '4cee96286c5b7da9763a4694868bb1853b33bb1558821e0c609ad2eabd426bfa')
+
+prepare() {
+  sed -i 's/{{TERMINAL_COMMAND}}/ghostty/g' "$srcdir/niri.kdl"
+  sed -i 's/{{TERMINAL_COMMAND}}/ghostty/g' "$srcdir/niri-binds.kdl"
+}
+
+check() {
+  local test_home="$srcdir/check-home"
+  rm -rf "$test_home"
+  install -d -m755 "$test_home/.config/niri/dms"
+  install -Dm644 "$srcdir/niri.kdl" "$test_home/.config/niri/config.kdl"
+  install -Dm644 "$srcdir/niri-colors.kdl" "$test_home/.config/niri/dms/colors.kdl"
+  install -Dm644 "$srcdir/niri-layout.kdl" "$test_home/.config/niri/dms/layout.kdl"
+  install -Dm644 "$srcdir/niri-alttab.kdl" "$test_home/.config/niri/dms/alttab.kdl"
+  install -Dm644 "$srcdir/niri-binds.kdl" "$test_home/.config/niri/dms/binds.kdl"
+  install -Dm644 "$srcdir/niri-windowrules.kdl" "$test_home/.config/niri/dms/windowrules.kdl"
+  install -Dm644 /dev/null "$test_home/.config/niri/dms/outputs.kdl"
+  install -Dm644 /dev/null "$test_home/.config/niri/dms/cursor.kdl"
+
+  HOME="$test_home" XDG_CONFIG_HOME="$test_home/.config" \
+    niri validate --config "$test_home/.config/niri/config.kdl"
+}
+
+package() {
+  install -d -m755 "$pkgdir/etc/skel/.config/environment.d"
+  install -d -m755 "$pkgdir/etc/skel/.config/niri/dms"
+  install -d -m755 "$pkgdir/etc/skel/.config/ghostty/themes"
+  install -d -m755 "$pkgdir/etc/skel/.config/systemd/user/niri.service.wants"
+
+  install -Dm644 "$srcdir/90-dms.conf" "$pkgdir/etc/skel/.config/environment.d/90-dms.conf"
+  install -Dm644 "$srcdir/niri.kdl" "$pkgdir/etc/skel/.config/niri/config.kdl"
+  install -Dm644 "$srcdir/niri-colors.kdl" "$pkgdir/etc/skel/.config/niri/dms/colors.kdl"
+  install -Dm644 "$srcdir/niri-layout.kdl" "$pkgdir/etc/skel/.config/niri/dms/layout.kdl"
+  install -Dm644 "$srcdir/niri-alttab.kdl" "$pkgdir/etc/skel/.config/niri/dms/alttab.kdl"
+  install -Dm644 "$srcdir/niri-binds.kdl" "$pkgdir/etc/skel/.config/niri/dms/binds.kdl"
+  install -Dm644 "$srcdir/niri-windowrules.kdl" "$pkgdir/etc/skel/.config/niri/dms/windowrules.kdl"
+  install -Dm644 /dev/null "$pkgdir/etc/skel/.config/niri/dms/outputs.kdl"
+  install -Dm644 /dev/null "$pkgdir/etc/skel/.config/niri/dms/cursor.kdl"
+  install -Dm644 "$srcdir/ghostty.conf" "$pkgdir/etc/skel/.config/ghostty/config"
+  install -Dm644 "$srcdir/ghostty-colors.conf" "$pkgdir/etc/skel/.config/ghostty/themes/dankcolors"
+
+  install -Dm644 "$srcdir/LICENSE-DMS" "$pkgdir/usr/share/licenses/$pkgname/LICENSE-DMS"
+
+  ln -s '/usr/lib/systemd/user/dms.service' \
+    "$pkgdir/etc/skel/.config/systemd/user/niri.service.wants/dms.service"
+  ln -s '/usr/lib/systemd/user/xwayland-satellite.service' \
+    "$pkgdir/etc/skel/.config/systemd/user/niri.service.wants/xwayland-satellite.service"
+}
