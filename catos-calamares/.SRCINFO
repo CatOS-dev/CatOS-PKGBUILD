@@ -1,6 +1,6 @@
 pkgbase = catos-calamares
 	pkgdesc = Distribution-independent installer framework
-	pkgver = 26.07.18
+	pkgver = 26.07
 	pkgrel = 2
 	url = https://codeberg.org/Aromatic/calamares
 	arch = x86_64

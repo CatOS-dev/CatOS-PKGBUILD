@@ -2,7 +2,7 @@
 # Contributor: Rustmilian Rustmilian@proton.me
 
 pkgname=('catos-calamares')
-pkgver=26.07.18
+pkgver=26.07
 pkgrel=2
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')

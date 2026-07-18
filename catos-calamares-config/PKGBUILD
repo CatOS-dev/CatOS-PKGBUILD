@@ -1,5 +1,5 @@
 pkgname=catos-calamares-config
-pkgver=26.07.18
+pkgver=26.07
 pkgrel=4
 pkgdesc="Calamares configuration for CatOS"
 arch=('any')
