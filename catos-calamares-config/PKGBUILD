@@ -1,6 +1,6 @@
 pkgname=catos-calamares-config
 pkgver=26.07.18
-pkgrel=2
+pkgrel=4
 pkgdesc="Calamares configuration for CatOS"
 arch=('any')
 url='https://github.com/Aromatic05/catos-calamares-config'
