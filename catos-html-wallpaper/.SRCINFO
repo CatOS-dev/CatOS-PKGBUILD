@@ -2,13 +2,13 @@ pkgbase = catos-html-wallpaper
 	pkgdesc = HTML wallpaper plugin for KDE Plasma
 	pkgver = 24.04
 	pkgrel = 3
-	url = https://github.com/Marcel1202/HTMLWallpaper
+	url = https://github.com/CatOS-dev/catos-html-wallpaper
 	arch = any
 	license = LGPL-2.1-or-later
 	makedepends = git
 	depends = kdeplasma-addons
 	depends = qt6-webengine
-	source = https://bdd.invalid/catos-html-wallpaper.git
+	source = git+https://github.com/CatOS-dev/catos-html-wallpaper.git
 	sha256sums = SKIP
 
 pkgname = catos-html-wallpaper

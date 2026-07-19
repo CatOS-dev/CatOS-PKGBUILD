@@ -3,11 +3,11 @@ pkgver=2.0
 pkgrel=3
 pkgdesc="Default Xfce settings for CatOS"
 arch=('any')
-url='https://catos.info'
+url='https://github.com/CatOS-dev/catos-xfce-settings'
 license=('GPL')
 depends=('catos-branding')
 makedepends=('git')
-source=('https://bdd.invalid/catos-xfce-settings.git')
+source=('git+https://github.com/CatOS-dev/catos-xfce-settings.git')
 sha256sums=('SKIP')
 
 package() {

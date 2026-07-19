@@ -3,7 +3,7 @@ pkgver=1.0.0
 pkgrel=3
 pkgdesc="Shared compositor-aware Waybar profiles for CatOS"
 arch=('any')
-url='https://www.catos.info/'
+url='https://github.com/CatOS-dev/catos-waybar-settings'
 license=('GPL-3.0-or-later')
 depends=(
   'waybar'
@@ -20,7 +20,7 @@ optdepends=(
   'wireplumber: PipeWire session manager and audio status'
 )
 makedepends=('git')
-source=("https://bdd.invalid/catos-waybar-settings.git")
+source=("git+https://github.com/CatOS-dev/catos-waybar-settings.git")
 sha256sums=('SKIP')
 
 package() {

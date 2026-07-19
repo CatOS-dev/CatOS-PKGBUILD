@@ -3,11 +3,11 @@ pkgver=1.0
 pkgrel=4
 pkgdesc="CatOS branding"
 arch=('any')
-url='https://github.com/CatOS-Home/CatOS'
+url='https://github.com/CatOS-dev/catos-branding'
 license=('GPL')
 makedepends=('git')
 install="${pkgname}.install"
-source=('https://bdd.invalid/catos-branding.git')
+source=('git+https://github.com/CatOS-dev/catos-branding.git')
 sha256sums=('SKIP')
 
 package() {

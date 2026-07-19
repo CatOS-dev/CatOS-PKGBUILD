@@ -2,7 +2,7 @@ pkgbase = catos-hello
 	pkgdesc = CatOS Hello - welcome application
 	pkgver = 0.1.0
 	pkgrel = 9
-	url = https://github.com/Aromatic05/catos-hello
+	url = https://github.com/CatOS-dev/catos-hello
 	arch = x86_64
 	license = GPL
 	makedepends = git
@@ -15,7 +15,7 @@ pkgbase = catos-hello
 	depends = lshw
 	depends = inxi
 	optdepends = lsb-release: include LSB information in collected logs
-	source = https://bdd.invalid/catos-hello.git
+	source = git+https://github.com/CatOS-dev/catos-hello.git
 	sha256sums = SKIP
 
 pkgname = catos-hello

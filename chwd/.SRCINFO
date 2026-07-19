@@ -2,7 +2,7 @@ pkgbase = chwd
 	pkgdesc = CatOS hardware detection tool
 	pkgver = 1.21.0.r9.g8ee72f5
 	pkgrel = 4
-	url = https://github.com/Aromatic05/chwd
+	url = https://github.com/CatOS-dev/chwd
 	arch = x86_64
 	groups = catos
 	license = GPL-3.0-or-later
@@ -20,7 +20,7 @@ pkgbase = chwd
 	provides = chwd-db
 	conflicts = chwd-db
 	replaces = chwd-db
-	source = https://bdd.invalid/chwd.git
+	source = git+https://github.com/CatOS-dev/chwd.git
 	sha256sums = SKIP
 
 pkgname = chwd

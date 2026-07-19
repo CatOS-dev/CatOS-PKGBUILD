@@ -3,11 +3,11 @@ pkgver=1.0
 pkgrel=3
 pkgdesc="Default GTK settings for CatOS"
 arch=('any')
-url='https://catos.info'
+url='https://github.com/CatOS-dev/catos-gtk-settings'
 license=('GPL')
 depends=('catos-branding' 'catos-graphite-gtk-theme')
 makedepends=('git')
-source=('https://bdd.invalid/catos-gtk-settings.git')
+source=('git+https://github.com/CatOS-dev/catos-gtk-settings.git')
 sha256sums=('SKIP')
 
 package() {

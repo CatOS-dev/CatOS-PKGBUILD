@@ -3,7 +3,7 @@ pkgver=1.0.0
 pkgrel=4
 pkgdesc="CatOS ready-to-use Wayfire session preset"
 arch=('any')
-url='https://www.catos.info/'
+url='https://github.com/CatOS-dev/catos-wayfire-settings'
 license=('GPL-3.0-or-later')
 depends=(
   'wayfire'
@@ -39,7 +39,7 @@ optdepends=(
   'catos-tela-icon-theme-blue: CatOS icon theme'
 )
 makedepends=('git')
-source=("https://bdd.invalid/catos-wayfire-settings.git")
+source=("git+https://github.com/CatOS-dev/catos-wayfire-settings.git")
 sha256sums=('SKIP')
 
 package() {

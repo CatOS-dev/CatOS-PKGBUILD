@@ -2,12 +2,12 @@ pkgbase = catos-xfce-settings
 	pkgdesc = Default Xfce settings for CatOS
 	pkgver = 2.0
 	pkgrel = 3
-	url = https://catos.info
+	url = https://github.com/CatOS-dev/catos-xfce-settings
 	arch = any
 	license = GPL
 	makedepends = git
 	depends = catos-branding
-	source = https://bdd.invalid/catos-xfce-settings.git
+	source = git+https://github.com/CatOS-dev/catos-xfce-settings.git
 	sha256sums = SKIP
 
 pkgname = catos-xfce-settings

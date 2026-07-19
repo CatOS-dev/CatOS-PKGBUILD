@@ -5,7 +5,7 @@ pkgver=0.1.2
 pkgrel=1
 pkgdesc='Generate Limine boot entries for Btrfs snapshots'
 arch=('x86_64')
-url='https://github.com/Aromatic05/limine-btrfs'
+url='https://github.com/CatOS-dev/limine-btrfs'
 license=('GPL-3.0-only')
 depends=(
   'btrfs-progs'
@@ -24,7 +24,7 @@ optdepends=(
 conflicts=('limine-snapper' 'limine-snapper-sync')
 backup=('etc/limine-btrfs.conf')
 options=('!debug')
-source=('https://bdd.invalid/limine-btrfs.git')
+source=('git+https://github.com/CatOS-dev/limine-btrfs.git')
 sha256sums=('SKIP')
 
 prepare() {

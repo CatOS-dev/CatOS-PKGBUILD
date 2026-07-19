@@ -3,7 +3,7 @@ pkgver=1.0.0
 pkgrel=4
 pkgdesc="CatOS ready-to-use Sway session preset"
 arch=('any')
-url='https://www.catos.info/'
+url='https://github.com/CatOS-dev/catos-sway-settings'
 license=('GPL-3.0-or-later')
 depends=(
   'sway'
@@ -40,7 +40,7 @@ optdepends=(
   'catos-tela-icon-theme-blue: CatOS icon theme'
 )
 makedepends=('git')
-source=("https://bdd.invalid/catos-sway-settings.git")
+source=("git+https://github.com/CatOS-dev/catos-sway-settings.git")
 sha256sums=('SKIP')
 
 package() {

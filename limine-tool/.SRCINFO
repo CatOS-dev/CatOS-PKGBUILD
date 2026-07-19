@@ -2,7 +2,7 @@ pkgbase = limine-tool
 	pkgdesc = Rust multicall Limine entry, install, and mkinitcpio integration tool
 	pkgver = 0.1.0
 	pkgrel = 3
-	url = https://github.com/Aromatic05/limine-tool
+	url = https://github.com/CatOS-dev/limine-tool
 	arch = x86_64
 	license = GPL-3.0-only
 	makedepends = git
@@ -33,7 +33,7 @@ pkgbase = limine-tool
 	replaces = limine-mkinitcpio-hook
 	options = !debug
 	backup = etc/limine-entry-tool.conf
-	source = https://bdd.invalid/limine-tool.git
+	source = git+https://github.com/CatOS-dev/limine-tool.git
 	sha256sums = SKIP
 
 pkgname = limine-tool

@@ -3,11 +3,11 @@ pkgver=25.02
 pkgrel=3
 pkgdesc='GRUB dark theme for CatOS'
 arch=('any')
-url='https://github.com/CatOS-Home/CatOS'
+url='https://github.com/CatOS-dev/catos-grub-theme-dark'
 license=('GPL-3.0-only')
 depends=('grub')
 makedepends=('git')
-source=("https://bdd.invalid/catos-grub-theme-dark.git")
+source=("git+https://github.com/CatOS-dev/catos-grub-theme-dark.git")
 sha256sums=('SKIP')
 
 package() {

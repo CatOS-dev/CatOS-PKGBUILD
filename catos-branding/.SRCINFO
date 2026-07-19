@@ -2,12 +2,12 @@ pkgbase = catos-branding
 	pkgdesc = CatOS branding
 	pkgver = 1.0
 	pkgrel = 4
-	url = https://github.com/CatOS-Home/CatOS
+	url = https://github.com/CatOS-dev/catos-branding
 	install = catos-branding.install
 	arch = any
 	license = GPL
 	makedepends = git
-	source = https://bdd.invalid/catos-branding.git
+	source = git+https://github.com/CatOS-dev/catos-branding.git
 	sha256sums = SKIP
 
 pkgname = catos-branding

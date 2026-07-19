@@ -2,7 +2,7 @@ pkgbase = catos-waybar-settings
 	pkgdesc = Shared compositor-aware Waybar profiles for CatOS
 	pkgver = 1.0.0
 	pkgrel = 3
-	url = https://www.catos.info/
+	url = https://github.com/CatOS-dev/catos-waybar-settings
 	arch = any
 	license = GPL-3.0-or-later
 	makedepends = git
@@ -16,7 +16,7 @@ pkgbase = catos-waybar-settings
 	optdepends = blueman: graphical Bluetooth manager
 	optdepends = pavucontrol: graphical audio mixer
 	optdepends = wireplumber: PipeWire session manager and audio status
-	source = https://bdd.invalid/catos-waybar-settings.git
+	source = git+https://github.com/CatOS-dev/catos-waybar-settings.git
 	sha256sums = SKIP
 
 pkgname = catos-waybar-settings

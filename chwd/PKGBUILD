@@ -6,7 +6,7 @@ pkgver=1.21.0.r9.g8ee72f5
 pkgrel=4
 pkgdesc="CatOS hardware detection tool"
 arch=(x86_64)
-url="https://github.com/Aromatic05/chwd"
+url='https://github.com/CatOS-dev/chwd'
 license=(GPL-3.0-or-later)
 depends=('gcc-libs' 'pciutils' 'lua' 'pacman' 'base-devel' 'paru')
 makedepends=('cargo' 'lld' 'clang' 'llvm' 'git')
@@ -14,7 +14,7 @@ provides=('chwd-db')
 replaces=('chwd-db')
 conflicts=('chwd-db')
 groups=('catos')
-source=("https://bdd.invalid/chwd.git")
+source=("git+https://github.com/CatOS-dev/chwd.git")
 sha256sums=('SKIP')
 
 prepare() {

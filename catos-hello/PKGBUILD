@@ -4,12 +4,12 @@ pkgver=0.1.0
 pkgrel=9
 pkgdesc="CatOS Hello - welcome application"
 arch=('x86_64')
-url="https://github.com/Aromatic05/catos-hello"
+url='https://github.com/CatOS-dev/catos-hello'
 license=('GPL')
 depends=('qt6-base' 'rate-mirrors' 'lshw' 'inxi')
 optdepends=('lsb-release: include LSB information in collected logs')
 makedepends=('git' 'cmake' 'gcc' 'make' 'qt6-tools')
-source=("https://bdd.invalid/catos-hello.git")
+source=("git+https://github.com/CatOS-dev/catos-hello.git")
 sha256sums=('SKIP')
 
 prepare() {

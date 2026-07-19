@@ -3,11 +3,11 @@ pkgver=2.0
 pkgrel=2
 pkgdesc="CatOS KDE Settings"
 arch=('any')
-url="https://www.catos.info/"
+url='https://github.com/CatOS-dev/catos-kde-settings'
 license=('GPL')
 install="${pkgname}.install"
 makedepends=('git')
-source=("https://bdd.invalid/catos-kde-settings.git")
+source=("git+https://github.com/CatOS-dev/catos-kde-settings.git")
 sha256sums=('SKIP')
 
 package() {

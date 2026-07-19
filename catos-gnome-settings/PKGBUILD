@@ -3,11 +3,11 @@ pkgver=2.0
 pkgrel=7
 pkgdesc="CatOS GNOME settings"
 arch=('any')
-url='https://catos.info'
+url='https://github.com/CatOS-dev/catos-gnome-settings'
 license=('GPL')
 depends=('catos-branding')
 makedepends=('git')
-source=('https://bdd.invalid/catos-gnome-settings.git')
+source=('git+https://github.com/CatOS-dev/catos-gnome-settings.git')
 sha256sums=('SKIP')
 
 package() {

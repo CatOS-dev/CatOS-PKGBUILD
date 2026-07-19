@@ -2,7 +2,7 @@ pkgbase = catos-sway-settings
 	pkgdesc = CatOS ready-to-use Sway session preset
 	pkgver = 1.0.0
 	pkgrel = 4
-	url = https://www.catos.info/
+	url = https://github.com/CatOS-dev/catos-sway-settings
 	arch = any
 	license = GPL-3.0-or-later
 	makedepends = git
@@ -36,7 +36,7 @@ pkgbase = catos-sway-settings
 	optdepends = catos-gtk-settings: CatOS GTK appearance
 	optdepends = catos-bibata-cursor: CatOS cursor theme
 	optdepends = catos-tela-icon-theme-blue: CatOS icon theme
-	source = https://bdd.invalid/catos-sway-settings.git
+	source = git+https://github.com/CatOS-dev/catos-sway-settings.git
 	sha256sums = SKIP
 
 pkgname = catos-sway-settings

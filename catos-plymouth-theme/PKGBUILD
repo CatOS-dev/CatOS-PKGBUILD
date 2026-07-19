@@ -3,11 +3,11 @@ pkgver=2.0
 pkgrel=2
 pkgdesc="CatOS Plymouth theme"
 arch=('any')
-url='https://catos.info'
+url='https://github.com/CatOS-dev/catos-plymouth-theme'
 license=('GPL')
 depends=('plymouth')
 makedepends=('git')
-source=('https://bdd.invalid/catos-plymouth-theme.git')
+source=('git+https://github.com/CatOS-dev/catos-plymouth-theme.git')
 sha256sums=('SKIP')
 
 package() {

@@ -3,7 +3,7 @@ pkgver=26.07
 pkgrel=7
 pkgdesc="Calamares configuration for CatOS"
 arch=('any')
-url='https://github.com/Aromatic05/catos-calamares-config'
+url='https://github.com/CatOS-dev/catos-calamares-config'
 license=('GPL3')
 depends=('catos-branding' 'catos-calamares' 'python-yaml')
 makedepends=('git')
@@ -11,7 +11,7 @@ conflicts=('alci-calamares-config'
            'alci-calamares-config-dev'
            'alci-calamares-config-pure'
            'alci-calamares-config-btrfs')
-source=('https://bdd.invalid/catos-calamares-config.git')
+source=('git+https://github.com/CatOS-dev/catos-calamares-config.git')
 sha256sums=('SKIP')
 
 package() {

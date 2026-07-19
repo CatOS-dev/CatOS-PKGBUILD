@@ -6,7 +6,7 @@ pkgver=26.07
 pkgrel=3
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
-url="https://codeberg.org/Aromatic/calamares"
+url='https://github.com/CatOS-dev/calamares'
 license=('BSD-2-Clause'
   'MIT'
   'CC-BY-4.0'
@@ -54,7 +54,7 @@ makedepends=('git'
   'qt6-translations'
   'qt6-tools')
 
-source=("${_srcname}::https://bdd.invalid/calamares.git"
+source=("${_srcname}::git+https://github.com/CatOS-dev/calamares.git"
   "calamares_polkit"
   "49-nopasswd-calamares.rules")
 

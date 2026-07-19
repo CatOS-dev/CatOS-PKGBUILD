@@ -2,12 +2,12 @@ pkgbase = catos-grub-theme-dark
 	pkgdesc = GRUB dark theme for CatOS
 	pkgver = 25.02
 	pkgrel = 3
-	url = https://github.com/CatOS-Home/CatOS
+	url = https://github.com/CatOS-dev/catos-grub-theme-dark
 	arch = any
 	license = GPL-3.0-only
 	makedepends = git
 	depends = grub
-	source = https://bdd.invalid/catos-grub-theme-dark.git
+	source = git+https://github.com/CatOS-dev/catos-grub-theme-dark.git
 	sha256sums = SKIP
 
 pkgname = catos-grub-theme-dark

@@ -2,12 +2,12 @@ pkgbase = catos-wallpaper-effects
 	pkgdesc = Wallpaper effects widget for KDE Plasma
 	pkgver = 25.03
 	pkgrel = 2
-	url = https://github.com/luisbocanegra/plasma-wallpaper-effects
+	url = https://github.com/CatOS-dev/catos-wallpaper-effects
 	arch = any
 	license = GPL-3.0-only
 	makedepends = git
 	depends = plasma-workspace
-	source = https://bdd.invalid/catos-wallpaper-effects.git
+	source = git+https://github.com/CatOS-dev/catos-wallpaper-effects.git
 	sha256sums = SKIP
 
 pkgname = catos-wallpaper-effects
