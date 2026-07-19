@@ -1,6 +1,6 @@
 pkgname=catos-wayfire-settings
 pkgver=1.0.0
-pkgrel=3
+pkgrel=4
 pkgdesc="CatOS ready-to-use Wayfire session preset"
 arch=('any')
 url='https://www.catos.info/'

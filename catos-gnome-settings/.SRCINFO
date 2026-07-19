@@ -1,7 +1,7 @@
 pkgbase = catos-gnome-settings
 	pkgdesc = CatOS GNOME settings
 	pkgver = 2.0
-	pkgrel = 6
+	pkgrel = 7
 	url = https://catos.info
 	arch = any
 	license = GPL

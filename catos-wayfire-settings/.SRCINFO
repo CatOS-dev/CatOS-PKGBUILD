@@ -1,7 +1,7 @@
 pkgbase = catos-wayfire-settings
 	pkgdesc = CatOS ready-to-use Wayfire session preset
 	pkgver = 1.0.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://www.catos.info/
 	arch = any
 	license = GPL-3.0-or-later
