@@ -1,0 +1,24 @@
+pkgbase = btrfs-assistant-cn
+	pkgdesc = Btrfs Assistant with Simplified Chinese localization
+	pkgver = 2.2
+	pkgrel = 1
+	url = https://github.com/CatOS-dev/btrfs-assistant/tree/i18n-zh-cn
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = cmake
+	makedepends = qt6-tools
+	depends = qt6-base
+	depends = qt6-svg
+	depends = polkit
+	depends = util-linux
+	depends = btrfs-progs
+	depends = diffutils
+	optdepends = snapper: Snapper support
+	optdepends = btrfsmaintenance: Btrfs maintenance support
+	provides = btrfs-assistant=2.2
+	conflicts = btrfs-assistant
+	backup = etc/btrfs-assistant.conf
+	source = btrfs-assistant-2.2-9a0d4b7ccc734607a6ef12dd83b0cb23895be305.tar.gz
+	sha256sums = 67ab00136e695a8fc3312430f1f7ac911e1f6fe5e8751e1be20facb46120a7f4
+
+pkgname = btrfs-assistant-cn

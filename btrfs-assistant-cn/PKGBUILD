@@ -1,0 +1,35 @@
+# Maintainer: Aromatic <Aromatic05@users.noreply.github.com>
+
+pkgname=btrfs-assistant-cn
+_pkgname=btrfs-assistant
+pkgver=2.2
+pkgrel=1
+_commit=9a0d4b7ccc734607a6ef12dd83b0cb23895be305
+pkgdesc="Btrfs Assistant with Simplified Chinese localization"
+arch=('x86_64')
+url="https://github.com/CatOS-dev/btrfs-assistant/tree/i18n-zh-cn"
+license=('GPL-3.0-or-later')
+depends=('qt6-base' 'qt6-svg' 'polkit' 'util-linux' 'btrfs-progs' 'diffutils')
+optdepends=('snapper: Snapper support'
+            'btrfsmaintenance: Btrfs maintenance support')
+makedepends=('cmake' 'qt6-tools')
+provides=("btrfs-assistant=${pkgver}")
+conflicts=('btrfs-assistant')
+backup=("etc/${_pkgname}.conf")
+source=("${_pkgname}-${pkgver}-${_commit}.tar.gz")
+sha256sums=('67ab00136e695a8fc3312430f1f7ac911e1f6fe5e8751e1be20facb46120a7f4')
+
+prepare() {
+  sed -e 's/-Werror//' -i "${_pkgname}-${pkgver}/src/CMakeLists.txt"
+}
+
+build() {
+  cmake -B build -S "${_pkgname}-${pkgver}" \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=None
+  cmake --build build
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install build
+}
