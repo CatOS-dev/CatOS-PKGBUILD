@@ -1,7 +1,7 @@
 pkgbase = catos-kde-theme
 	pkgdesc = CatOS KDE theme
 	pkgver = 1.0
-	pkgrel = 6
+	pkgrel = 7
 	url = https://github.com/CatOS-dev/catos-kde-theme
 	arch = any
 	license = GPL

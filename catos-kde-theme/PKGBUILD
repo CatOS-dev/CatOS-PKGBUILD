@@ -1,6 +1,6 @@
 pkgname=catos-kde-theme
 pkgver=1.0
-pkgrel=6
+pkgrel=7
 pkgdesc="CatOS KDE theme"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-kde-theme'
