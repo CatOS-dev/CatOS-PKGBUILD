@@ -3,7 +3,7 @@
 pkgname=btrfs-assistant-cn
 _pkgname=btrfs-assistant
 pkgver=2.2
-pkgrel=1
+pkgrel=2
 _commit=9a0d4b7ccc734607a6ef12dd83b0cb23895be305
 pkgdesc="Btrfs Assistant with Simplified Chinese localization"
 arch=('x86_64')
@@ -12,7 +12,7 @@ license=('GPL-3.0-or-later')
 depends=('qt6-base' 'qt6-svg' 'polkit' 'util-linux' 'btrfs-progs' 'diffutils')
 optdepends=('snapper: Snapper support'
             'btrfsmaintenance: Btrfs maintenance support')
-makedepends=('cmake' 'qt6-tools')
+makedepends=('cmake' 'qt6-tools' 'qt6-declarative')
 provides=("btrfs-assistant=${pkgver}")
 conflicts=('btrfs-assistant')
 backup=("etc/${_pkgname}.conf")

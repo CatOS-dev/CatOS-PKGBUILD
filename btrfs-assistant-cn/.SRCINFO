@@ -1,12 +1,13 @@
 pkgbase = btrfs-assistant-cn
 	pkgdesc = Btrfs Assistant with Simplified Chinese localization
 	pkgver = 2.2
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/btrfs-assistant/tree/i18n-zh-cn
 	arch = x86_64
 	license = GPL-3.0-or-later
 	makedepends = cmake
 	makedepends = qt6-tools
+	makedepends = qt6-declarative
 	depends = qt6-base
 	depends = qt6-svg
 	depends = polkit
