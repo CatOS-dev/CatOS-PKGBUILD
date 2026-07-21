@@ -1,6 +1,6 @@
 pkgname=catos-branding
 pkgver=1.0
-pkgrel=4
+pkgrel=5
 pkgdesc="CatOS branding"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-branding'
