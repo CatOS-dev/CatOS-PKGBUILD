@@ -1,0 +1,24 @@
+--- a/breezedecoration.cpp
++++ b/breezedecoration.cpp
+@@ -1023 +1023,7 @@
+-        else if (!hasBorders())
++        else if (c->isShaded())
++        {
++            // A shaded window consists only of its title bar, so all four
++            // corners must follow the window shape.
++            painter->drawRoundedRect(titleRect, m_internalSettings->cornerRadius(), m_internalSettings->cornerRadius());
++        }
++        else
+@@ -1026,2 +1032,3 @@
+-            // the rect is made a little bit larger to be able to clip away the rounded corners at the bottom and sides
+-            QRectF adjustetTitleRect = titleRect.adjusted(
++            // Extend the rounded rectangle below the title bar so its lower
++            // corners are clipped away and meet the window contents cleanly.
++            const QRectF adjustedTitleRect = titleRect.adjusted(
+@@ -1033,5 +1040 @@
+-            painter->drawRoundedRect(adjustetTitleRect, m_internalSettings->cornerRadius(), m_internalSettings->cornerRadius());
+-        }
+-        else
+-        {
+-            painter->drawRoundedRect(titleRect, m_internalSettings->cornerRadius(), m_internalSettings->cornerRadius());
++            painter->drawRoundedRect(adjustedTitleRect, m_internalSettings->cornerRadius(), m_internalSettings->cornerRadius());

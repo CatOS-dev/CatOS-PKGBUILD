@@ -1,0 +1,30 @@
+--- a/breezedecoration.h
++++ b/breezedecoration.h
+@@ -69 +69 @@
+-        int captionHeight() const;
++        int captionHeight(bool useNextState = false) const;
+--- a/breezedecoration.cpp
++++ b/breezedecoration.cpp
+@@ -427,0 +428,2 @@
++        connect(this, &KDecoration3::Decoration::bordersChanged, this, &Decoration::updateTitleBar);
++        connect(this, &KDecoration3::Decoration::bordersChanged, this, &Decoration::updateButtonsGeometry);
+@@ -448,0 +451 @@
++        const int borderTop = nextState()->borders().top();
+@@ -451 +454 @@
+-        const int height = maximized ? borderTop() : borderTop() - s->smallSpacing() * Metrics::TitleBar_TopMargin;
++        const int height = maximized ? borderTop : borderTop - s->smallSpacing() * Metrics::TitleBar_TopMargin;
+@@ -876 +879 @@
+-        const int verticalOffset = (isTopEdge() ? s->smallSpacing() * Metrics::TitleBar_TopMargin : 0) + (captionHeight() - buttonHeight()) / 2;
++        const int verticalOffset = (isTopEdge() ? s->smallSpacing() * Metrics::TitleBar_TopMargin : 0) + (captionHeight(true) - buttonHeight()) / 2;
+@@ -905 +908 @@
+-                m_leftButtons->setPos(QPointF(hMargin + borderLeft(), verticalOffset + vPadding));
++                m_leftButtons->setPos(QPointF(hMargin + nextState()->borders().left(), verticalOffset + vPadding));
+@@ -925 +928 @@
+-                m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - hMargin - borderRight(), verticalOffset + vPadding));
++                m_rightButtons->setPos(QPointF(size().width() - m_rightButtons->geometry().width() - hMargin - nextState()->borders().right(), verticalOffset + vPadding));
+@@ -1094 +1097 @@
+-    int Decoration::captionHeight() const
++    int Decoration::captionHeight(bool useNextState) const
+@@ -1096 +1099 @@
+-        int border = borderTop();
++        int border = useNextState ? nextState()->borders().top() : borderTop();
