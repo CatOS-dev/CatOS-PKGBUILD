@@ -1,6 +1,6 @@
 pkgname=catos-kde-settings
-pkgver=2.0
-pkgrel=4
+pkgver=2.1
+pkgrel=1
 pkgdesc="CatOS KDE Settings"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-kde-settings'
