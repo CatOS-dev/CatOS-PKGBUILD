@@ -3,14 +3,14 @@
 
 pkgname=catos-cinnamon-settings
 pkgver=2.0
-pkgrel=3
+pkgrel=4
 pkgdesc="CatOS Cinnamon settings"
 arch=('any')
 url='https://catos.info'
 license=('GPL3')
 depends=('catos-branding')
 source=('99_catos-cinnamon.gschema.override')
-sha256sums=('3d5ce1aeed2d6212bd8663867f36ac0f0777f8bf17ec51a701a23877e8216fba')
+sha256sums=('8c686daf8bd4128513307b54a18ffda84beca0c34b09ba8ad2b7c58b157fbacc')
 
 package() {
   install -Dm644 "${srcdir}/99_catos-cinnamon.gschema.override" \

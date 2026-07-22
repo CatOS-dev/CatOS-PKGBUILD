@@ -1,19 +1,34 @@
 post_install() {
-    # 检查文件是否存在
-    if [ -f "/etc/issue" ]; then
-        rm /etc/issue
-    fi
-    ln -s /etc/catos-issue /etc/issue
-    if [ -f "/etc/os-release" ]; then
-        rm /etc/os-release
-    fi
-    ln -s /etc/catos-os-release /etc/os-release
-    if [ -f "/etc/lsb-release" ]; then
-        rm /etc/lsb-release
-    fi
-    ln -s /etc/catos-lsb-release /etc/lsb-release
+    /usr/lib/catos-branding/apply
 }
 
 post_upgrade() {
-    post_install
+    /usr/lib/catos-branding/apply
+}
+
+post_remove() {
+    state_dir=/var/lib/catos-branding/backup
+
+    restore_path() {
+        path=$1
+        name=$2
+        backup="$state_dir/$name"
+        absent="$state_dir/$name.absent"
+
+        rm -f "$path"
+        if [ -e "$backup" ] || [ -L "$backup" ]; then
+            cp -a --no-dereference "$backup" "$path"
+        elif [ -e "$absent" ]; then
+            :
+        fi
+    }
+
+    restore_path /usr/lib/os-release usr-lib-os-release
+    restore_path /etc/issue etc-issue
+    restore_path /etc/lsb-release etc-lsb-release
+
+    rm -f /etc/os-release
+    ln -s ../usr/lib/os-release /etc/os-release
+    rm -f /etc/catos-os-release /etc/catos-issue /etc/catos-lsb-release
+    rm -rf /var/lib/catos-branding
 }

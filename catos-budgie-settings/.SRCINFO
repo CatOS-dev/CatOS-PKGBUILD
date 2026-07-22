@@ -1,12 +1,12 @@
 pkgbase = catos-budgie-settings
 	pkgdesc = CatOS Budgie settings
 	pkgver = 2.0
-	pkgrel = 4
+	pkgrel = 5
 	url = https://catos.info
 	arch = any
 	license = GPL3
 	depends = catos-branding
 	source = 99_catos-budgie.gschema.override
-	sha256sums = 61ff94776964109f2c3eb2cd8adf5522329cbe2fadb6e7301938b021f5e314df
+	sha256sums = 7681dc5dff175fbaee1ccd239bc95733d483dbaf635de2101990b0fc1a82839d
 
 pkgname = catos-budgie-settings

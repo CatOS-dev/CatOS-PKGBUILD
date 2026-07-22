@@ -1,7 +1,7 @@
 pkgname=catos-graphite-gtk-theme
 _pkgname='Graphite-gtk-theme'
 pkgver=1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="CatOS Graphite GTK theme"
 arch=('any')
 url='https://github.com/CatOS-dev/Graphite-gtk-theme'
@@ -28,7 +28,5 @@ package() {
   cp -a "${srcdir}/${_pkgname}/wallpaper/wallpapers/." "${wallpaper_dir}/"
 
   cd "${srcdir}/${_pkgname}"
-  ./install.sh -t all -d "${theme_dir}" --tweaks macos float colorful darker
-  ./install.sh -t all -d "${theme_dir}" --tweaks macos nord float colorful darker
-  ./install.sh -t all -d "${theme_dir}" --tweaks macos nord float colorful darker -s compact
+  ./install.sh -t all -c light dark -d "${theme_dir}" --tweaks macos nord float colorful darker
 }

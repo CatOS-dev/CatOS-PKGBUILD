@@ -1,7 +1,7 @@
 pkgbase = catos-lightdm-slick-theme
 	pkgdesc = CatOS theme for lightdm-slick-greeter
 	pkgver = 3.2
-	pkgrel = 3
+	pkgrel = 4
 	url = https://catos.info
 	arch = any
 	license = GPL3
@@ -13,7 +13,7 @@ pkgbase = catos-lightdm-slick-theme
 	backup = etc/lightdm/lightdm.conf.d/10-catos-slick.conf
 	source = slick-greeter.conf
 	source = 10-catos-slick.conf
-	sha512sums = f21d22b150f3f0ba1ccd80b77f3ac35c4bb127e9de3fa71f588b28d1bf9b5ca5d5b4e64883b834524d7a0056c9f3ac6b5f6b34fb8704775bf31a456d9cf74ff3
+	sha512sums = dd7b01258293b0196e47cca8dc0b46e5188b64ae8228a7ff4a0638053fe0a41a1ee99ba77a6161d65295c1ea34ef940f1eb2e349af6bdd8c833f64c23586fa2d
 	sha512sums = bcab1b65a2b8719c5fe86bcca674c58501e4e1c4db7255b40c29b6cc5498164b581cab4538251d3a43a275bba2db056e8e845267105aa8bd063ae4077dd648ca
 
 pkgname = catos-lightdm-slick-theme

@@ -1,6 +1,6 @@
 pkgname=catos-sway-settings
 pkgver=1.0.0
-pkgrel=4
+pkgrel=5
 pkgdesc="CatOS ready-to-use Sway session preset"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-sway-settings'

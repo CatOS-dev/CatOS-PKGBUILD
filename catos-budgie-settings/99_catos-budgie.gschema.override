@@ -15,8 +15,8 @@ dark-theme=true
 
 [org.gnome.desktop.background:Budgie]
 picture-options='zoom'
-picture-uri='file:///usr/share/backgrounds/catos.png'
+picture-uri='file:///usr/share/backgrounds/catos/catos-light.png'
 
 [org.gnome.desktop.screensaver]
 picture-options='zoom'
-picture-uri='file:///usr/share/backgrounds/catos.png'
+picture-uri='file:///usr/share/backgrounds/catos/catos-light.png'

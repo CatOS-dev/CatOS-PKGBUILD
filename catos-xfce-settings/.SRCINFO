@@ -1,7 +1,7 @@
 pkgbase = catos-xfce-settings
 	pkgdesc = Default Xfce settings for CatOS
 	pkgver = 2.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/CatOS-dev/catos-xfce-settings
 	arch = any
 	license = GPL

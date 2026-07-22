@@ -1,5 +1,5 @@
 [org.cinnamon.desktop.background]
-picture-uri='file:///usr/share/backgrounds/catos.png'
+picture-uri='file:///usr/share/backgrounds/catos/catos-light.png'
 
 [org.cinnamon.desktop.interface]
 cursor-theme='Bibata-Modern-Classic'

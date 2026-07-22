@@ -1,7 +1,7 @@
 pkgbase = catos-hello
 	pkgdesc = CatOS Hello - welcome application
 	pkgver = 0.1.0
-	pkgrel = 9
+	pkgrel = 10
 	url = https://github.com/CatOS-dev/catos-hello
 	arch = x86_64
 	license = GPL

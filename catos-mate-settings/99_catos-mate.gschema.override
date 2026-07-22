@@ -5,7 +5,7 @@ font='Noto Sans 10'
 default-layout='catos'
 
 [org.mate.background]
-picture-filename='/usr/share/backgrounds/catos.png'
+picture-filename='/usr/share/backgrounds/catos/catos-light.png'
 picture-options='zoom'
 
 [org.mate.interface]

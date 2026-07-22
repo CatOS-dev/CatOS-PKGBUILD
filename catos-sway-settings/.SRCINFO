@@ -1,7 +1,7 @@
 pkgbase = catos-sway-settings
 	pkgdesc = CatOS ready-to-use Sway session preset
 	pkgver = 1.0.0
-	pkgrel = 4
+	pkgrel = 5
 	url = https://github.com/CatOS-dev/catos-sway-settings
 	arch = any
 	license = GPL-3.0-or-later
