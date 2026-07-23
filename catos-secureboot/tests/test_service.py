@@ -175,6 +175,7 @@ class ServiceTests(unittest.TestCase):
             keys.mkdir()
             (keys / "machine.key").write_bytes(b"key")
             (keys / "machine.crt").write_bytes(b"certificate")
+            (root / "cmdline").write_text("root=UUID=test quiet\n", encoding="utf-8")
             config = replace(
                 Config.defaults(),
                 esp_path=esp,
@@ -227,6 +228,7 @@ class ServiceTests(unittest.TestCase):
             (keys / "machine.der").write_bytes(b"certificate-der")
             (vendor / "shimx64.efi").write_bytes(b"shim")
             (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            (root / "cmdline").write_text("root=UUID=test quiet\n", encoding="utf-8")
             config = replace(
                 Config.defaults(),
                 esp_path=esp,
