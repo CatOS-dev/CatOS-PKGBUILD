@@ -1,0 +1,13 @@
+pkgbase = catos-vim-config
+	pkgdesc = Vim configuration for CatOS
+	pkgver = 1.0
+	pkgrel = 1
+	url = https://github.com/CatOS-dev/catos-vim-config
+	arch = any
+	license = GPL-3.0-or-later
+	makedepends = git
+	depends = vim
+	source = git+https://github.com/CatOS-dev/catos-vim-config.git
+	sha256sums = SKIP
+
+pkgname = catos-vim-config

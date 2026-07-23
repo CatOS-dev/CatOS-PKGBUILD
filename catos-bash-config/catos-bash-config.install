@@ -1,0 +1,47 @@
+_catos_bashrc_file=${CATOS_BASHRC_FILE:-/etc/skel/.bashrc}
+_catos_block_start='# >>> CatOS bash configuration >>>'
+_catos_block_end='# <<< CatOS bash configuration <<<'
+
+_catos_remove_block() {
+    [ -e "$_catos_bashrc_file" ] || return 0
+
+    _catos_tmp=$(mktemp "${_catos_bashrc_file}.XXXXXX") || return 1
+    if ! awk -v start="$_catos_block_start" -v end="$_catos_block_end" '
+        $0 == start { skip = 1; next }
+        $0 == end { skip = 0; next }
+        !skip { print }
+    ' "$_catos_bashrc_file" > "$_catos_tmp"; then
+        rm -f "$_catos_tmp"
+        return 1
+    fi
+
+    cat "$_catos_tmp" > "$_catos_bashrc_file"
+    rm -f "$_catos_tmp"
+}
+
+_catos_install_block() {
+    if [ ! -e "$_catos_bashrc_file" ]; then
+        install -Dm644 /dev/null "$_catos_bashrc_file"
+    fi
+
+    _catos_remove_block || return 1
+    cat >> "$_catos_bashrc_file" <<'EOF'
+# >>> CatOS bash configuration >>>
+if [[ -r /usr/share/catos-bash-config/bashrc ]]; then
+    source /usr/share/catos-bash-config/bashrc
+fi
+# <<< CatOS bash configuration <<<
+EOF
+}
+
+post_install() {
+    _catos_install_block
+}
+
+post_upgrade() {
+    _catos_install_block
+}
+
+post_remove() {
+    _catos_remove_block
+}

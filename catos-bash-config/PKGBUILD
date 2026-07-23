@@ -1,0 +1,24 @@
+pkgname=catos-bash-config
+pkgver=1.0
+pkgrel=1
+pkgdesc="Bash configuration for CatOS"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-bash-config"
+license=('GPL-3.0-or-later')
+install='catos-bash-config.install'
+makedepends=('git')
+depends=('bash' 'bat' 'expac' 'eza' 'fastfetch' 'pkgfile' 'starship' 'zoxide')
+optdepends=(
+  'direnv: per-directory environment integration'
+  'hwinfo: hardware summary alias'
+  'openbsd-netcat: termbin alias'
+)
+source=("git+https://github.com/CatOS-dev/catos-bash-config.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  install -d "${pkgdir}/etc" "${pkgdir}/usr"
+  cp -a etc/. "${pkgdir}/etc/"
+  cp -a usr/. "${pkgdir}/usr/"
+}

@@ -1,0 +1,18 @@
+pkgname=catos-vim-config
+pkgver=1.0
+pkgrel=1
+pkgdesc="Vim configuration for CatOS"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-vim-config"
+license=('GPL-3.0-or-later')
+makedepends=('git')
+depends=('vim')
+source=("git+https://github.com/CatOS-dev/catos-vim-config.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  install -d "${pkgdir}/etc" "${pkgdir}/usr"
+  cp -a etc/. "${pkgdir}/etc/"
+  cp -a usr/. "${pkgdir}/usr/"
+}

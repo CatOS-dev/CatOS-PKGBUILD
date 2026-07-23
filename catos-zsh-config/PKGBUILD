@@ -1,32 +1,34 @@
-pkgname=catos-fish-config
-pkgver=3.0
+pkgname=catos-zsh-config
+pkgver=1.0
 pkgrel=1
-pkgdesc="Fish configuration for CatOS"
+pkgdesc="Zsh configuration for CatOS"
 arch=('any')
-url="https://github.com/CatOS-dev/catos-fish-config"
-license=('GPL-3.0-or-later' 'MIT')
+url="https://github.com/CatOS-dev/catos-zsh-config"
+license=('GPL-3.0-or-later')
 makedepends=('git')
 depends=(
   'bat'
   'expac'
   'eza'
   'fastfetch'
-  'fish'
-  'fisher'
-  'fzf'
   'libnotify'
   'pkgfile'
   'starship'
-  'tealdeer'
   'zoxide'
+  'zsh'
+  'zsh-autosuggestions'
+  'zsh-completions'
+  'zsh-history-substring-search'
+  'zsh-syntax-highlighting'
 )
 optdepends=(
   'direnv: per-directory environment integration'
   'hwinfo: hardware summary alias'
-  'jq: focused-window detection under Sway and Kitty'
+  'jq: focused-window detection under Sway'
   'openbsd-netcat: termbin alias'
+  'xorg-xprop: focused-window detection under X11'
 )
-source=("git+https://github.com/CatOS-dev/catos-fish-config.git")
+source=("git+https://github.com/CatOS-dev/catos-zsh-config.git")
 sha256sums=('SKIP')
 
 package() {
