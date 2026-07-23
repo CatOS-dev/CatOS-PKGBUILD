@@ -40,6 +40,8 @@ class GrubTests(unittest.TestCase):
             "search",
             "probe",
             "efi_gop",
+            "efi_uga",
+            "video_fb",
             "tpm",
             "tpm2_key_protector",
             "zstd",
@@ -63,6 +65,9 @@ class GrubTests(unittest.TestCase):
             "testspeed",
             "usbtest",
             "videotest",
+            "all_video",
+            "video_bochs",
+            "video_cirrus",
         }
 
         self.assertTrue(required.issubset(GRUB_PRELOAD_MODULES))
