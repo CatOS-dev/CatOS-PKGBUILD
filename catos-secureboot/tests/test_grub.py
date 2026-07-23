@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from catos_secureboot.grub import discover_grub_modules, rebuild_grub_core
+from catos_secureboot.grub import GRUB_PRELOAD_MODULES, rebuild_grub_core, select_grub_modules
 from catos_secureboot.system import CommandResult
 
 
@@ -22,19 +22,68 @@ class FakeRunner:
 
 
 class GrubTests(unittest.TestCase):
-    def test_discovers_every_platform_module_in_stable_order(self) -> None:
+    def test_preload_set_covers_supported_boot_paths_without_native_disk_drivers(self) -> None:
+        required = {
+            "normal",
+            "configfile",
+            "linux",
+            "btrfs",
+            "ext2",
+            "fat",
+            "xfs",
+            "zfs",
+            "cryptodisk",
+            "luks",
+            "luks2",
+            "lvm",
+            "mdraid1x",
+            "search",
+            "probe",
+            "efi_gop",
+            "tpm",
+            "tpm2_key_protector",
+            "zstd",
+            "xzio",
+        }
+        prohibited = {
+            "nativedisk",
+            "ahci",
+            "ata",
+            "pata",
+            "usbms",
+            "uhci",
+            "ohci",
+            "ehci",
+            "memdisk",
+            "memrw",
+            "iorw",
+            "functional_test",
+            "argon2_test",
+            "testload",
+            "testspeed",
+            "usbtest",
+            "videotest",
+        }
+
+        self.assertTrue(required.issubset(GRUB_PRELOAD_MODULES))
+        self.assertTrue(prohibited.isdisjoint(GRUB_PRELOAD_MODULES))
+        self.assertEqual(tuple(sorted(set(GRUB_PRELOAD_MODULES))), GRUB_PRELOAD_MODULES)
+
+    def test_selects_only_the_curated_modules_and_rejects_incomplete_grub_packages(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             modules = Path(directory)
-            for name in ("zfs.mod", "normal.mod", "linux.mod", "test.mod"):
-                (modules / name).write_bytes(b"module")
-            (modules / "moddep.lst").write_text("", encoding="utf-8")
+            for name in GRUB_PRELOAD_MODULES:
+                (modules / f"{name}.mod").write_bytes(b"module")
+            (modules / "nativedisk.mod").write_bytes(b"must-not-preload")
+            (modules / "normal.mod").unlink()
 
-            self.assertEqual(
-                discover_grub_modules(modules),
-                ("linux", "normal", "test", "zfs"),
-            )
+            with self.assertRaisesRegex(RuntimeError, "normal"):
+                select_grub_modules(modules)
 
-    def test_rebuilds_installed_grub_with_all_modules_inside_the_signed_core(self) -> None:
+            (modules / "normal.mod").write_bytes(b"module")
+            self.assertEqual(select_grub_modules(modules), GRUB_PRELOAD_MODULES)
+
+    def test_rebuilds_installed_grub_with_curated_modules_inside_the_signed_core(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             esp = root / "esp"
@@ -43,8 +92,9 @@ class GrubTests(unittest.TestCase):
             sbat = root / "sbat.csv"
             output = esp / "EFI/CatOS/grubx64.efi"
             modules.mkdir()
-            for name in ("normal.mod", "linux.mod", "btrfs.mod", "luks2.mod"):
-                (modules / name).write_bytes(b"module")
+            for name in GRUB_PRELOAD_MODULES:
+                (modules / f"{name}.mod").write_bytes(b"module")
+            (modules / "nativedisk.mod").write_bytes(b"must-not-preload")
             sbat.write_text("sbat,1,SBAT Version,sbat,1,https://example.invalid\n", encoding="utf-8")
             runner = FakeRunner(output)
 
@@ -57,7 +107,7 @@ class GrubTests(unittest.TestCase):
                 runner=runner,
             )
 
-            self.assertEqual(module_count, 4)
+            self.assertEqual(module_count, len(GRUB_PRELOAD_MODULES))
             self.assertEqual(output.read_bytes(), b"rebuilt-grub-core")
             command = runner.calls[0]
             self.assertEqual(command[0], "grub-install")
@@ -69,7 +119,8 @@ class GrubTests(unittest.TestCase):
             self.assertIn("--no-nvram", command)
             self.assertIn("--recheck", command)
             self.assertIn(f"--sbat={sbat}", command)
-            self.assertIn("--modules=btrfs linux luks2 normal", command)
+            self.assertIn(f"--modules={' '.join(GRUB_PRELOAD_MODULES)}", command)
+            self.assertNotIn("nativedisk", command[-1].split("=", 1)[1].split())
             self.assertNotIn("--disable-shim-lock", command)
 
 

@@ -24,7 +24,7 @@ catos-secureboot maintain
 2. enforces `module.sig_enforce=1` and integrity lockdown in the installed boot configuration;
 3. signs modules under `updates/` and `extramodules/`, then regenerates initramfs;
 4. signs the installed kernel images found through `kernel_globs`;
-5. when GRUB is selected, reruns `grub-install` with every module from `/usr/lib/grub/x86_64-efi/*.mod` preloaded into the EFI core and with the distribution SBAT metadata;
+5. when GRUB is selected, reruns `grub-install` with the CatOS normal-disk Secure Boot module set preloaded into the EFI core and with the distribution SBAT metadata;
 6. signs the final EFI artifacts owned by the selected GRUB, systemd-boot or Limine provider;
 7. atomically deploys shim, MokManager, the signed second stage and the machine certificate;
 8. registers `CatOS Secure Boot` in firmware and submits the machine certificate to `mokutil`;
@@ -40,4 +40,4 @@ This package does not create, convert to, or update UKIs. If a separately select
 
 ## Update integration
 
-The pacman hooks split the lifecycle into two ordered stages. The early stage runs after DKMS and before `mkinitcpio`, signs external modules and canonical kernels, and never touches deployed kernel copies. The final EFI stage runs after bootloader generation. For GRUB it rebuilds `grubx64.efi` with the complete platform module set inside the core image, then signs and deploys the final shim chain. Limine kernel copies and their recorded hashes are not modified by the final stage.
+The pacman hooks split the lifecycle into two ordered stages. The early stage runs after DKMS and before `mkinitcpio`, signs external modules and canonical kernels, and never touches deployed kernel copies. The final EFI stage runs after bootloader generation. For GRUB it rebuilds `grubx64.efi` with a curated normal-disk module set inside the core image, then signs and deploys the final shim chain. The set covers GRUB configuration, Linux loading, common filesystems, LUKS/LVM/MD RAID, TPM2 and compression paths, while excluding native disk-controller, raw memory and test modules. Limine kernel copies and their recorded hashes are not modified by the final stage.

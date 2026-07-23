@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from catos_secureboot.config import Config
+from catos_secureboot.grub import GRUB_PRELOAD_MODULES
 from catos_secureboot.service import SecureBootService
 from catos_secureboot.system import CommandResult
 
@@ -139,7 +140,10 @@ class ServiceTests(unittest.TestCase):
             with (
                 patch("catos_secureboot.service.os.geteuid", return_value=0),
                 patch("catos_secureboot.service.second_stage_sbat_source", return_value=sbat_source),
-                patch("catos_secureboot.service.rebuild_grub_core", return_value=295) as rebuild_grub,
+                patch(
+                    "catos_secureboot.service.rebuild_grub_core",
+                    return_value=len(GRUB_PRELOAD_MODULES),
+                ) as rebuild_grub,
             ):
                 result = service.maintain()
 

@@ -21,6 +21,9 @@ class PackagingTests(unittest.TestCase):
 
     def test_package_pins_vendor_boot_chain_and_runtime_tools(self) -> None:
         pkgbuild = (ROOT / "PKGBUILD").read_text(encoding="utf-8")
+        self.assertIn("pkgver=0.1.1", pkgbuild)
+        self.assertIn("pkgrel=1", pkgbuild)
+        self.assertNotIn("pkgver=0.1.0", pkgbuild)
         self.assertIn("shim-x64-16.1-5.x86_64.rpm", pkgbuild)
         self.assertIn("a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917", pkgbuild)
         self.assertIn("usr/share/catos-secureboot/vendor/shimx64.efi", pkgbuild)
