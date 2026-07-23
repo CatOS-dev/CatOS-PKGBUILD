@@ -1,0 +1,2 @@
+z /var/lib/catos-secureboot 0700 root root -
+z /var/lib/catos-secureboot/keys 0700 root root -

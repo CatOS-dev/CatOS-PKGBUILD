@@ -1,0 +1,42 @@
+pkgname=catos-secureboot
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
+arch=('x86_64')
+url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
+license=('GPL-3.0-or-later' 'BSD-2-Clause-Patent')
+depends=('python' 'openssl' 'mokutil' 'sbsigntools' 'kmod' 'zstd' 'xz' 'gzip'
+         'mkinitcpio' 'efibootmgr' 'util-linux')
+optdepends=('linux-headers: sign external modules for the linux kernel'
+            'dkms: build third-party modules before CatOS signs them'
+            'grub: regenerate GRUB configuration before signing the installed loader')
+backup=('etc/catos/secureboot.conf')
+options=('!strip')
+_fedora_shim_version=16.1-5
+source=("shim-x64-16.1-5.x86_64.rpm::https://dl.fedoraproject.org/pub/fedora/linux/releases/44/Everything/x86_64/os/Packages/s/shim-x64-16.1-5.x86_64.rpm")
+sha256sums=('a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917')
+
+check() {
+    cd "$startdir"
+    PYTHONPATH=python python -m unittest discover -s tests -v
+}
+
+package() {
+    cd "$startdir"
+    install -Dm755 packaging/catos-secureboot "$pkgdir/usr/bin/catos-secureboot"
+    install -d "$pkgdir/usr/lib/catos-secureboot"
+    cp -a python/catos_secureboot "$pkgdir/usr/lib/catos-secureboot/"
+    install -Dm644 packaging/secureboot.conf "$pkgdir/etc/catos/secureboot.conf"
+    install -Dm644 packaging/95-catos-secureboot.hook "$pkgdir/usr/share/libalpm/hooks/95-catos-secureboot.hook"
+    install -Dm644 packaging/catos-secureboot.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/catos-secureboot.conf"
+    install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/GPL-3.0-or-later.txt"
+    install -Dm644 packaging/FEDORA-SHIM-COPYRIGHT \
+        "$pkgdir/usr/share/licenses/$pkgname/FEDORA-SHIM-COPYRIGHT"
+    install -Dm644 \
+        "$srcdir/usr/lib/efi/shim/${_fedora_shim_version}/EFI/fedora/shimx64.efi" \
+        "$pkgdir/usr/share/catos-secureboot/vendor/shimx64.efi"
+    install -Dm644 \
+        "$srcdir/usr/lib/efi/shim/${_fedora_shim_version}/EFI/fedora/mmx64.efi" \
+        "$pkgdir/usr/share/catos-secureboot/vendor/mmx64.efi"
+}
