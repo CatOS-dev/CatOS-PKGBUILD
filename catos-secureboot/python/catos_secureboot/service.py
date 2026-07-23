@@ -12,7 +12,7 @@ from .keys import generate_key_material, random_enrollment_password, request_enr
 from .model import Phase, evaluate_phase
 from .modules import discover_external_modules, kernel_version_for, sign_module
 from .probe import probe
-from .signing import Signer, discover_efi_targets, discover_kernel_targets
+from .signing import Signer, discover_efi_targets, discover_kernel_targets, second_stage_sbat_source
 from .state import State
 from .system import Runner
 
@@ -72,13 +72,22 @@ class SecureBootService:
             raise RuntimeError("no installed kernel image was found")
         kernels_signed = sum(int(signer.sign_pe(path)) for path in kernel_targets)
 
-        efi_changed = 0
-        for path in discover_efi_targets(self.config.esp_path, self.config.efi_globs):
-            efi_changed += int(signer.sign_pe(path))
         second_stage = select_second_stage(
             self.config.esp_path,
             self.config.second_stage_candidates,
         )
+        second_stage_resolved = second_stage.resolve()
+        sbat_source = second_stage_sbat_source(second_stage)
+        efi_changed = 0
+        for path in discover_efi_targets(self.config.esp_path, self.config.efi_globs):
+            is_second_stage = path.resolve() == second_stage_resolved
+            efi_changed += int(
+                signer.sign_pe(
+                    path,
+                    require_sbat=is_second_stage,
+                    sbat_source=sbat_source if is_second_stage else None,
+                )
+            )
         if not signer.verify_pe(second_stage):
             raise RuntimeError(f"shim second stage is not signed by the machine key: {second_stage}")
         deployed = deploy_boot_chain(

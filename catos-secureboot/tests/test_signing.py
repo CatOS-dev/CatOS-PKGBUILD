@@ -1,11 +1,38 @@
 from __future__ import annotations
 
+import struct
 import tempfile
 import unittest
 from pathlib import Path
 
-from catos_secureboot.signing import Signer, discover_kernel_targets
-from catos_secureboot.system import CommandResult
+from catos_secureboot.signing import Signer, discover_kernel_targets, ensure_sbat, read_pe_section
+from catos_secureboot.system import CommandResult, Runner
+
+
+def write_minimal_pe(path: Path) -> None:
+    data = bytearray(0x400)
+    data[0:2] = b"MZ"
+    struct.pack_into("<I", data, 0x3C, 0x80)
+    offset = 0x80
+    data[offset : offset + 4] = b"PE\0\0"
+    offset += 4
+    struct.pack_into("<HHIIIHH", data, offset, 0x8664, 1, 0, 0, 0, 0xF0, 0x2022)
+    offset += 20
+    optional = offset
+    struct.pack_into("<H", data, optional, 0x20B)
+    struct.pack_into("<I", data, optional + 16, 0x1000)
+    struct.pack_into("<Q", data, optional + 24, 0)
+    struct.pack_into("<I", data, optional + 32, 0x1000)
+    struct.pack_into("<I", data, optional + 36, 0x200)
+    struct.pack_into("<I", data, optional + 56, 0x2000)
+    struct.pack_into("<I", data, optional + 60, 0x200)
+    struct.pack_into("<H", data, optional + 68, 10)
+    struct.pack_into("<I", data, optional + 108, 16)
+    section = optional + 0xF0
+    data[section : section + 8] = b".text\0\0\0"
+    struct.pack_into("<IIIIIIHHI", data, section + 8, 1, 0x1000, 0x200, 0x200, 0, 0, 0, 0, 0x60000020)
+    data[0x200] = 0xC3
+    path.write_bytes(data)
 
 
 class FakeRunner:
@@ -28,6 +55,36 @@ class FakeRunner:
 
 
 class SigningTests(unittest.TestCase):
+    def test_missing_sbat_is_injected_at_an_aligned_pe_section(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            image = root / "limine_x64.efi"
+            source = root / "limine.csv"
+            write_minimal_pe(image)
+            source.write_text(
+                "sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md\n"
+                "limine,1,Limine Bootloader,limine,1,https://limine-bootloader.org/\n",
+                encoding="utf-8",
+            )
+
+            changed = ensure_sbat(image, source, Runner())
+            unchanged = ensure_sbat(image, source, Runner())
+
+            self.assertTrue(changed)
+            self.assertFalse(unchanged)
+            payload = read_pe_section(image, ".sbat")
+            self.assertIsNotNone(payload)
+            self.assertIn(b"limine,1,", payload or b"")
+
+    def test_missing_sbat_requires_an_explicit_metadata_source(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            image = Path(directory) / "unknown.efi"
+            write_minimal_pe(image)
+            signer = Signer(key=Path("key"), certificate=Path("cert"), runner=FakeRunner())
+
+            with self.assertRaisesRegex(RuntimeError, "has no SBAT metadata"):
+                signer.sign_pe(image, require_sbat=True)
+
     def test_pe_signing_is_atomic_and_verified_after_replacement(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

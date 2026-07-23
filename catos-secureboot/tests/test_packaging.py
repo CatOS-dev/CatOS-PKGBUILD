@@ -28,8 +28,11 @@ class PackagingTests(unittest.TestCase):
         self.assertNotIn("systemd-ukify", pkgbuild)
         self.assertNotIn("ukify", pkgbuild)
         self.assertIn("efibootmgr", pkgbuild)
+        self.assertIn("binutils", pkgbuild)
         self.assertIn("options=('!strip')", pkgbuild)
         self.assertNotIn("git+file://", pkgbuild)
+        self.assertIn("packaging/limine.sbat.csv", pkgbuild)
+        self.assertTrue((ROOT / "packaging/limine.sbat.csv").is_file())
 
     def test_hook_runs_after_kernel_module_and_bootloader_updates(self) -> None:
         hook = (ROOT / "packaging/95-catos-secureboot.hook").read_text(encoding="utf-8")
