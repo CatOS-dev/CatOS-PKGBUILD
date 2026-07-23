@@ -13,6 +13,7 @@ class ConfigTests(unittest.TestCase):
 
         self.assertEqual(config.esp_path, Path("/boot/efi"))
         self.assertIn("EFI/Linux/*.efi", config.efi_globs)
+        self.assertEqual(config.canonical_kernel_globs, ("/usr/lib/modules/*/vmlinuz",))
         self.assertIn("/boot/efi/*/*/linux", config.kernel_globs)
         self.assertIn("/boot/efi/*/*/vmlinuz", config.kernel_globs)
         self.assertNotIn("EFI/BOOT/BOOT*.EFI", config.efi_globs)

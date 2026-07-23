@@ -18,6 +18,7 @@ class Config:
     vendor_shim: Path
     vendor_mok_manager: Path
     efi_globs: tuple[str, ...]
+    canonical_kernel_globs: tuple[str, ...]
     kernel_globs: tuple[str, ...]
     second_stage_candidates: tuple[str, ...]
     module_directories: tuple[str, ...]
@@ -44,6 +45,7 @@ class Config:
                 "EFI/systemd/*.efi",
                 "EFI/limine/*.efi",
             ),
+            canonical_kernel_globs=("/usr/lib/modules/*/vmlinuz",),
             kernel_globs=(
                 "/usr/lib/modules/*/vmlinuz",
                 "/boot/vmlinuz-*",
@@ -86,7 +88,13 @@ class Config:
         ):
             if name in section:
                 values[name] = Path(str(section[name]))
-        for name in ("efi_globs", "kernel_globs", "second_stage_candidates", "module_directories"):
+        for name in (
+            "efi_globs",
+            "canonical_kernel_globs",
+            "kernel_globs",
+            "second_stage_candidates",
+            "module_directories",
+        ):
             if name in section:
                 raw = section[name]
                 if not isinstance(raw, list) or not all(isinstance(item, str) and item for item in raw):

@@ -32,6 +32,14 @@ def parser() -> argparse.ArgumentParser:
     maintain.add_argument("--hook", action="store_true", help=argparse.SUPPRESS)
     maintain.add_argument("--json", action="store_true")
 
+    prepare = subcommands.add_parser("prepare", help=argparse.SUPPRESS)
+    prepare.add_argument("--hook", action="store_true", help=argparse.SUPPRESS)
+    prepare.add_argument("--json", action="store_true")
+
+    finalize_efi = subcommands.add_parser("finalize-efi", help=argparse.SUPPRESS)
+    finalize_efi.add_argument("--hook", action="store_true", help=argparse.SUPPRESS)
+    finalize_efi.add_argument("--json", action="store_true")
+
     verify = subcommands.add_parser("verify", help="verify the current state")
     verify.add_argument("--json", action="store_true")
     return result
@@ -57,7 +65,15 @@ def main(arguments: list[str] | None = None) -> int:
                 return 2
             return 0
         if options.command == "maintain":
-            payload = service.maintain()
+            payload = service.prepare() if options.hook else service.maintain()
+            emit(payload, options.json)
+            return 0
+        if options.command == "prepare":
+            payload = service.prepare()
+            emit(payload, options.json)
+            return 0
+        if options.command == "finalize-efi":
+            payload = service.finalize_efi()
             emit(payload, options.json)
             return 0
         password = None

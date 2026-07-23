@@ -1,6 +1,6 @@
 pkgname=catos-secureboot
 pkgver=0.1.0
-pkgrel=3
+pkgrel=4
 pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
 arch=('x86_64')
 url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
@@ -28,7 +28,10 @@ package() {
     cp -a python/catos_secureboot "$pkgdir/usr/lib/catos-secureboot/"
     install -Dm644 packaging/secureboot.conf "$pkgdir/etc/catos/secureboot.conf"
     install -Dm644 packaging/limine.sbat.csv "$pkgdir/usr/share/catos-secureboot/sbat/limine.csv"
-    install -Dm644 packaging/95-catos-secureboot.hook "$pkgdir/usr/share/libalpm/hooks/95-catos-secureboot.hook"
+    install -Dm644 packaging/75-catos-secureboot-prepare.hook \
+        "$pkgdir/usr/share/libalpm/hooks/75-catos-secureboot-prepare.hook"
+    install -Dm644 packaging/95-catos-secureboot-efi.hook \
+        "$pkgdir/usr/share/libalpm/hooks/95-catos-secureboot-efi.hook"
     install -Dm644 packaging/catos-secureboot.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/catos-secureboot.conf"
     install -Dm644 README.md "$pkgdir/usr/share/doc/$pkgname/README.md"
     install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/GPL-3.0-or-later.txt"

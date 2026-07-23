@@ -34,14 +34,22 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("packaging/limine.sbat.csv", pkgbuild)
         self.assertTrue((ROOT / "packaging/limine.sbat.csv").is_file())
 
-    def test_hook_runs_after_kernel_module_and_bootloader_updates(self) -> None:
-        hook = (ROOT / "packaging/95-catos-secureboot.hook").read_text(encoding="utf-8")
-        self.assertIn("Target = usr/lib/modules/*/vmlinuz", hook)
-        self.assertIn("Target = usr/src/*/dkms.conf", hook)
-        self.assertIn("Target = usr/lib/systemd/boot/efi/*.efi", hook)
-        self.assertIn("Target = usr/share/limine/*.EFI", hook)
-        self.assertIn("Target = grub", hook)
-        self.assertIn("Operation = Remove", hook)
+    def test_hooks_split_kernel_preparation_from_efi_finalization(self) -> None:
+        prepare = (ROOT / "packaging/75-catos-secureboot-prepare.hook").read_text(encoding="utf-8")
+        finalize = (ROOT / "packaging/95-catos-secureboot-efi.hook").read_text(encoding="utf-8")
+
+        self.assertIn("Target = usr/lib/modules/*/vmlinuz", prepare)
+        self.assertIn("Target = usr/src/*/dkms.conf", prepare)
+        self.assertIn("Exec = /usr/bin/catos-secureboot prepare --hook", prepare)
+        self.assertNotIn("usr/share/limine", prepare)
+        self.assertNotIn("EFI/", prepare)
+
+        self.assertIn("Target = usr/lib/systemd/boot/efi/*.efi", finalize)
+        self.assertIn("Target = usr/share/limine/*.EFI", finalize)
+        self.assertIn("Target = grub", finalize)
+        self.assertIn("Target = usr/lib/modules/*/vmlinuz", finalize)
+        self.assertIn("Exec = /usr/bin/catos-secureboot finalize-efi --hook", finalize)
+        self.assertFalse((ROOT / "packaging/95-catos-secureboot.hook").exists())
 
     def test_package_does_not_implement_or_generate_ukis(self) -> None:
         self.assertFalse((ROOT / "python/catos_secureboot/uki.py").exists())

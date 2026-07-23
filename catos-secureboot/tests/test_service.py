@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import hashlib
 import struct
 import subprocess
 import tempfile
@@ -40,8 +41,17 @@ def write_minimal_pe(path: Path) -> None:
 
 
 class FakeRunner:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        canonical_kernel: Path | None = None,
+        deployed_kernel: Path | None = None,
+        limine_config: Path | None = None,
+    ) -> None:
         self.calls: list[tuple[str, ...]] = []
+        self.canonical_kernel = canonical_kernel
+        self.deployed_kernel = deployed_kernel
+        self.limine_config = limine_config
+        self.kernel_was_signed_before_mkinitcpio = False
 
     def run(self, arguments: list[str], *, check: bool = True, input_text: str | None = None) -> CommandResult:
         del check, input_text
@@ -62,6 +72,16 @@ class FakeRunner:
                 raise AssertionError(completed.stderr)
             return CommandResult(completed.returncode, completed.stdout, completed.stderr)
         if arguments[0] == "mkinitcpio":
+            if self.canonical_kernel is not None:
+                self.kernel_was_signed_before_mkinitcpio = self.canonical_kernel.read_bytes().endswith(b"-signed")
+            return CommandResult(0, "", "")
+        if arguments[0] == "limine-mkinitcpio":
+            if self.canonical_kernel is None or self.deployed_kernel is None or self.limine_config is None:
+                raise AssertionError("limine refresh paths were not configured")
+            self.kernel_was_signed_before_mkinitcpio = self.canonical_kernel.read_bytes().endswith(b"-signed")
+            self.deployed_kernel.write_bytes(self.canonical_kernel.read_bytes())
+            digest = hashlib.blake2b(self.deployed_kernel.read_bytes()).hexdigest()
+            self.limine_config.write_text(f"path: boot():/linux#{digest}\n", encoding="utf-8")
             return CommandResult(0, "", "")
         raise AssertionError(arguments)
 
@@ -107,12 +127,13 @@ class ServiceTests(unittest.TestCase):
                 grub_dropin_path=root / "grub-secureboot.cfg",
                 key_dir=keys,
                 module_root=modules,
+                canonical_kernel_globs=(str(version / "vmlinuz"),),
                 kernel_globs=(str(version / "vmlinuz"), str(deployed_kernel)),
                 vendor_shim=vendor / "shimx64.efi",
                 vendor_mok_manager=vendor / "mmx64.efi",
                 register_efi=False,
             )
-            runner = FakeRunner()
+            runner = FakeRunner(version / "vmlinuz")
             service = SecureBootService(config, runner)
 
             with (
@@ -123,9 +144,10 @@ class ServiceTests(unittest.TestCase):
 
             self.assertEqual(result["deployed"], 8)
             self.assertFalse(result["efi_registered"])
-            self.assertEqual(result["kernels_signed"], 2)
+            self.assertEqual(result["kernels_signed"], 1)
             self.assertTrue((version / "vmlinuz").read_bytes().endswith(b"-signed"))
-            self.assertTrue(deployed_kernel.read_bytes().endswith(b"-signed"))
+            self.assertEqual(deployed_kernel.read_bytes(), b"deployed-kernel")
+            self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
             self.assertEqual((esp / "EFI/BOOT/BOOTX64.EFI").read_bytes(), b"shim")
             self.assertTrue((esp / "EFI/BOOT/grubx64.efi").read_bytes().endswith(b"-signed"))
             self.assertTrue(any(call[0] == "objcopy" for call in runner.calls))
@@ -133,6 +155,108 @@ class ServiceTests(unittest.TestCase):
             enforced = cmdline.read_text(encoding="utf-8")
             self.assertIn("module.sig_enforce=1", enforced)
             self.assertIn("lockdown=integrity", enforced)
+
+    def test_prepare_never_touches_esp_kernel_or_efi_loader(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            modules = root / "modules"
+            version = modules / "6.12.1-catos"
+            version.mkdir(parents=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel")
+            esp = root / "esp"
+            deployed = esp / "machine-id/linux/linux"
+            loader = esp / "EFI/limine/limine_x64.efi"
+            deployed.parent.mkdir(parents=True)
+            loader.parent.mkdir(parents=True)
+            deployed.write_bytes(b"deployed")
+            write_minimal_pe(loader)
+            keys = root / "keys"
+            keys.mkdir()
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                kernel_globs=(str(canonical), str(deployed)),
+                cmdline_path=root / "cmdline",
+                grub_dropin_path=root / "grub.cfg",
+            )
+            runner = FakeRunner()
+            service = SecureBootService(config, runner)
+
+            with patch("catos_secureboot.service.os.geteuid", return_value=0):
+                result = service.prepare()
+
+            self.assertEqual(result["kernels_signed"], 1)
+            self.assertTrue(canonical.read_bytes().endswith(b"-signed"))
+            self.assertEqual(deployed.read_bytes(), b"deployed")
+            self.assertFalse(loader.read_bytes().endswith(b"-signed"))
+            self.assertFalse(any(call[0] == "mkinitcpio" for call in runner.calls))
+
+    def test_limine_hash_is_generated_after_kernel_signing_and_remains_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            modules = root / "modules"
+            version = modules / "6.12.1-catos"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/limine", version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel")
+            deployed = esp / "machine-id/linux/linux"
+            deployed.parent.mkdir(parents=True)
+            deployed.write_bytes(b"old-kernel")
+            limine_config = esp / "limine.conf"
+            limine_config.write_text("path: boot():/linux#old\n", encoding="utf-8")
+            loader = esp / "EFI/limine/limine_x64.efi"
+            write_minimal_pe(loader)
+            sbat_source = root / "limine.sbat.csv"
+            sbat_source.write_text(
+                "sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md\n"
+                "limine,1,Limine Bootloader,limine,12.5.1,https://limine-bootloader.org/\n",
+                encoding="utf-8",
+            )
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=root / "boot",
+                cmdline_path=root / "cmdline",
+                grub_dropin_path=root / "grub.cfg",
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                kernel_globs=(str(canonical), str(deployed)),
+                second_stage_candidates=("EFI/limine/limine_x64.efi",),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            runner = FakeRunner(canonical, deployed, limine_config)
+            service = SecureBootService(config, runner)
+
+            with (
+                patch("catos_secureboot.service.os.geteuid", return_value=0),
+                patch("catos_secureboot.service.shutil.which", side_effect=lambda name: f"/usr/bin/{name}" if name == "limine-mkinitcpio" else None),
+                patch("catos_secureboot.service.second_stage_sbat_source", return_value=sbat_source),
+            ):
+                service.maintain()
+
+            expected = hashlib.blake2b(deployed.read_bytes()).hexdigest()
+            self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
+            self.assertTrue(deployed.read_bytes().endswith(b"-signed"))
+            self.assertIn(f"#{expected}", limine_config.read_text(encoding="utf-8"))
+            self.assertEqual([call[0] for call in runner.calls].count("limine-mkinitcpio"), 1)
 
 
 if __name__ == "__main__":

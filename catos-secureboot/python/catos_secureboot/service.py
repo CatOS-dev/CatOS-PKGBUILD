@@ -26,26 +26,30 @@ class SecureBootService:
         if os.geteuid() != 0:
             raise PermissionError("catos-secureboot must run as root")
 
-    def maintain(self) -> dict[str, object]:
-        self.require_root()
-        if not self.config.private_key.is_file() or not self.config.certificate_pem.is_file():
-            return {
-                "efi_signed": 0,
-                "kernels_signed": 0,
-                "modules_signed": 0,
-                "deployed": 0,
-                "efi_registered": False,
-                "skipped": "not-enabled",
-            }
-        if not self.config.esp_path.is_dir():
-            raise FileNotFoundError(f"EFI system partition is not mounted: {self.config.esp_path}")
-        for vendor in (self.config.vendor_shim, self.config.vendor_mok_manager):
-            if not vendor.is_file():
-                raise FileNotFoundError(f"vendor Secure Boot binary is missing: {vendor}")
-            if self.runner.run(["sbverify", "--list", str(vendor)], check=False).returncode != 0:
-                raise RuntimeError(f"vendor Secure Boot binary is not signed: {vendor}")
+    def _disabled_result(self) -> dict[str, object]:
+        return {
+            "efi_signed": 0,
+            "kernels_signed": 0,
+            "modules_signed": 0,
+            "deployed": 0,
+            "efi_registered": False,
+            "skipped": "not-enabled",
+        }
 
-        signer = Signer(key=self.config.private_key, certificate=self.config.certificate_pem, runner=self.runner)
+    def _enabled(self) -> bool:
+        return self.config.private_key.is_file() and self.config.certificate_pem.is_file()
+
+    def prepare(self) -> dict[str, object]:
+        """Sign inputs consumed later by mkinitcpio and bootloader tooling."""
+        self.require_root()
+        if not self._enabled():
+            return self._disabled_result()
+
+        signer = Signer(
+            key=self.config.private_key,
+            certificate=self.config.certificate_pem,
+            runner=self.runner,
+        )
         module_changed = 0
         changed_versions: set[str] = set()
         for path in discover_external_modules(self.config.module_root, self.config.module_directories):
@@ -62,16 +66,52 @@ class SecureBootService:
             self.runner.run(["depmod", version])
 
         configure_enforcement(self.config.cmdline_path, self.config.grub_dropin_path)
-        self.runner.run(["mkinitcpio", "-P"])
+        kernel_targets = discover_kernel_targets(self.config.canonical_kernel_globs)
+        if not kernel_targets:
+            raise RuntimeError("no canonical installed kernel image was found")
+        kernels_signed = sum(int(signer.sign_pe(path)) for path in kernel_targets)
+        return {
+            "efi_signed": 0,
+            "kernels_signed": kernels_signed,
+            "modules_signed": module_changed,
+            "deployed": 0,
+            "efi_registered": False,
+            "skipped": "",
+        }
+
+    def _refresh_boot_artifacts(self) -> None:
+        has_limine = any(
+            "limine" in candidate.casefold()
+            and (self.config.esp_path / candidate.lstrip("/")).is_file()
+            for candidate in self.config.second_stage_candidates
+        )
+        if has_limine and shutil.which("limine-mkinitcpio"):
+            self.runner.run(["limine-mkinitcpio"])
+        else:
+            self.runner.run(["mkinitcpio", "-P"])
+
         grub_config = self.config.boot_path / "grub/grub.cfg"
         if grub_config.is_file() and shutil.which("grub-mkconfig"):
             self.runner.run(["grub-mkconfig", "-o", str(grub_config)])
 
-        kernel_targets = discover_kernel_targets(self.config.kernel_globs)
-        if not kernel_targets:
-            raise RuntimeError("no installed kernel image was found")
-        kernels_signed = sum(int(signer.sign_pe(path)) for path in kernel_targets)
+    def finalize_efi(self) -> dict[str, object]:
+        """Sign final EFI loaders without modifying any kernel image."""
+        self.require_root()
+        if not self._enabled():
+            return self._disabled_result()
+        if not self.config.esp_path.is_dir():
+            raise FileNotFoundError(f"EFI system partition is not mounted: {self.config.esp_path}")
+        for vendor in (self.config.vendor_shim, self.config.vendor_mok_manager):
+            if not vendor.is_file():
+                raise FileNotFoundError(f"vendor Secure Boot binary is missing: {vendor}")
+            if self.runner.run(["sbverify", "--list", str(vendor)], check=False).returncode != 0:
+                raise RuntimeError(f"vendor Secure Boot binary is not signed: {vendor}")
 
+        signer = Signer(
+            key=self.config.private_key,
+            certificate=self.config.certificate_pem,
+            runner=self.runner,
+        )
         second_stage = select_second_stage(
             self.config.esp_path,
             self.config.second_stage_candidates,
@@ -103,10 +143,26 @@ class SecureBootService:
             registered = True
         return {
             "efi_signed": efi_changed,
-            "kernels_signed": kernels_signed,
-            "modules_signed": module_changed,
+            "kernels_signed": 0,
+            "modules_signed": 0,
             "deployed": len(deployed),
             "efi_registered": registered,
+            "skipped": "",
+        }
+
+    def maintain(self) -> dict[str, object]:
+        self.require_root()
+        prepared = self.prepare()
+        if prepared["skipped"]:
+            return prepared
+        self._refresh_boot_artifacts()
+        finalized = self.finalize_efi()
+        return {
+            "efi_signed": finalized["efi_signed"],
+            "kernels_signed": prepared["kernels_signed"],
+            "modules_signed": prepared["modules_signed"],
+            "deployed": finalized["deployed"],
+            "efi_registered": finalized["efi_registered"],
             "skipped": "",
         }
 

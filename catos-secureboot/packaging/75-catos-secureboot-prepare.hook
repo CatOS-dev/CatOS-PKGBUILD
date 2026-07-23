@@ -1,0 +1,24 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Path
+Target = usr/lib/modules/*/vmlinuz
+Target = usr/lib/modules/*/pkgbase
+Target = usr/lib/modules/*/updates/*
+Target = usr/lib/modules/*/extramodules/*
+Target = usr/src/*/dkms.conf
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = nvidia
+Target = nvidia-open
+Target = nvidia-dkms
+Target = broadcom-wl
+Target = broadcom-wl-dkms
+
+[Action]
+Description = Signing CatOS kernel and external modules...
+When = PostTransaction
+Exec = /usr/bin/catos-secureboot prepare --hook

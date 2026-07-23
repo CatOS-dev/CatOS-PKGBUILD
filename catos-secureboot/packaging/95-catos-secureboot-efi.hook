@@ -1,7 +1,6 @@
 [Trigger]
 Operation = Install
 Operation = Upgrade
-Operation = Remove
 Type = Path
 Target = usr/lib/modules/*/vmlinuz
 Target = usr/lib/modules/*/pkgbase
@@ -15,18 +14,13 @@ Target = usr/lib/grub/*
 [Trigger]
 Operation = Install
 Operation = Upgrade
-Operation = Remove
 Type = Package
 Target = grub
 Target = systemd
 Target = limine
-Target = nvidia
-Target = nvidia-open
-Target = nvidia-dkms
-Target = broadcom-wl
-Target = broadcom-wl-dkms
+Target = limine-tool
 
 [Action]
-Description = Maintaining CatOS Secure Boot signatures...
+Description = Signing final CatOS EFI boot chain...
 When = PostTransaction
-Exec = /usr/bin/catos-secureboot maintain --hook
+Exec = /usr/bin/catos-secureboot finalize-efi --hook
