@@ -47,6 +47,9 @@ class ServiceTests(unittest.TestCase):
                 path.mkdir(parents=True, exist_ok=True)
             (version / "pkgbase").write_text("linux\n", encoding="utf-8")
             (version / "vmlinuz").write_bytes(b"kernel")
+            deployed_kernel = esp / "machine-id/6.12.1-catos/linux"
+            deployed_kernel.parent.mkdir(parents=True)
+            deployed_kernel.write_bytes(b"deployed-kernel")
             (boot / "initramfs-linux.img").write_bytes(b"initramfs")
             (esp / "EFI/CatOS/grubx64.efi").write_bytes(b"grub")
             (keys / "machine.key").write_bytes(b"key")
@@ -64,7 +67,7 @@ class ServiceTests(unittest.TestCase):
                 grub_dropin_path=root / "grub-secureboot.cfg",
                 key_dir=keys,
                 module_root=modules,
-                kernel_globs=(str(version / "vmlinuz"),),
+                kernel_globs=(str(version / "vmlinuz"), str(deployed_kernel)),
                 vendor_shim=vendor / "shimx64.efi",
                 vendor_mok_manager=vendor / "mmx64.efi",
                 register_efi=False,
@@ -77,8 +80,9 @@ class ServiceTests(unittest.TestCase):
 
             self.assertEqual(result["deployed"], 8)
             self.assertFalse(result["efi_registered"])
-            self.assertEqual(result["kernels_signed"], 1)
+            self.assertEqual(result["kernels_signed"], 2)
             self.assertTrue((version / "vmlinuz").read_bytes().endswith(b"-signed"))
+            self.assertTrue(deployed_kernel.read_bytes().endswith(b"-signed"))
             self.assertEqual((esp / "EFI/BOOT/BOOTX64.EFI").read_bytes(), b"shim")
             self.assertTrue((esp / "EFI/BOOT/grubx64.efi").read_bytes().endswith(b"-signed"))
             self.assertFalse(any(call[0] == "ukify" for call in runner.calls))

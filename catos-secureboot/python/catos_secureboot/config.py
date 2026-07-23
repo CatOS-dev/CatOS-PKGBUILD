@@ -47,6 +47,8 @@ class Config:
             kernel_globs=(
                 "/usr/lib/modules/*/vmlinuz",
                 "/boot/vmlinuz-*",
+                "/boot/efi/*/*/linux",
+                "/boot/efi/*/*/vmlinuz",
             ),
             second_stage_candidates=(
                 "EFI/systemd/systemd-bootx64.efi",

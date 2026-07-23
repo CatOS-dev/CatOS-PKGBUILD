@@ -1,6 +1,6 @@
 pkgname=catos-secureboot
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
 arch=('x86_64')
 url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
