@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parents[1] / "catos-firmware-boot-update"
 loader = SourceFileLoader("catos_firmware_boot_update", str(SCRIPT))
@@ -78,6 +79,85 @@ class FirmwareBootUpdateTests(unittest.TestCase):
             path.write_text("[boot]\nmethod = grub\n", encoding="utf-8")
             with self.assertRaises(module.FirmwareBootError):
                 module.load_configuration(path)
+
+    def test_machine_secure_boot_management_applies_only_to_uki(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            key = Path(temporary) / "machine.key"
+            key.write_bytes(b"key")
+            uki = module.Configuration("uki", Path("/efi"), "/dev/nvme0n1", 1, "CatOS", "linux")
+            efistub = module.Configuration("efistub", Path("/efi"), "/dev/nvme0n1", 1, "CatOS", "linux")
+
+            self.assertTrue(module.machine_secure_boot_managed(uki, key))
+            self.assertFalse(module.machine_secure_boot_managed(efistub, key))
+            key.unlink()
+            self.assertFalse(module.machine_secure_boot_managed(uki, key))
+
+    def test_managed_uki_build_does_not_register_direct_firmware_entry(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            configuration = module.Configuration(
+                method="uki",
+                esp_path=root / "efi",
+                efi_disk="/dev/nvme0n1",
+                efi_partition=1,
+                label_prefix="CatOS",
+                default_kernel="linux",
+            )
+            kernel = module.Kernel(
+                version="7.1.4-test",
+                package="linux",
+                image=root / "vmlinuz",
+                initramfs=root / "initramfs.img",
+            )
+            kernel.image.write_bytes(b"kernel")
+            kernel.initramfs.write_bytes(b"initrd")
+
+            def fake_run(arguments, *, capture=False):
+                del capture
+                output = Path(arguments[arguments.index("--output") + 1])
+                output.write_bytes(b"uki")
+                return mock.Mock(stdout="")
+
+            with (
+                mock.patch.object(module, "run", side_effect=fake_run),
+                mock.patch.object(module, "replace_entry") as replace_entry,
+                mock.patch.object(module, "microcode_images", return_value=[]),
+            ):
+                output = module.build_uki(
+                    configuration,
+                    kernel,
+                    "quiet",
+                    register_firmware=False,
+                )
+
+            self.assertEqual(output.read_bytes(), b"uki")
+            replace_entry.assert_not_called()
+
+    def test_managed_uki_verification_does_not_require_direct_firmware_entries(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            configuration = module.Configuration(
+                method="uki",
+                esp_path=root / "efi",
+                efi_disk="/dev/nvme0n1",
+                efi_partition=1,
+                label_prefix="CatOS",
+                default_kernel="linux",
+            )
+            kernel = module.Kernel(
+                version="7.1.4-test",
+                package="linux",
+                image=root / "vmlinuz",
+                initramfs=root / "initramfs.img",
+            )
+            output = module.uki_output_path(configuration, kernel)
+            output.parent.mkdir(parents=True)
+            output.write_bytes(b"uki")
+
+            with mock.patch.object(module, "efi_entries", return_value=[]):
+                module.verify(configuration, [kernel], require_entries=False)
+                with self.assertRaises(module.FirmwareBootError):
+                    module.verify(configuration, [kernel], require_entries=True)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 pkgname=catos-firmware-boot
-pkgver=0.1.0
+pkgver=0.2.0
 pkgrel=1
 pkgdesc='Maintain CatOS UKI and Linux EFI stub direct firmware boot entries'
 arch=('any')

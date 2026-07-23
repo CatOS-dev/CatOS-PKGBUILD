@@ -18,6 +18,7 @@ class ConfigTests(unittest.TestCase):
         self.assertIn("/boot/efi/*/*/vmlinuz", config.kernel_globs)
         self.assertNotIn("EFI/BOOT/BOOT*.EFI", config.efi_globs)
         self.assertEqual(config.key_dir, Path("/var/lib/catos-secureboot/keys"))
+        self.assertEqual(config.firmware_boot_config_path, Path("/etc/catos/firmware-boot.conf"))
 
     def test_toml_overrides_paths_and_module_directories(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

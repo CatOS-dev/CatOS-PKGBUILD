@@ -3,7 +3,7 @@
 
 pkgname=('catos-calamares')
 pkgver=26.07
-pkgrel=4
+pkgrel=5
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/calamares'

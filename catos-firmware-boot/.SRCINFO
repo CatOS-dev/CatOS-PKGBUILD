@@ -1,6 +1,6 @@
 pkgbase = catos-firmware-boot
 	pkgdesc = Maintain CatOS UKI and Linux EFI stub direct firmware boot entries
-	pkgver = 0.1.0
+	pkgver = 0.2.0
 	pkgrel = 1
 	url = https://github.com/Aromatic05/CatOS-PKGBUILD
 	arch = any

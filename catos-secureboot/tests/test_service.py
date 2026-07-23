@@ -79,12 +79,14 @@ class FakeRunner:
         deployed_kernel: Path | None = None,
         limine_config: Path | None = None,
         systemd_uki: Path | None = None,
+        direct_ukis: dict[str, Path] | None = None,
     ) -> None:
         self.calls: list[tuple[str, ...]] = []
         self.canonical_kernel = canonical_kernel
         self.deployed_kernel = deployed_kernel
         self.limine_config = limine_config
         self.systemd_uki = systemd_uki
+        self.direct_ukis = direct_ukis or {}
         self.kernel_was_signed_before_mkinitcpio = False
 
     def run(self, arguments: list[str], *, check: bool = True, input_text: str | None = None) -> CommandResult:
@@ -129,6 +131,16 @@ class FakeRunner:
             if self.systemd_uki is not None:
                 self.systemd_uki.parent.mkdir(parents=True, exist_ok=True)
                 write_minimal_pe(self.systemd_uki)
+            return CommandResult(0, "", "")
+        if arguments[0] == "catos-firmware-boot-update":
+            if arguments != ["catos-firmware-boot-update", "--force"]:
+                raise AssertionError(arguments)
+            if self.canonical_kernel is None or not self.canonical_kernel.read_bytes().endswith(b"-signed"):
+                raise AssertionError("direct UKIs were generated before canonical kernel signing")
+            self.kernel_was_signed_before_mkinitcpio = True
+            for path in self.direct_ukis.values():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                write_sbat_pe(path)
             return CommandResult(0, "", "")
         raise AssertionError(arguments)
 
@@ -401,6 +413,77 @@ class ServiceTests(unittest.TestCase):
             self.assertTrue(uki.is_file())
             self.assertTrue(uki.read_bytes().endswith(b"-signed"))
             self.assertIn(("kernel-install", "--entry-type=all", "add-all"), runner.calls)
+
+    def test_direct_uki_provider_deploys_shim_without_systemd_boot(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            modules = root / "modules"
+            version = modules / "7.1.4-arch1-1"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/Linux", version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel")
+            firmware_config = root / "firmware-boot.conf"
+            firmware_config.write_text(
+                "[boot]\nmethod = uki\nlabel_prefix = CatOS\ndefault_kernel = linux\n",
+                encoding="utf-8",
+            )
+            ukis = {
+                "linux": esp / "EFI/Linux/catos-linux.efi",
+                "linux-lts": esp / "EFI/Linux/catos-linux-lts.efi",
+            }
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            (root / "cmdline").write_text("root=UUID=test quiet\n", encoding="utf-8")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=root / "boot",
+                cmdline_path=root / "cmdline",
+                grub_dropin_path=root / "grub.cfg",
+                firmware_boot_config_path=firmware_config,
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            runner = FakeRunner(canonical, direct_ukis=ukis)
+            service = SecureBootService(config, runner)
+
+            with (
+                patch("catos_secureboot.service.os.geteuid", return_value=0),
+                patch(
+                    "catos_secureboot.service.shutil.which",
+                    side_effect=lambda name: "/usr/bin/catos-firmware-boot-update"
+                    if name == "catos-firmware-boot-update"
+                    else None,
+                ),
+            ):
+                result = service.maintain()
+
+            self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
+            self.assertEqual(
+                [call for call in runner.calls if call[0] == "catos-firmware-boot-update"],
+                [("catos-firmware-boot-update", "--force")],
+            )
+            self.assertFalse(any(call[0] == "kernel-install" for call in runner.calls))
+            self.assertTrue(ukis["linux"].read_bytes().endswith(b"-signed"))
+            self.assertTrue(ukis["linux-lts"].read_bytes().endswith(b"-signed"))
+            self.assertEqual((esp / "EFI/BOOT/BOOTX64.EFI").read_bytes(), b"shim")
+            self.assertEqual((esp / "EFI/BOOT/grubx64.efi").read_bytes(), ukis["linux"].read_bytes())
+            self.assertEqual(
+                (esp / "EFI/CatOS/UKI/linux-lts/grubx64.efi").read_bytes(),
+                ukis["linux-lts"].read_bytes(),
+            )
+            self.assertGreaterEqual(result["deployed"], 12)
 
     def test_limine_hash_is_generated_after_kernel_signing_and_remains_valid(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

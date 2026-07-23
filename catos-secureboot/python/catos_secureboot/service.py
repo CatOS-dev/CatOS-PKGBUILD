@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 from .config import Config
-from .efi import deploy_boot_chain, register_boot_entry, select_second_stage
+from .efi import deploy_boot_chain, deploy_uki_boot_chains, register_boot_entry, select_second_stage
 from .enforcement import configure_enforcement
 from .grub import rebuild_grub_core
 from .keys import generate_key_material, random_enrollment_password, request_enrollment
@@ -17,6 +17,7 @@ from .probe import probe
 from .signing import Signer, discover_efi_targets, discover_kernel_targets, second_stage_sbat_source
 from .state import State
 from .system import Runner
+from .uki import DirectUkiConfig, discover_direct_ukis, load_direct_uki_config, select_default_uki
 
 
 class SecureBootService:
@@ -93,7 +94,18 @@ class SecureBootService:
             "skipped": "",
         }
 
-    def _refresh_boot_artifacts(self, second_stage: Path) -> None:
+    def _refresh_boot_artifacts(
+        self,
+        second_stage: Path | None,
+        direct_uki: DirectUkiConfig | None,
+    ) -> None:
+        if direct_uki is not None:
+            if not shutil.which("catos-firmware-boot-update"):
+                raise FileNotFoundError("catos-firmware-boot-update is required for the direct UKI provider")
+            self.runner.run(["catos-firmware-boot-update", "--force"])
+            return
+        if second_stage is None:
+            raise RuntimeError("no shim second stage was selected")
         kind = self._bootloader_kind(second_stage)
         if kind == "limine":
             if not shutil.which("limine-mkinitcpio"):
@@ -129,7 +141,12 @@ class SecureBootService:
                 if not signer.verify_pe(path):
                     raise RuntimeError(f"systemd-boot EFISTUB copy is not signed by the machine key: {path}")
 
-    def finalize_efi(self, *, second_stage: Path | None = None) -> dict[str, object]:
+    def finalize_efi(
+        self,
+        *,
+        second_stage: Path | None = None,
+        direct_uki: DirectUkiConfig | None = None,
+    ) -> dict[str, object]:
         """Sign final EFI loaders without modifying any kernel image."""
         self.require_root()
         if not self._enabled():
@@ -147,6 +164,44 @@ class SecureBootService:
             certificate=self.config.certificate_pem,
             runner=self.runner,
         )
+        if direct_uki is None:
+            direct_uki = load_direct_uki_config(self.config.firmware_boot_config_path)
+        if direct_uki is not None:
+            ukis = discover_direct_ukis(self.config.esp_path)
+            default_package = select_default_uki(ukis, direct_uki.default_kernel)
+            efi_changed = 0
+            for path in ukis.values():
+                efi_changed += int(signer.sign_pe(path, require_sbat=True))
+                if not signer.verify_pe(path):
+                    raise RuntimeError(f"direct UKI is not signed by the machine key: {path}")
+            deployed, loaders = deploy_uki_boot_chains(
+                esp=self.config.esp_path,
+                shim=self.config.vendor_shim,
+                mok_manager=self.config.vendor_mok_manager,
+                certificate=self.config.certificate_der,
+                ukis=ukis,
+                default_package=default_package,
+            )
+            registered = False
+            if self.config.register_efi:
+                ordered_packages = [package for package in sorted(ukis) if package != default_package]
+                ordered_packages.append(default_package)
+                for package in ordered_packages:
+                    register_boot_entry(
+                        esp=self.config.esp_path,
+                        label=f"{direct_uki.label_prefix} {package}",
+                        loader=loaders[package],
+                        runner=self.runner,
+                    )
+                registered = True
+            return {
+                "efi_signed": efi_changed,
+                "kernels_signed": 0,
+                "modules_signed": 0,
+                "deployed": len(deployed),
+                "efi_registered": registered,
+                "skipped": "",
+            }
         if second_stage is None:
             second_stage = select_second_stage(
                 self.config.esp_path,
@@ -201,12 +256,15 @@ class SecureBootService:
         prepared = self.prepare()
         if prepared["skipped"]:
             return prepared
-        second_stage = select_second_stage(
-            self.config.esp_path,
-            self.config.second_stage_candidates,
-        )
-        self._refresh_boot_artifacts(second_stage)
-        finalized = self.finalize_efi(second_stage=second_stage)
+        direct_uki = load_direct_uki_config(self.config.firmware_boot_config_path)
+        second_stage = None
+        if direct_uki is None:
+            second_stage = select_second_stage(
+                self.config.esp_path,
+                self.config.second_stage_candidates,
+            )
+        self._refresh_boot_artifacts(second_stage, direct_uki)
+        finalized = self.finalize_efi(second_stage=second_stage, direct_uki=direct_uki)
         return {
             "efi_signed": finalized["efi_signed"],
             "kernels_signed": prepared["kernels_signed"],

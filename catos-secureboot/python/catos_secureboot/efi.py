@@ -65,6 +65,52 @@ def deploy_boot_chain(
     return tuple(destinations)
 
 
+def deploy_uki_boot_chains(
+    *,
+    esp: Path,
+    shim: Path,
+    mok_manager: Path,
+    certificate: Path,
+    ukis: dict[str, Path],
+    default_package: str,
+) -> tuple[tuple[Path, ...], dict[str, str]]:
+    required = (shim, mok_manager, certificate, *ukis.values())
+    missing = [str(path) for path in required if not path.is_file()]
+    if missing:
+        raise EfiError("missing UKI boot-chain files: " + ", ".join(missing))
+    if default_package not in ukis:
+        raise EfiError(f"default UKI package is not available: {default_package}")
+
+    chain_root = esp / "EFI/CatOS/UKI"
+    expected = set(ukis)
+    if chain_root.is_dir():
+        for path in chain_root.iterdir():
+            if path.is_dir() and path.name not in expected:
+                shutil.rmtree(path)
+
+    destinations: dict[Path, Path] = {
+        esp / "EFI/BOOT/BOOTX64.EFI": shim,
+        esp / "EFI/BOOT/mmx64.efi": mok_manager,
+        esp / "EFI/BOOT/grubx64.efi": ukis[default_package],
+        esp / "EFI/CatOS/shimx64.efi": shim,
+        esp / "EFI/CatOS/mmx64.efi": mok_manager,
+        esp / "EFI/CatOS/grubx64.efi": ukis[default_package],
+        esp / "EFI/CatOS/catos-machine.cer": certificate,
+        esp / "catos-machine.cer": certificate,
+    }
+    loaders: dict[str, str] = {}
+    for package, uki in sorted(ukis.items()):
+        directory = chain_root / package
+        destinations[directory / "shimx64.efi"] = shim
+        destinations[directory / "mmx64.efi"] = mok_manager
+        destinations[directory / "grubx64.efi"] = uki
+        loaders[package] = "\\" + str((directory / "shimx64.efi").relative_to(esp)).replace("/", "\\")
+
+    for destination, source in destinations.items():
+        atomic_copy(source, destination)
+    return tuple(destinations), loaders
+
+
 def _efi_entries(runner: Runner) -> list[tuple[str, str]]:
     result = runner.run(["efibootmgr"], check=False)
     if result.returncode != 0:
@@ -90,7 +136,13 @@ def detect_esp_partition(esp: Path, runner: Runner) -> tuple[str, int]:
     return f"/dev/{parent}", int(part_number)
 
 
-def register_boot_entry(*, esp: Path, label: str, runner: Runner) -> None:
+def register_boot_entry(
+    *,
+    esp: Path,
+    label: str,
+    runner: Runner,
+    loader: str = "\\EFI\\CatOS\\shimx64.efi",
+) -> None:
     disk, partition = detect_esp_partition(esp, runner)
     for number, existing_label in _efi_entries(runner):
         if existing_label == label:
@@ -106,6 +158,6 @@ def register_boot_entry(*, esp: Path, label: str, runner: Runner) -> None:
             "--label",
             label,
             "--loader",
-            "\\EFI\\CatOS\\shimx64.efi",
+            loader,
         ]
     )

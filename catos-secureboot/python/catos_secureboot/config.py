@@ -11,6 +11,7 @@ class Config:
     boot_path: Path
     cmdline_path: Path
     grub_dropin_path: Path
+    firmware_boot_config_path: Path
     key_dir: Path
     state_path: Path
     enrollment_password_path: Path
@@ -33,6 +34,7 @@ class Config:
             boot_path=Path("/boot"),
             cmdline_path=Path("/etc/kernel/cmdline"),
             grub_dropin_path=Path("/etc/default/grub.d/90-catos-secureboot.cfg"),
+            firmware_boot_config_path=Path("/etc/catos/firmware-boot.conf"),
             key_dir=Path("/var/lib/catos-secureboot/keys"),
             state_path=Path("/var/lib/catos-secureboot/state.json"),
             enrollment_password_path=Path("/var/lib/catos-secureboot/enrollment-password"),
@@ -79,6 +81,7 @@ class Config:
             "boot_path",
             "cmdline_path",
             "grub_dropin_path",
+            "firmware_boot_config_path",
             "key_dir",
             "state_path",
             "enrollment_password_path",

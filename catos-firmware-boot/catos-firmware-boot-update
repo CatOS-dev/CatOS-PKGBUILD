@@ -18,6 +18,7 @@ CONFIG_PATH = Path("/etc/catos/firmware-boot.conf")
 CMDLINE_PATH = Path("/etc/kernel/cmdline")
 INSTALL_MARKER = Path("/run/calamares/bootloadu-installing")
 LOCK_PATH = Path("/run/lock/boot-partition.lock")
+SECURE_BOOT_KEY_PATH = Path("/var/lib/catos-secureboot/keys/machine.key")
 
 
 class FirmwareBootError(RuntimeError):
@@ -182,7 +183,20 @@ def efistub_directory(configuration: Configuration, kernel: Kernel) -> Path:
     return configuration.esp_path / "EFI/CatOS" / kernel.package
 
 
-def build_uki(configuration: Configuration, kernel: Kernel, cmdline: str) -> Path:
+def machine_secure_boot_managed(
+    configuration: Configuration,
+    key_path: Path = SECURE_BOOT_KEY_PATH,
+) -> bool:
+    return configuration.method == "uki" and key_path.is_file()
+
+
+def build_uki(
+    configuration: Configuration,
+    kernel: Kernel,
+    cmdline: str,
+    *,
+    register_firmware: bool = True,
+) -> Path:
     output = uki_output_path(configuration, kernel)
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_name(output.name + ".new")
@@ -208,7 +222,12 @@ def build_uki(configuration: Configuration, kernel: Kernel, cmdline: str) -> Pat
         os.replace(temporary, output)
     finally:
         temporary.unlink(missing_ok=True)
-    replace_entry(configuration, f"{configuration.label_prefix} {kernel.package}", loader_path(output.relative_to(configuration.esp_path)))
+    if register_firmware:
+        replace_entry(
+            configuration,
+            f"{configuration.label_prefix} {kernel.package}",
+            loader_path(output.relative_to(configuration.esp_path)),
+        )
     return output
 
 
@@ -268,12 +287,18 @@ def prune_entries(configuration: Configuration, desired_labels: set[str]) -> Non
             delete_entry(number)
 
 
-def verify(configuration: Configuration, kernels: list[Kernel]) -> None:
-    labels = {f"{configuration.label_prefix} {kernel.package}" for kernel in kernels}
-    entries = efi_entries()
-    for label in labels:
-        if not any(entry_matches(details, label) for _, details in entries):
-            raise FirmwareBootError(f"EFI entry is missing: {label}")
+def verify(
+    configuration: Configuration,
+    kernels: list[Kernel],
+    *,
+    require_entries: bool = True,
+) -> None:
+    if require_entries:
+        labels = {f"{configuration.label_prefix} {kernel.package}" for kernel in kernels}
+        entries = efi_entries()
+        for label in labels:
+            if not any(entry_matches(details, label) for _, details in entries):
+                raise FirmwareBootError(f"EFI entry is missing: {label}")
     if configuration.method == "uki":
         for kernel in kernels:
             output = uki_output_path(configuration, kernel)
@@ -297,20 +322,26 @@ def update(configuration: Configuration) -> None:
     run(["mkinitcpio", "-P"])
     kernels = discover_kernels()
     cmdline = CMDLINE_PATH.read_text(encoding="utf-8").strip()
+    register_direct_firmware = not machine_secure_boot_managed(configuration)
     desired_labels = {f"{configuration.label_prefix} {kernel.package}" for kernel in kernels}
     outputs: dict[str, Path] = {}
     for kernel in kernels:
         if configuration.method == "uki":
-            outputs[kernel.package] = build_uki(configuration, kernel, cmdline)
+            outputs[kernel.package] = build_uki(
+                configuration,
+                kernel,
+                cmdline,
+                register_firmware=register_direct_firmware,
+            )
         else:
             outputs[kernel.package] = build_efistub(configuration, kernel, cmdline)[0]
     prune_files(configuration, kernels)
-    prune_entries(configuration, desired_labels)
-    if configuration.method == "uki":
+    prune_entries(configuration, desired_labels if register_direct_firmware else set())
+    if configuration.method == "uki" and register_direct_firmware:
         default = selected_default(kernels, configuration.default_kernel)
         fallback_name = "BOOTAA64.EFI" if os.uname().machine in {"aarch64", "arm64"} else "BOOTX64.EFI"
         atomic_copy(outputs[default.package], configuration.esp_path / "EFI/BOOT" / fallback_name)
-    verify(configuration, kernels)
+    verify(configuration, kernels, require_entries=register_direct_firmware)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -335,7 +366,11 @@ def main() -> int:
     with LOCK_PATH.open("a+") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         if arguments.verify:
-            verify(configuration, discover_kernels())
+            verify(
+                configuration,
+                discover_kernels(),
+                require_entries=not machine_secure_boot_managed(configuration),
+            )
         else:
             update(configuration)
     return 0
