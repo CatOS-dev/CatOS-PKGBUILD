@@ -21,15 +21,14 @@ class PackagingTests(unittest.TestCase):
 
     def test_package_pins_vendor_boot_chain_and_runtime_tools(self) -> None:
         pkgbuild = (ROOT / "PKGBUILD").read_text(encoding="utf-8")
-        self.assertIn("pkgver=0.1.2", pkgbuild)
+        self.assertIn("pkgver=0.2.0", pkgbuild)
         self.assertIn("pkgrel=1", pkgbuild)
-        self.assertNotIn("pkgver=0.1.1", pkgbuild)
+        self.assertNotIn("pkgver=0.1.2", pkgbuild)
         self.assertIn("shim-x64-16.1-5.x86_64.rpm", pkgbuild)
         self.assertIn("a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917", pkgbuild)
         self.assertIn("usr/share/catos-secureboot/vendor/shimx64.efi", pkgbuild)
         self.assertIn("usr/share/catos-secureboot/vendor/mmx64.efi", pkgbuild)
-        self.assertNotIn("systemd-ukify", pkgbuild)
-        self.assertNotIn("ukify", pkgbuild)
+        self.assertIn("systemd-ukify", pkgbuild)
         self.assertIn("efibootmgr", pkgbuild)
         self.assertIn("binutils", pkgbuild)
         self.assertIn("options=('!strip')", pkgbuild)
@@ -54,11 +53,11 @@ class PackagingTests(unittest.TestCase):
         self.assertIn("Exec = /usr/bin/catos-secureboot finalize-efi --hook", finalize)
         self.assertFalse((ROOT / "packaging/95-catos-secureboot.hook").exists())
 
-    def test_package_does_not_implement_or_generate_ukis(self) -> None:
-        self.assertFalse((ROOT / "python/catos_secureboot/uki.py").exists())
+    def test_package_supports_systemd_type1_efistub_and_type2_uki(self) -> None:
         service = (ROOT / "python/catos_secureboot/service.py").read_text(encoding="utf-8")
-        self.assertNotIn("UkiBuilder", service)
-        self.assertNotIn("ukis_built", service)
+        config = (ROOT / "packaging/secureboot.conf").read_text(encoding="utf-8")
+        self.assertIn('"kernel-install", "--entry-type=all", "add-all"', service)
+        self.assertIn('"EFI/Linux/*.efi"', config)
 
 
 if __name__ == "__main__":

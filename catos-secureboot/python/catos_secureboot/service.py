@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import replace
 import getpass
 import os
+from pathlib import Path
 import shutil
 
 from .config import Config
@@ -39,6 +40,18 @@ class SecureBootService:
 
     def _enabled(self) -> bool:
         return self.config.private_key.is_file() and self.config.certificate_pem.is_file()
+
+    @staticmethod
+    def _bootloader_kind(second_stage: Path) -> str:
+        normalized = second_stage.as_posix().casefold()
+        name = second_stage.name.casefold()
+        if "limine" in normalized:
+            return "limine"
+        if name.startswith("systemd-boot") or "/efi/systemd/" in normalized:
+            return "systemd-boot"
+        if name.startswith("grub") or "grub" in normalized:
+            return "grub"
+        raise RuntimeError(f"unsupported shim second stage: {second_stage}")
 
     def prepare(self) -> dict[str, object]:
         """Sign inputs consumed later by mkinitcpio and bootloader tooling."""
@@ -80,22 +93,43 @@ class SecureBootService:
             "skipped": "",
         }
 
-    def _refresh_boot_artifacts(self) -> None:
-        has_limine = any(
-            "limine" in candidate.casefold()
-            and (self.config.esp_path / candidate.lstrip("/")).is_file()
-            for candidate in self.config.second_stage_candidates
-        )
-        if has_limine and shutil.which("limine-mkinitcpio"):
+    def _refresh_boot_artifacts(self, second_stage: Path) -> None:
+        kind = self._bootloader_kind(second_stage)
+        if kind == "limine":
+            if not shutil.which("limine-mkinitcpio"):
+                raise FileNotFoundError("limine-mkinitcpio is required for the selected Limine bootloader")
             self.runner.run(["limine-mkinitcpio"])
-        else:
+            return
+        if kind == "systemd-boot":
+            if not shutil.which("kernel-install"):
+                raise FileNotFoundError("kernel-install is required for systemd-boot EFISTUB and UKI deployment")
+            self.runner.run(["kernel-install", "--entry-type=all", "add-all"])
+            return
+
+        if kind == "grub":
             self.runner.run(["mkinitcpio", "-P"])
+            grub_config = self.config.boot_path / "grub/grub.cfg"
+            if grub_config.is_file() and shutil.which("grub-mkconfig"):
+                self.runner.run(["grub-mkconfig", "-o", str(grub_config)])
 
-        grub_config = self.config.boot_path / "grub/grub.cfg"
-        if grub_config.is_file() and shutil.which("grub-mkconfig"):
-            self.runner.run(["grub-mkconfig", "-o", str(grub_config)])
+    def _verify_systemd_efistub_copies(self, signer: Signer) -> None:
+        canonical_kernels = discover_kernel_targets(self.config.canonical_kernel_globs)
+        for canonical in canonical_kernels:
+            version = canonical.parent.name
+            deployed: set[Path] = set()
+            for root in (self.config.esp_path, self.config.boot_path):
+                if not root.is_dir():
+                    continue
+                deployed.update(path for path in root.glob(f"*/{version}/linux") if path.is_file())
+            for path in sorted(deployed, key=lambda item: str(item)):
+                if path.read_bytes() != canonical.read_bytes():
+                    raise RuntimeError(
+                        f"systemd-boot EFISTUB copy is stale or differs from the signed canonical kernel: {path}"
+                    )
+                if not signer.verify_pe(path):
+                    raise RuntimeError(f"systemd-boot EFISTUB copy is not signed by the machine key: {path}")
 
-    def finalize_efi(self) -> dict[str, object]:
+    def finalize_efi(self, *, second_stage: Path | None = None) -> dict[str, object]:
         """Sign final EFI loaders without modifying any kernel image."""
         self.require_root()
         if not self._enabled():
@@ -113,11 +147,13 @@ class SecureBootService:
             certificate=self.config.certificate_pem,
             runner=self.runner,
         )
-        second_stage = select_second_stage(
-            self.config.esp_path,
-            self.config.second_stage_candidates,
-        )
-        if second_stage.name.casefold() == "grubx64.efi":
+        if second_stage is None:
+            second_stage = select_second_stage(
+                self.config.esp_path,
+                self.config.second_stage_candidates,
+            )
+        kind = self._bootloader_kind(second_stage)
+        if kind == "grub":
             rebuild_grub_core(
                 esp_path=self.config.esp_path,
                 boot_path=self.config.boot_path,
@@ -138,6 +174,8 @@ class SecureBootService:
             )
         if not signer.verify_pe(second_stage):
             raise RuntimeError(f"shim second stage is not signed by the machine key: {second_stage}")
+        if kind == "systemd-boot":
+            self._verify_systemd_efistub_copies(signer)
         deployed = deploy_boot_chain(
             esp=self.config.esp_path,
             shim=self.config.vendor_shim,
@@ -163,8 +201,12 @@ class SecureBootService:
         prepared = self.prepare()
         if prepared["skipped"]:
             return prepared
-        self._refresh_boot_artifacts()
-        finalized = self.finalize_efi()
+        second_stage = select_second_stage(
+            self.config.esp_path,
+            self.config.second_stage_candidates,
+        )
+        self._refresh_boot_artifacts(second_stage)
+        finalized = self.finalize_efi(second_stage=second_stage)
         return {
             "efi_signed": finalized["efi_signed"],
             "kernels_signed": prepared["kernels_signed"],

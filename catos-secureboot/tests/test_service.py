@@ -41,17 +41,50 @@ def write_minimal_pe(path: Path) -> None:
     path.write_bytes(data)
 
 
+def write_sbat_pe(path: Path) -> None:
+    write_minimal_pe(path)
+    sbat = path.with_name(path.name + ".sbat.csv")
+    temporary = path.with_name(path.name + ".sbat.tmp")
+    sbat.write_text(
+        "sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md\n"
+        "systemd,1,systemd,systemd,261,https://systemd.io/\n",
+        encoding="utf-8",
+    )
+    completed = subprocess.run(
+        [
+            "objcopy",
+            "--add-section",
+            f".sbat={sbat}",
+            "--set-section-flags",
+            ".sbat=contents,alloc,load,readonly,data",
+            "--change-section-vma",
+            ".sbat=0x2000",
+            str(path),
+            str(temporary),
+        ],
+        check=False,
+        text=True,
+        capture_output=True,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(completed.stderr)
+    temporary.replace(path)
+    sbat.unlink()
+
+
 class FakeRunner:
     def __init__(
         self,
         canonical_kernel: Path | None = None,
         deployed_kernel: Path | None = None,
         limine_config: Path | None = None,
+        systemd_uki: Path | None = None,
     ) -> None:
         self.calls: list[tuple[str, ...]] = []
         self.canonical_kernel = canonical_kernel
         self.deployed_kernel = deployed_kernel
         self.limine_config = limine_config
+        self.systemd_uki = systemd_uki
         self.kernel_was_signed_before_mkinitcpio = False
 
     def run(self, arguments: list[str], *, check: bool = True, input_text: str | None = None) -> CommandResult:
@@ -83,6 +116,19 @@ class FakeRunner:
             self.deployed_kernel.write_bytes(self.canonical_kernel.read_bytes())
             digest = hashlib.blake2b(self.deployed_kernel.read_bytes()).hexdigest()
             self.limine_config.write_text(f"path: boot():/linux#{digest}\n", encoding="utf-8")
+            return CommandResult(0, "", "")
+        if arguments[0] == "kernel-install":
+            if arguments != ["kernel-install", "--entry-type=all", "add-all"]:
+                raise AssertionError(arguments)
+            if self.canonical_kernel is None:
+                raise AssertionError("systemd refresh kernel was not configured")
+            self.kernel_was_signed_before_mkinitcpio = self.canonical_kernel.read_bytes().endswith(b"-signed")
+            if self.deployed_kernel is not None:
+                self.deployed_kernel.parent.mkdir(parents=True, exist_ok=True)
+                self.deployed_kernel.write_bytes(self.canonical_kernel.read_bytes())
+            if self.systemd_uki is not None:
+                self.systemd_uki.parent.mkdir(parents=True, exist_ok=True)
+                write_minimal_pe(self.systemd_uki)
             return CommandResult(0, "", "")
         raise AssertionError(arguments)
 
@@ -208,6 +254,153 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(deployed.read_bytes(), b"deployed")
             self.assertFalse(loader.read_bytes().endswith(b"-signed"))
             self.assertFalse(any(call[0] == "mkinitcpio" for call in runner.calls))
+
+    def test_systemd_boot_refreshes_type1_efistub_from_signed_canonical_kernel(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            boot = root / "boot"
+            modules = root / "modules"
+            version = modules / "7.1.4-arch1-1"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/systemd", esp / "EFI/limine", boot, version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel")
+            deployed = esp / "machine-id/7.1.4-arch1-1/linux"
+            deployed.parent.mkdir(parents=True)
+            deployed.write_bytes(b"stale-unsigned-kernel")
+            loader = esp / "EFI/systemd/systemd-bootx64.efi"
+            write_sbat_pe(loader)
+            write_minimal_pe(esp / "EFI/limine/limine_x64.efi")
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            (root / "cmdline").write_text("root=UUID=test quiet\n", encoding="utf-8")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=boot,
+                cmdline_path=root / "cmdline",
+                grub_dropin_path=root / "grub.cfg",
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                kernel_globs=(str(canonical), str(deployed)),
+                second_stage_candidates=(
+                    "EFI/systemd/systemd-bootx64.efi",
+                    "EFI/limine/limine_x64.efi",
+                ),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            runner = FakeRunner(canonical, deployed)
+            service = SecureBootService(config, runner)
+
+            with patch("catos_secureboot.service.os.geteuid", return_value=0):
+                service.maintain()
+
+            self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
+            self.assertEqual(deployed.read_bytes(), canonical.read_bytes())
+            self.assertTrue(deployed.read_bytes().endswith(b"-signed"))
+            self.assertTrue(loader.read_bytes().endswith(b"-signed"))
+            self.assertEqual(
+                [call for call in runner.calls if call[0] == "kernel-install"],
+                [("kernel-install", "--entry-type=all", "add-all")],
+            )
+            self.assertFalse(any(call[0] in {"mkinitcpio", "limine-mkinitcpio"} for call in runner.calls))
+
+    def test_systemd_boot_finalization_rejects_a_stale_type1_efistub_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            modules = root / "modules"
+            version = modules / "7.1.4-arch1-1"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/systemd", version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel-signed")
+            deployed = esp / "machine-id/7.1.4-arch1-1/linux"
+            deployed.parent.mkdir(parents=True)
+            deployed.write_bytes(b"stale-unsigned-kernel")
+            loader = esp / "EFI/systemd/systemd-bootx64.efi"
+            write_sbat_pe(loader)
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=root / "boot",
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                second_stage_candidates=("EFI/systemd/systemd-bootx64.efi",),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            service = SecureBootService(config, FakeRunner())
+
+            with (
+                patch("catos_secureboot.service.os.geteuid", return_value=0),
+                self.assertRaisesRegex(RuntimeError, "stale or differs"),
+            ):
+                service.finalize_efi(second_stage=loader)
+
+    def test_systemd_boot_generates_then_signs_type2_uki(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            modules = root / "modules"
+            version = modules / "7.1.4-arch1-1"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/systemd", version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel")
+            loader = esp / "EFI/systemd/systemd-bootx64.efi"
+            write_sbat_pe(loader)
+            uki = esp / "EFI/Linux/machine-id-7.1.4-arch1-1.efi"
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            (root / "cmdline").write_text("root=UUID=test quiet\n", encoding="utf-8")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=root / "boot",
+                cmdline_path=root / "cmdline",
+                grub_dropin_path=root / "grub.cfg",
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                second_stage_candidates=("EFI/systemd/systemd-bootx64.efi",),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            runner = FakeRunner(canonical, systemd_uki=uki)
+            service = SecureBootService(config, runner)
+
+            with patch("catos_secureboot.service.os.geteuid", return_value=0):
+                service.maintain()
+
+            self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
+            self.assertTrue(uki.is_file())
+            self.assertTrue(uki.read_bytes().endswith(b"-signed"))
+            self.assertIn(("kernel-install", "--entry-type=all", "add-all"), runner.calls)
 
     def test_limine_hash_is_generated_after_kernel_signing_and_remains_valid(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
