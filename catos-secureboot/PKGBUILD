@@ -1,6 +1,6 @@
 pkgname=catos-secureboot
 pkgver=0.1.0
-pkgrel=4
+pkgrel=5
 pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
 arch=('x86_64')
 url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
@@ -9,7 +9,7 @@ depends=('python' 'openssl' 'mokutil' 'sbsigntools' 'binutils' 'kmod' 'zstd' 'xz
          'mkinitcpio' 'efibootmgr' 'util-linux')
 optdepends=('linux-headers: sign external modules for the linux kernel'
             'dkms: build third-party modules before CatOS signs them'
-            'grub: regenerate GRUB configuration before signing the installed loader')
+            'grub: rebuild GRUB with every platform module preloaded before signing')
 backup=('etc/catos/secureboot.conf')
 options=('!strip')
 _fedora_shim_version=16.1-5

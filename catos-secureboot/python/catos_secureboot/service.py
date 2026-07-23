@@ -8,6 +8,7 @@ import shutil
 from .config import Config
 from .efi import deploy_boot_chain, register_boot_entry, select_second_stage
 from .enforcement import configure_enforcement
+from .grub import rebuild_grub_core
 from .keys import generate_key_material, random_enrollment_password, request_enrollment
 from .model import Phase, evaluate_phase
 from .modules import discover_external_modules, kernel_version_for, sign_module
@@ -116,6 +117,13 @@ class SecureBootService:
             self.config.esp_path,
             self.config.second_stage_candidates,
         )
+        if second_stage.name.casefold() == "grubx64.efi":
+            rebuild_grub_core(
+                esp_path=self.config.esp_path,
+                boot_path=self.config.boot_path,
+                second_stage=second_stage,
+                runner=self.runner,
+            )
         second_stage_resolved = second_stage.resolve()
         sbat_source = second_stage_sbat_source(second_stage)
         efi_changed = 0

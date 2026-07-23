@@ -139,6 +139,7 @@ class ServiceTests(unittest.TestCase):
             with (
                 patch("catos_secureboot.service.os.geteuid", return_value=0),
                 patch("catos_secureboot.service.second_stage_sbat_source", return_value=sbat_source),
+                patch("catos_secureboot.service.rebuild_grub_core", return_value=295) as rebuild_grub,
             ):
                 result = service.maintain()
 
@@ -150,6 +151,12 @@ class ServiceTests(unittest.TestCase):
             self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
             self.assertEqual((esp / "EFI/BOOT/BOOTX64.EFI").read_bytes(), b"shim")
             self.assertTrue((esp / "EFI/BOOT/grubx64.efi").read_bytes().endswith(b"-signed"))
+            rebuild_grub.assert_called_once_with(
+                esp_path=esp,
+                boot_path=boot,
+                second_stage=second_stage,
+                runner=runner,
+            )
             self.assertTrue(any(call[0] == "objcopy" for call in runner.calls))
             self.assertFalse(any(call[0] == "ukify" for call in runner.calls))
             enforced = cmdline.read_text(encoding="utf-8")

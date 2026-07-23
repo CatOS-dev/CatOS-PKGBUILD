@@ -24,10 +24,11 @@ catos-secureboot maintain
 2. enforces `module.sig_enforce=1` and integrity lockdown in the installed boot configuration;
 3. signs modules under `updates/` and `extramodules/`, then regenerates initramfs;
 4. signs the installed kernel images found through `kernel_globs`;
-5. signs the existing EFI artifacts owned by the selected GRUB, systemd-boot or Limine provider;
-6. atomically deploys shim, MokManager, the signed second stage and the machine certificate;
-7. registers `CatOS Secure Boot` in firmware and submits the machine certificate to `mokutil`;
-8. records `enrollment-pending` until MokManager enrollment completes.
+5. when GRUB is selected, reruns `grub-install` with every module from `/usr/lib/grub/x86_64-efi/*.mod` preloaded into the EFI core and with the distribution SBAT metadata;
+6. signs the final EFI artifacts owned by the selected GRUB, systemd-boot or Limine provider;
+7. atomically deploys shim, MokManager, the signed second stage and the machine certificate;
+8. registers `CatOS Secure Boot` in firmware and submits the machine certificate to `mokutil`;
+9. records `enrollment-pending` until MokManager enrollment completes.
 
 For unattended installation, Calamares may use `--generate-enrollment-password` and display the returned one-time password. The password is stored root-only at `/var/lib/catos-secureboot/enrollment-password` until enrollment is observed.
 
@@ -39,4 +40,4 @@ This package does not create, convert to, or update UKIs. If a separately select
 
 ## Update integration
 
-The pacman hook runs `maintain` after boot artifacts or external modules change. DKMS modules are built first; this package signs the resulting files, runs `depmod`, regenerates initramfs, signs installed kernels and existing provider-owned EFI files, redeploys the boot chain, and refreshes the firmware entry.
+The pacman hooks split the lifecycle into two ordered stages. The early stage runs after DKMS and before `mkinitcpio`, signs external modules and canonical kernels, and never touches deployed kernel copies. The final EFI stage runs after bootloader generation. For GRUB it rebuilds `grubx64.efi` with the complete platform module set inside the core image, then signs and deploys the final shim chain. Limine kernel copies and their recorded hashes are not modified by the final stage.
