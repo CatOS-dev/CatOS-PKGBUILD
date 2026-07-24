@@ -1,7 +1,7 @@
 pkgbase = catos-fish-config
 	pkgdesc = Fish configuration for CatOS
 	pkgver = 3.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-fish-config
 	arch = any
 	license = GPL-3.0-or-later
@@ -16,7 +16,7 @@ pkgbase = catos-fish-config
 	depends = fzf
 	depends = libnotify
 	depends = pkgfile
-	depends = starship
+	depends = catos-starship-config
 	depends = tealdeer
 	depends = zoxide
 	optdepends = direnv: per-directory environment integration

@@ -1,6 +1,6 @@
 pkgname=catos-zsh-config
 pkgver=1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Zsh configuration for CatOS"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-zsh-config"
@@ -13,7 +13,7 @@ depends=(
   'fastfetch'
   'libnotify'
   'pkgfile'
-  'starship'
+  'catos-starship-config'
   'zoxide'
   'zsh'
   'zsh-autosuggestions'

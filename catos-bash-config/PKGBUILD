@@ -1,13 +1,13 @@
 pkgname=catos-bash-config
 pkgver=1.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Bash configuration for CatOS"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-bash-config"
 license=('GPL-3.0-or-later')
 install='catos-bash-config.install'
 makedepends=('git')
-depends=('bash' 'bat' 'expac' 'eza' 'fastfetch' 'pkgfile' 'starship' 'zoxide')
+depends=('bash' 'bat' 'catos-starship-config' 'expac' 'eza' 'fastfetch' 'pkgfile' 'zoxide')
 optdepends=(
   'direnv: per-directory environment integration'
   'hwinfo: hardware summary alias'

@@ -1,7 +1,7 @@
 pkgbase = catos-zsh-config
 	pkgdesc = Zsh configuration for CatOS
 	pkgver = 1.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-zsh-config
 	arch = any
 	license = GPL-3.0-or-later
@@ -12,7 +12,7 @@ pkgbase = catos-zsh-config
 	depends = fastfetch
 	depends = libnotify
 	depends = pkgfile
-	depends = starship
+	depends = catos-starship-config
 	depends = zoxide
 	depends = zsh
 	depends = zsh-autosuggestions

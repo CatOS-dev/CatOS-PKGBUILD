@@ -1,6 +1,6 @@
 pkgname=catos-fish-config
 pkgver=3.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Fish configuration for CatOS"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-fish-config"
@@ -16,7 +16,7 @@ depends=(
   'fzf'
   'libnotify'
   'pkgfile'
-  'starship'
+  'catos-starship-config'
   'tealdeer'
   'zoxide'
 )
