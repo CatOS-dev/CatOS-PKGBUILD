@@ -1,0 +1,14 @@
+pkgbase = catos-symbols-font
+	pkgdesc = CatOS-specific terminal symbol font
+	pkgver = 1.0
+	pkgrel = 1
+	url = https://github.com/CatOS-dev/catos-symbols-font
+	arch = any
+	license = MIT
+	makedepends = fontforge
+	makedepends = git
+	depends = fontconfig
+	source = git+https://github.com/CatOS-dev/catos-symbols-font.git
+	sha256sums = SKIP
+
+pkgname = catos-symbols-font

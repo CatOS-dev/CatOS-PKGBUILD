@@ -1,0 +1,22 @@
+pkgname=catos-starship-config
+pkgver=1.0
+pkgrel=1
+pkgdesc="Starship prompt configuration for CatOS"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-starship-config"
+license=('MIT')
+makedepends=('git')
+depends=('catos-symbols-font' 'starship')
+optdepends=('ttf-jetbrains-mono-nerd: prompt icons and Powerline separators')
+source=("git+https://github.com/CatOS-dev/catos-starship-config.git")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  install -Dm644 starship.toml \
+    "${pkgdir}/usr/share/catos-starship-config/starship.toml"
+  install -Dm644 starship.toml \
+    "${pkgdir}/etc/skel/.config/starship.toml"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

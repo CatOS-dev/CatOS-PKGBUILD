@@ -1,0 +1,30 @@
+pkgname=catos-symbols-font
+pkgver=1.0
+pkgrel=1
+pkgdesc="CatOS-specific terminal symbol font"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-symbols-font"
+license=('MIT')
+makedepends=('fontforge' 'git')
+depends=('fontconfig')
+source=("git+https://github.com/CatOS-dev/catos-symbols-font.git")
+sha256sums=('SKIP')
+
+build() {
+  cd "${srcdir}/${pkgname}"
+  fontforge -lang=py -script scripts/build_font.py \
+    --output build/CatOSSymbols-Regular.ttf
+}
+
+package() {
+  cd "${srcdir}/${pkgname}"
+  install -Dm644 build/CatOSSymbols-Regular.ttf \
+    "${pkgdir}/usr/share/fonts/catos/CatOSSymbols-Regular.ttf"
+  install -Dm644 fontconfig/70-catos-symbols.conf \
+    "${pkgdir}/usr/share/fontconfig/conf.avail/70-catos-symbols.conf"
+  install -d "${pkgdir}/etc/fonts/conf.d"
+  ln -s /usr/share/fontconfig/conf.avail/70-catos-symbols.conf \
+    "${pkgdir}/etc/fonts/conf.d/70-catos-symbols.conf"
+  install -Dm644 LICENSE \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+}

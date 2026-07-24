@@ -1,0 +1,15 @@
+pkgbase = catos-starship-config
+	pkgdesc = Starship prompt configuration for CatOS
+	pkgver = 1.0
+	pkgrel = 1
+	url = https://github.com/CatOS-dev/catos-starship-config
+	arch = any
+	license = MIT
+	makedepends = git
+	depends = catos-symbols-font
+	depends = starship
+	optdepends = ttf-jetbrains-mono-nerd: prompt icons and Powerline separators
+	source = git+https://github.com/CatOS-dev/catos-starship-config.git
+	sha256sums = SKIP
+
+pkgname = catos-starship-config
