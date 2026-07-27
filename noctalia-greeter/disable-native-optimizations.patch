@@ -1,0 +1,22 @@
+From: CatOS Package Maintainers <packages@catos.info>
+Subject: [PATCH] build: remove build-machine CPU tuning from release builds
+
+Distribution packages must run on machines other than the builder. Keep the
+remaining release flags, but let the distribution toolchain select the target
+ISA through CFLAGS and CXXFLAGS.
+
+---
+ meson.build | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 3db7adb..60e1d30 100644
+--- a/meson.build
++++ b/meson.build
+@@ -16,6 +16,5 @@
+ if get_option('buildtype') == 'release'
+   add_project_arguments(
+-    '-march=native', '-mtune=native',
+     '-fomit-frame-pointer', '-ffunction-sections', '-fdata-sections',
+     language: ['c', 'cpp'],
+   )

@@ -1,0 +1,24 @@
+From: CatOS Package Maintainers <packages@catos.info>
+Subject: [PATCH] build: do not embed the package build directory
+
+The source-assets fallback is useful for an uninstalled development build, but
+embedding the absolute package build directory in a distribution binary leaks
+$srcdir and can never resolve on an installed system. Point that fallback at
+the installed asset directory instead.
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index e68f823..70bb879 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1001,6 +1001,6 @@ noctalia_exe = executable('noctalia',
+   cpp_args: [
+     '-Wall', '-Wextra', '-Wno-missing-field-initializers', '-Wpedantic', '-Wconversion', '-Wshadow',
+-    '-DNOCTALIA_SOURCE_ASSETS_DIR="' + meson.project_source_root() / 'assets' + '"',
++    '-DNOCTALIA_SOURCE_ASSETS_DIR="' + get_option('prefix') / get_option('datadir') / 'noctalia' / 'assets' + '"',
+     '-DNOCTALIA_INSTALL_PREFIX="' + get_option('prefix') + '"',
+     '-DNOCTALIA_INSTALL_DATADIR="' + get_option('datadir') + '"',
+     '-DNOCTALIA_VERSION="' + meson.project_version() + '"',

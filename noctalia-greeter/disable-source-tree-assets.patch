@@ -1,0 +1,22 @@
+From: CatOS Package Maintainers <packages@catos.info>
+Subject: [PATCH] build: do not embed the package build directory
+
+The source-tree fallback is only useful for an uninstalled development build.
+A distribution binary must not retain the absolute package build directory, so
+use the installed assets directory for the fallback as well.
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 3db7adb..f17a8ad 100644
+--- a/meson.build
++++ b/meson.build
+@@ -207,5 +207,5 @@ executable('noctalia-greeter',
+     '-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow',
+     '-DNOCTALIA_GREETER_VERSION="' + meson.project_version() + '"',
+-    '-DNOCTALIA_GREETER_ASSETS_DIR="' + meson.project_source_root() / 'assets' + '"',
++    '-DNOCTALIA_GREETER_ASSETS_DIR="' + get_option('prefix') / get_option('datadir') / 'noctalia-greeter' / 'assets' + '"',
+     '-DNOCTALIA_GREETER_INSTALLED_ASSETS_DIR="' + get_option('datadir') / 'noctalia-greeter' / 'assets' + '"',
+   ],

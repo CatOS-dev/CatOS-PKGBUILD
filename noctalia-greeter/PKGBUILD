@@ -1,0 +1,70 @@
+pkgname=noctalia-greeter
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="A minimal greetd login greeter matching Noctalia Shell"
+arch=('x86_64')
+url="https://github.com/noctalia-dev/noctalia-greeter"
+license=('MIT')
+provides=("noctalia-greeter=$pkgver")
+conflicts=('noctalia-greeter-git')
+
+depends=(
+    'bash'
+    'cairo'
+    'dbus'
+    'fontconfig'
+    'freetype2'
+    'gcc-libs'
+    'glib2'
+    'glibc'
+    'greetd'
+    'harfbuzz'
+    'libglvnd'
+    'libinput'
+    'librsvg'
+    'libwebp'
+    'libxkbcommon'
+    'pango'
+    'polkit'
+    'ripgrep'
+    'wayland'
+    'wlroots0.20'
+)
+makedepends=(
+    'meson'
+    'ninja'
+    'nlohmann-json'
+    'pkgconf'
+    'stb'
+    'tomlplusplus'
+    'wayland-protocols'
+)
+
+source=(
+    "$pkgname-$pkgver.tar.gz::https://github.com/noctalia-dev/noctalia-greeter/archive/refs/tags/v$pkgver.tar.gz"
+    'disable-native-optimizations.patch'
+    'disable-source-tree-assets.patch'
+    'noctalia-greeter.conf'
+)
+sha256sums=('974c0adc444dbe63be38d60f2ae0eedbd97cf1fc5844a9f022a7468b0a495ba3'
+            '17694b3f0648843e5c37c80ef766b64725f365e4c2445c79433370cd66f3f50a'
+            'd05fc3bf99acbeff393768d909f040bee81c34daf8c637e45edd0e0512726d86'
+            '420266cca341af8ea3513508340828d74a98edb24d1018c59ec547bf759b9909')
+
+prepare() {
+    patch -d "$pkgname-$pkgver" -Np1 -i "$srcdir/disable-native-optimizations.patch"
+    patch -d "$pkgname-$pkgver" -Np1 -i "$srcdir/disable-source-tree-assets.patch"
+}
+
+build() {
+    arch-meson "$pkgname-$pkgver" build --buildtype=release
+    meson compile -C build
+}
+
+package() {
+    meson install -C build --destdir "$pkgdir"
+    install -Dm644 noctalia-greeter.conf \
+        "$pkgdir/usr/lib/tmpfiles.d/noctalia-greeter.conf"
+    install -Dm644 "$pkgname-$pkgver/LICENSE" \
+        "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

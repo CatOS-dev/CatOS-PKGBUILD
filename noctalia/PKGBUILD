@@ -1,0 +1,81 @@
+pkgname=noctalia
+pkgver=5.0.0_beta.5
+pkgrel=1
+pkgdesc="A sleek, customizable desktop shell crafted for Wayland"
+arch=('x86_64')
+url="https://github.com/noctalia-dev/noctalia"
+license=('MIT')
+provides=("noctalia=$pkgver")
+conflicts=('noctalia-git')
+
+depends=(
+    'bash'
+    'cairo'
+    'curl'
+    'fontconfig'
+    'freetype2'
+    'gcc-libs'
+    'glib2'
+    'glibc'
+    'harfbuzz'
+    'hicolor-icon-theme'
+    'libglvnd'
+    'libqalculate'
+    'libsecret'
+    'libsodium'
+    'libwebp'
+    'libxkbcommon'
+    'libxml2'
+    'librsvg'
+    'md4c'
+    'pam'
+    'pango'
+    'pipewire'
+    'polkit'
+    'sdbus-cpp'
+    'tomlplusplus'
+    'wayland'
+    'wireplumber'
+)
+makedepends=(
+    'meson'
+    'ninja'
+    'nlohmann-json'
+    'pkgconf'
+    'stb'
+    'wayland-protocols'
+)
+optdepends=(
+    'ddcutil: external monitor brightness control'
+    'git: plugin sources and plugin updates'
+    'gnome-keyring: Secret Service provider'
+    'keepassxc: alternative Secret Service provider'
+    'upower: battery and power-device information'
+)
+
+_tag=v5.0.0-beta.5
+source=(
+    "$pkgname-$pkgver.tar.gz::https://github.com/noctalia-dev/noctalia/archive/refs/tags/$_tag.tar.gz"
+    'disable-source-tree-assets.patch'
+)
+sha256sums=('1460781135969e9a8985c2c7343131df69f5b8595e8428cfdc416f85585b9447'
+            '3f9e6c29198fda20845831f22ef29141f8f66a05f182dcfe40762cea85c63895')
+
+prepare() {
+    patch -d "noctalia-${_tag#v}" -Np1 -i "$srcdir/disable-source-tree-assets.patch"
+}
+
+build() {
+    arch-meson "noctalia-${_tag#v}" build \
+        --buildtype=release \
+        -Dtests=disabled \
+        -Dnative_optimizations=false \
+        -Djemalloc=disabled
+    meson compile -C build
+}
+
+package() {
+    meson install -C build --destdir "$pkgdir"
+    install -Dm644 "noctalia-${_tag#v}/LICENSE" \
+        "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
