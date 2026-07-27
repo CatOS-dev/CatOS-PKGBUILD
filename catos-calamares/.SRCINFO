@@ -1,7 +1,7 @@
 pkgbase = catos-calamares
 	pkgdesc = Distribution-independent installer framework
 	pkgver = 26.07
-	pkgrel = 5
+	pkgrel = 6
 	url = https://github.com/CatOS-dev/calamares
 	arch = x86_64
 	license = BSD-2-Clause

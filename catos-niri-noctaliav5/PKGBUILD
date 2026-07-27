@@ -1,0 +1,38 @@
+pkgname=catos-niri-noctaliav5
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="CatOS Niri desktop profile powered by Noctalia v5"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-niri-noctaliav5"
+license=('GPL-3.0-only')
+makedepends=('git')
+depends=(
+  'adw-gtk-theme'
+  'brightnessctl'
+  'catos-bibata-cursor'
+  'catdot'
+  'dconf'
+  'fcitx5'
+  'fuzzel'
+  'kitty'
+  'niri'
+  'noctalia'
+  'orca'
+  'playerctl'
+  'polkit-gnome'
+  'qt5ct'
+  'qt6ct'
+  'wireplumber'
+  'xdg-desktop-portal-gnome'
+  'xdg-desktop-portal-gtk'
+  'xwayland-satellite'
+)
+source=('git+https://github.com/CatOS-dev/catos-niri-noctaliav5.git')
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/usr"
+  cp -a usr/. "${pkgdir}/usr/"
+}

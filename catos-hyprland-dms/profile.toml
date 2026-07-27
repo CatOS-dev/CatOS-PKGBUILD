@@ -1,0 +1,19 @@
+schema = 4
+name = "CatOS Hyprland DMS"
+description = "CatOS Hyprland session with Dank Material Shell and Ghostty"
+
+packages = [
+  "hyprland",
+  "dms-shell-hyprland",
+  "xdg-desktop-portal-gtk",
+  "xdg-desktop-portal-hyprland",
+  "ghostty",
+  "matugen",
+]
+
+manage = [
+  ".config/hypr/hyprland.lua",
+  ".config/environment.d/90-dms.conf",
+  ".config/ghostty/config",
+  ".config/ghostty/themes/dankcolors",
+]

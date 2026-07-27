@@ -1,11 +1,12 @@
 pkgbase = catos-wayfire-settings
 	pkgdesc = CatOS ready-to-use Wayfire session preset
 	pkgver = 1.0.0
-	pkgrel = 5
+	pkgrel = 6
 	url = https://github.com/CatOS-dev/catos-wayfire-settings
 	arch = any
 	license = GPL-3.0-or-later
 	makedepends = git
+	depends = catdot
 	depends = wayfire
 	depends = wf-shell
 	depends = wcm

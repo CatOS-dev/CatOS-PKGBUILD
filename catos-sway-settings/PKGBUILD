@@ -1,11 +1,12 @@
 pkgname=catos-sway-settings
 pkgver=1.0.0
-pkgrel=5
+pkgrel=6
 pkgdesc="CatOS ready-to-use Sway session preset"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-sway-settings'
 license=('GPL-3.0-or-later')
 depends=(
+  'catdot'
   'sway'
   'swaybg'
   'catos-waybar-settings'
@@ -46,8 +47,7 @@ sha256sums=('SKIP')
 package() {
   cd "${srcdir}/${pkgname}"
 
-  install -d "${pkgdir}/etc" "${pkgdir}/usr"
-  cp -a etc/. "${pkgdir}/etc/"
+  install -d "${pkgdir}/usr"
   cp -a usr/. "${pkgdir}/usr/"
 
   install -Dm644 README.md "${pkgdir}/usr/share/doc/${pkgname}/README.md"

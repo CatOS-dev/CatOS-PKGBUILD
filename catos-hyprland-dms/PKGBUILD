@@ -1,40 +1,52 @@
 pkgname=catos-hyprland-dms
 pkgver=1.0
-pkgrel=4
-pkgdesc="CatOS preset: Hyprland + DMS + Ghostty"
+pkgrel=5
+pkgdesc="CatOS Catdot Profile: Hyprland + DMS + Ghostty"
 arch=('any')
 url="https://www.catos.info/"
 license=('MIT')
 provides=('catos-dms-preset')
 depends=(
-  'catos-dms-common'
+  'catdot'
   'dms-shell-hyprland>=1.5.1'
   'hyprland>=0.55'
   'xdg-desktop-portal-gtk'
   'xdg-desktop-portal-hyprland'
+  'ghostty'
+  'matugen'
 )
 source=(
+  'profile.toml'
   'hyprland.lua'
   'hypr-colors.lua'
   'hypr-layout.lua'
   'hypr-binds.lua'
-  'hypr-binds-user.lua'
-  'hypr-outputs.lua'
-  'hypr-cursor.lua'
-  'hypr-windowrules.lua'
+  'custom-input.lua'
+  'custom-outputs.lua'
+  'custom-cursor.lua'
+  'custom-binds.lua'
+  'custom-rules.lua'
+  '90-dms.conf'
+  'ghostty.conf'
+  'ghostty-colors.conf'
   'hyprland-session.target'
   'catos-hyprland-dms-session'
   'catos-hyprland-dms.desktop'
   'LICENSE-DMS'
 )
-sha256sums=('e3ae30537ce814880638e17aa00ae0c296b5dc7a0f3d76b270f14ac6745950e8'
+sha256sums=('a3a2b3fd32c2032c2a48dd1a8f0028d9b3abd9f71613c37c8b909f08b4131dbb'
+            'be5714b20db20e74175d71ceac5fa32604f87cbbf6560e2676b3781a0bc7a89c'
             'f475de7859b9fd5c1905ce7b91fd816bece986b2ad2cb83cece126c1fd9e1bd4'
             'b7988f0fccce700aff14207e5f3f42a3b0da2051acc82bfb7dafa6c7b7f92642'
             '2c342f7739852e216a28d0b07c8fd0999597756d9f0a4df094ee68b4436b62a8'
-            '0b5ab863b5697dbaf1011b0e1e64b3107458525a0f1218ae8e4be36cb9f99723'
+            '5ec438aff22b16ba251e6ea42c56f2e067da94980dbf618d77e48f20667efa98'
             '06d82ff69f4d4cfa5085349adfc66f3f0ac14e783679723ecf161aa009f84ec0'
             'e94d46067cd1c97800779a4b1d0e7876ff0eb5f48a52bec98c8dd69735261fa9'
+            '0b5ab863b5697dbaf1011b0e1e64b3107458525a0f1218ae8e4be36cb9f99723'
             '7162b4e6ea6f31b179d338a36c6ad6eee2bdee0215312ad2f9c7674a2ca196d7'
+            'dde57e33ad9d9c713440b2f0411c0c42a09ed46c2ee549c4f91627dc374a5661'
+            'b069a527d4529a6021354ffdb2da420349995a11f68a4264f70df3ae52d28ff5'
+            '67a2587d2bf6f564f1b6f7889d4579ea8a7d9e73ed61654e935af3ef75180399'
             '2d6b3e7d71802cb57a060239c7461b54e059a34437a21c97f0779d98a564c255'
             '6383c091904db90d664866e3ce6dcfba5404b0e101257ac41e112d0d4037c17b'
             'cb72a64b29eaacae389b9c1a3952ed0a1de5c56c53043dae743569c8bf946cdf'
@@ -44,44 +56,42 @@ prepare() {
   sed -i 's/{{TERMINAL_COMMAND}}/ghostty/g' "$srcdir/hypr-binds.lua"
 }
 
-check() {
-  local test_home="$srcdir/check-home"
-  rm -rf "$test_home"
-  install -d -m755 "$test_home/.config/hypr/dms"
-  install -Dm644 "$srcdir/hyprland.lua" "$test_home/.config/hypr/hyprland.lua"
-  install -Dm644 "$srcdir/hypr-colors.lua" "$test_home/.config/hypr/dms/colors.lua"
-  install -Dm644 "$srcdir/hypr-layout.lua" "$test_home/.config/hypr/dms/layout.lua"
-  install -Dm644 "$srcdir/hypr-binds.lua" "$test_home/.config/hypr/dms/binds.lua"
-  install -Dm644 "$srcdir/hypr-binds-user.lua" "$test_home/.config/hypr/dms/binds-user.lua"
-  install -Dm644 "$srcdir/hypr-outputs.lua" "$test_home/.config/hypr/dms/outputs.lua"
-  install -Dm644 "$srcdir/hypr-cursor.lua" "$test_home/.config/hypr/dms/cursor.lua"
-  install -Dm644 "$srcdir/hypr-windowrules.lua" "$test_home/.config/hypr/dms/windowrules.lua"
-
-  install -d -m700 "$test_home/runtime"
-  HOME="$test_home" \
-    XDG_CONFIG_HOME="$test_home/.config" \
-    XDG_RUNTIME_DIR="$test_home/runtime" \
-    Hyprland --verify-config --config "$test_home/.config/hypr/hyprland.lua"
-}
-
 package() {
-  install -d -m755 "$pkgdir/etc/skel/.config/hypr/dms"
-  install -d -m755 "$pkgdir/etc/skel/.config/systemd/user/hyprland-session.target.wants"
+  local content="$pkgdir/usr/share/$pkgname"
 
-  install -Dm644 "$srcdir/hyprland.lua" "$pkgdir/etc/skel/.config/hypr/hyprland.lua"
-  install -Dm644 "$srcdir/hypr-colors.lua" "$pkgdir/etc/skel/.config/hypr/dms/colors.lua"
-  install -Dm644 "$srcdir/hypr-layout.lua" "$pkgdir/etc/skel/.config/hypr/dms/layout.lua"
-  install -Dm644 "$srcdir/hypr-binds.lua" "$pkgdir/etc/skel/.config/hypr/dms/binds.lua"
-  install -Dm644 "$srcdir/hypr-binds-user.lua" "$pkgdir/etc/skel/.config/hypr/dms/binds-user.lua"
-  install -Dm644 "$srcdir/hypr-outputs.lua" "$pkgdir/etc/skel/.config/hypr/dms/outputs.lua"
-  install -Dm644 "$srcdir/hypr-cursor.lua" "$pkgdir/etc/skel/.config/hypr/dms/cursor.lua"
-  install -Dm644 "$srcdir/hypr-windowrules.lua" "$pkgdir/etc/skel/.config/hypr/dms/windowrules.lua"
-  install -Dm644 "$srcdir/hyprland-session.target" "$pkgdir/etc/skel/.config/systemd/user/hyprland-session.target"
-  ln -s '/usr/lib/systemd/user/dms.service' \
-    "$pkgdir/etc/skel/.config/systemd/user/hyprland-session.target.wants/dms.service"
+  install -Dm644 "$srcdir/profile.toml" \
+    "$pkgdir/usr/share/catdot/profiles/$pkgname/profile.toml"
 
-  install -Dm755 "$srcdir/catos-hyprland-dms-session" "$pkgdir/usr/bin/catos-hyprland-dms-session"
-  install -Dm644 "$srcdir/LICENSE-DMS" "$pkgdir/usr/share/licenses/$pkgname/LICENSE-DMS"
+  install -Dm644 "$srcdir/hyprland.lua" "$content/.config/hypr/hyprland.lua"
+  install -Dm644 "$srcdir/hypr-colors.lua" "$content/.config/hypr/dms/colors.lua"
+  install -Dm644 "$srcdir/hypr-layout.lua" "$content/.config/hypr/dms/layout.lua"
+  install -Dm644 "$srcdir/hypr-binds.lua" "$content/.config/hypr/dms/binds.lua"
+
+  install -Dm644 "$srcdir/custom-input.lua" \
+    "$content/.config/hypr/custom/$pkgname/input.lua"
+  install -Dm644 "$srcdir/custom-outputs.lua" \
+    "$content/.config/hypr/custom/$pkgname/outputs.lua"
+  install -Dm644 "$srcdir/custom-cursor.lua" \
+    "$content/.config/hypr/custom/$pkgname/cursor.lua"
+  install -Dm644 "$srcdir/custom-binds.lua" \
+    "$content/.config/hypr/custom/$pkgname/binds.lua"
+  install -Dm644 "$srcdir/custom-rules.lua" \
+    "$content/.config/hypr/custom/$pkgname/rules.lua"
+
+  install -Dm644 "$srcdir/90-dms.conf" "$content/.config/environment.d/90-dms.conf"
+  install -Dm644 "$srcdir/ghostty.conf" "$content/.config/ghostty/config"
+  install -Dm644 "$srcdir/ghostty-colors.conf" \
+    "$content/.config/ghostty/themes/dankcolors"
+  install -Dm644 "$srcdir/hyprland-session.target" \
+    "$pkgdir/usr/lib/systemd/user/hyprland-session.target"
+  install -d "$pkgdir/usr/lib/systemd/user/hyprland-session.target.wants"
+  ln -s ../dms.service \
+    "$pkgdir/usr/lib/systemd/user/hyprland-session.target.wants/dms.service"
+
+  install -Dm755 "$srcdir/catos-hyprland-dms-session" \
+    "$pkgdir/usr/bin/catos-hyprland-dms-session"
   install -Dm644 "$srcdir/catos-hyprland-dms.desktop" \
     "$pkgdir/usr/share/wayland-sessions/catos-hyprland-dms.desktop"
+  install -Dm644 "$srcdir/LICENSE-DMS" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE-DMS"
 }

@@ -10,16 +10,6 @@ end)
 -- DMS_STARTUP_END
 
 hl.config({
-	input = {
-		-- empty inherits XKB_DEFAULT_LAYOUT (libxkbcommon), falls back to "us"
-		kb_layout = "",
-		numlock_by_default = true,
-		follow_mouse = 0,
-		touchpad = {
-			tap_to_click = true,
-			natural_scroll = true,
-		},
-	},
 	general = {
 		gaps_in = 5,
 		gaps_out = 5,
@@ -82,9 +72,10 @@ hl.layer_rule({ match = { namespace = "^(quickshell)$" }, no_anim = true })
 hl.layer_rule({ match = { namespace = "^dms:.*" }, no_anim = true })
 
 require("dms.colors")
-require("dms.outputs")
 require("dms.layout")
-require("dms.cursor")
 require("dms.binds")
-require("dms.binds-user")
-require("dms.windowrules")
+require("custom.catos-hyprland-dms.input")
+require("custom.catos-hyprland-dms.outputs")
+require("custom.catos-hyprland-dms.cursor")
+require("custom.catos-hyprland-dms.binds")
+require("custom.catos-hyprland-dms.rules")
