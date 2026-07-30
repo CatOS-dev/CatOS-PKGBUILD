@@ -8,23 +8,37 @@ from catos_secureboot.modules import discover_external_modules
 
 
 class ModuleTests(unittest.TestCase):
-    def test_only_external_module_directories_are_selected(self) -> None:
+    def test_discovers_dkms_modules_at_their_installed_kernel_paths(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            version = root / "6.12.1-catos"
-            builtin = version / "kernel/drivers/gpu/drm/example.ko.zst"
-            nvidia = version / "extramodules/nvidia.ko.zst"
-            broadcom = version / "updates/wl.ko"
-            builtin.parent.mkdir(parents=True)
-            nvidia.parent.mkdir(parents=True)
-            broadcom.parent.mkdir(parents=True)
-            builtin.write_bytes(b"builtin")
-            nvidia.write_bytes(b"nvidia")
-            broadcom.write_bytes(b"wl")
+            module_root = root / "usr/lib/modules"
+            dkms_root = root / "var/lib/dkms"
+            version = "7.1.5-1-cachyos"
 
-            modules = discover_external_modules(root, ("updates", "extramodules"))
+            builtin = module_root / version / "kernel/drivers/gpu/drm/amd/amdgpu.ko.zst"
+            nvidia = module_root / version / "kernel/drivers/video/nvidia.ko.zst"
+            vbox = module_root / version / "kernel/misc/vboxdrv.ko.zst"
+            legacy = module_root / version / "updates/wl.ko"
+            for path in (builtin, nvidia, vbox, legacy):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(path.name.encode())
 
-        self.assertEqual([path.name for path in modules], ["nvidia.ko.zst", "wl.ko"])
+            for package, release, module in (
+                ("nvidia", "610.43.03", "nvidia.ko.zst"),
+                ("vboxhost", "7.2.14_OSE", "vboxdrv.ko.zst"),
+            ):
+                record = dkms_root / package / release / version / "x86_64/module" / module
+                record.parent.mkdir(parents=True, exist_ok=True)
+                record.write_bytes(b"dkms build output")
+
+            modules = discover_external_modules(
+                module_root,
+                ("updates", "extramodules"),
+                dkms_root=dkms_root,
+            )
+
+        self.assertEqual(modules, sorted((legacy, nvidia, vbox), key=str))
+        self.assertNotIn(builtin, modules)
 
 
 if __name__ == "__main__":

@@ -52,7 +52,11 @@ def signatures_valid(config: Config, runner: Runner) -> bool:
     common_name = subject.partition("CN = ")[2].strip()
     if not common_name:
         return False
-    modules = discover_external_modules(config.module_root, config.module_directories)
+    modules = discover_external_modules(
+        config.module_root,
+        config.module_directories,
+        dkms_root=config.dkms_root,
+    )
     for module in modules:
         module_signer = runner.run(["modinfo", "-F", "signer", str(module)], check=False).stdout.strip()
         if common_name not in module_signer:

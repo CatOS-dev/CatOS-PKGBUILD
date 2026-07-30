@@ -10,6 +10,7 @@ from .config import Config
 from .efi import deploy_boot_chain, deploy_uki_boot_chains, register_boot_entry, select_second_stage
 from .enforcement import configure_enforcement
 from .grub import rebuild_grub_core
+from .kernels import deploy_grub_kernel_copies, discover_grub_kernel_copies, verify_grub_kernel_copies
 from .keys import generate_key_material, random_enrollment_password, request_enrollment
 from .model import Phase, evaluate_phase
 from .modules import discover_external_modules, kernel_version_for, sign_module
@@ -35,7 +36,10 @@ class SecureBootService:
             "kernels_signed": 0,
             "modules_signed": 0,
             "deployed": 0,
+            "deployed_kernels_verified": 0,
             "efi_registered": False,
+            "provider": "",
+            "boot_chain_verified": False,
             "skipped": "not-enabled",
         }
 
@@ -54,6 +58,54 @@ class SecureBootService:
             return "grub"
         raise RuntimeError(f"unsupported shim second stage: {second_stage}")
 
+    @staticmethod
+    def _validate_provider(provider: str) -> str:
+        if provider not in {"grub", "limine", "systemd-boot", "uki"}:
+            raise ValueError(f"unsupported Secure Boot provider: {provider}")
+        return provider
+
+    def _requested_provider(self, provider: str | None) -> str | None:
+        selected = provider or State.load(self.config.state_path).provider or None
+        return self._validate_provider(selected) if selected is not None else None
+
+    def _select_second_stage_for_provider(self, provider: str) -> Path:
+        for candidate in self.config.second_stage_candidates:
+            path = self.config.esp_path / candidate.lstrip("/")
+            if path.is_file() and self._bootloader_kind(path) == provider:
+                return path
+        raise RuntimeError(f"no configured {provider} bootloader is available as shim second stage")
+
+    def _resolve_boot_artifacts(
+        self,
+        *,
+        provider: str | None,
+        second_stage: Path | None,
+        direct_uki: DirectUkiConfig | None,
+    ) -> tuple[str, Path | None, DirectUkiConfig | None]:
+        selected = self._requested_provider(provider)
+        if direct_uki is not None:
+            if selected not in {None, "uki"}:
+                raise RuntimeError(f"selected provider {selected} does not match the direct UKI configuration")
+            return "uki", None, direct_uki
+        if second_stage is not None:
+            kind = self._bootloader_kind(second_stage)
+            if selected not in {None, kind}:
+                raise RuntimeError(f"selected provider {selected} does not match shim second stage {second_stage}")
+            return kind, second_stage, None
+        if selected == "uki":
+            configured = load_direct_uki_config(self.config.firmware_boot_config_path)
+            if configured is None:
+                raise RuntimeError("the selected direct UKI provider is not configured")
+            return "uki", None, configured
+        if selected is not None:
+            return selected, self._select_second_stage_for_provider(selected), None
+
+        configured = load_direct_uki_config(self.config.firmware_boot_config_path)
+        if configured is not None:
+            return "uki", None, configured
+        detected = select_second_stage(self.config.esp_path, self.config.second_stage_candidates)
+        return self._bootloader_kind(detected), detected, None
+
     def prepare(self) -> dict[str, object]:
         """Sign inputs consumed later by mkinitcpio and bootloader tooling."""
         self.require_root()
@@ -67,7 +119,11 @@ class SecureBootService:
         )
         module_changed = 0
         changed_versions: set[str] = set()
-        for path in discover_external_modules(self.config.module_root, self.config.module_directories):
+        for path in discover_external_modules(
+            self.config.module_root,
+            self.config.module_directories,
+            dkms_root=self.config.dkms_root,
+        ):
             if sign_module(
                 path,
                 module_root=self.config.module_root,
@@ -124,8 +180,9 @@ class SecureBootService:
             if grub_config.is_file() and shutil.which("grub-mkconfig"):
                 self.runner.run(["grub-mkconfig", "-o", str(grub_config)])
 
-    def _verify_systemd_efistub_copies(self, signer: Signer) -> None:
+    def _verify_systemd_efistub_copies(self, signer: Signer) -> int:
         canonical_kernels = discover_kernel_targets(self.config.canonical_kernel_globs)
+        verified = 0
         for canonical in canonical_kernels:
             version = canonical.parent.name
             deployed: set[Path] = set()
@@ -140,12 +197,15 @@ class SecureBootService:
                     )
                 if not signer.verify_pe(path):
                     raise RuntimeError(f"systemd-boot EFISTUB copy is not signed by the machine key: {path}")
+                verified += 1
+        return verified
 
     def finalize_efi(
         self,
         *,
         second_stage: Path | None = None,
         direct_uki: DirectUkiConfig | None = None,
+        provider: str | None = None,
     ) -> dict[str, object]:
         """Sign final EFI loaders without modifying any kernel image."""
         self.require_root()
@@ -164,8 +224,11 @@ class SecureBootService:
             certificate=self.config.certificate_pem,
             runner=self.runner,
         )
-        if direct_uki is None:
-            direct_uki = load_direct_uki_config(self.config.firmware_boot_config_path)
+        resolved_provider, second_stage, direct_uki = self._resolve_boot_artifacts(
+            provider=provider,
+            second_stage=second_stage,
+            direct_uki=direct_uki,
+        )
         if direct_uki is not None:
             ukis = discover_direct_ukis(self.config.esp_path)
             default_package = select_default_uki(ukis, direct_uki.default_kernel)
@@ -199,16 +262,23 @@ class SecureBootService:
                 "kernels_signed": 0,
                 "modules_signed": 0,
                 "deployed": len(deployed),
+                "deployed_kernels_verified": len(ukis),
                 "efi_registered": registered,
+                "provider": resolved_provider,
+                "boot_chain_verified": True,
                 "skipped": "",
             }
         if second_stage is None:
-            second_stage = select_second_stage(
-                self.config.esp_path,
-                self.config.second_stage_candidates,
-            )
-        kind = self._bootloader_kind(second_stage)
+            raise RuntimeError("no shim second stage was selected")
+        kind = resolved_provider
+        deployed_kernels_verified = 0
         if kind == "grub":
+            copies = discover_grub_kernel_copies(
+                discover_kernel_targets(self.config.canonical_kernel_globs),
+                boot_path=self.config.boot_path,
+                preset_dir=self.config.mkinitcpio_preset_dir,
+            )
+            deployed_kernels_verified = verify_grub_kernel_copies(copies, signer)
             rebuild_grub_core(
                 esp_path=self.config.esp_path,
                 boot_path=self.config.boot_path,
@@ -230,7 +300,7 @@ class SecureBootService:
         if not signer.verify_pe(second_stage):
             raise RuntimeError(f"shim second stage is not signed by the machine key: {second_stage}")
         if kind == "systemd-boot":
-            self._verify_systemd_efistub_copies(signer)
+            deployed_kernels_verified = self._verify_systemd_efistub_copies(signer)
         deployed = deploy_boot_chain(
             esp=self.config.esp_path,
             shim=self.config.vendor_shim,
@@ -247,37 +317,59 @@ class SecureBootService:
             "kernels_signed": 0,
             "modules_signed": 0,
             "deployed": len(deployed),
+            "deployed_kernels_verified": deployed_kernels_verified,
             "efi_registered": registered,
+            "provider": resolved_provider,
+            "boot_chain_verified": True,
             "skipped": "",
         }
 
-    def maintain(self) -> dict[str, object]:
+    def maintain(self, *, provider: str | None = None) -> dict[str, object]:
         self.require_root()
         prepared = self.prepare()
         if prepared["skipped"]:
             return prepared
-        direct_uki = load_direct_uki_config(self.config.firmware_boot_config_path)
-        second_stage = None
-        if direct_uki is None:
-            second_stage = select_second_stage(
-                self.config.esp_path,
-                self.config.second_stage_candidates,
+        resolved_provider, second_stage, direct_uki = self._resolve_boot_artifacts(
+            provider=provider,
+            second_stage=None,
+            direct_uki=None,
+        )
+        if resolved_provider == "grub":
+            copies = discover_grub_kernel_copies(
+                discover_kernel_targets(self.config.canonical_kernel_globs),
+                boot_path=self.config.boot_path,
+                preset_dir=self.config.mkinitcpio_preset_dir,
             )
+            deploy_grub_kernel_copies(copies)
         self._refresh_boot_artifacts(second_stage, direct_uki)
-        finalized = self.finalize_efi(second_stage=second_stage, direct_uki=direct_uki)
+        finalized = self.finalize_efi(
+            second_stage=second_stage,
+            direct_uki=direct_uki,
+            provider=resolved_provider,
+        )
         return {
             "efi_signed": finalized["efi_signed"],
             "kernels_signed": prepared["kernels_signed"],
             "modules_signed": prepared["modules_signed"],
             "deployed": finalized["deployed"],
+            "deployed_kernels_verified": finalized["deployed_kernels_verified"],
             "efi_registered": finalized["efi_registered"],
+            "provider": finalized["provider"],
+            "boot_chain_verified": finalized["boot_chain_verified"],
             "skipped": "",
         }
 
-    def enable(self, *, password: str | None, generate_password: bool, enroll: bool = True) -> dict[str, object]:
+    def enable(
+        self,
+        *,
+        password: str | None,
+        generate_password: bool,
+        enroll: bool = True,
+        provider: str | None = None,
+    ) -> dict[str, object]:
         self.require_root()
         material = generate_key_material(self.config, self.runner)
-        maintenance = self.maintain()
+        maintenance = self.maintain(provider=provider)
         state = State.load(self.config.state_path)
         result: dict[str, object] = {
             "fingerprint": material.fingerprint,
@@ -285,12 +377,21 @@ class SecureBootService:
             "kernels_signed": maintenance["kernels_signed"],
             "modules_signed": maintenance["modules_signed"],
             "deployed": maintenance["deployed"],
+            "deployed_kernels_verified": maintenance["deployed_kernels_verified"],
             "efi_registered": maintenance["efi_registered"],
+            "provider": maintenance["provider"],
+            "boot_chain_verified": maintenance["boot_chain_verified"],
             "enrollment_pending": False,
         }
         if enroll:
             if self.runner.run(["mokutil", "--test-key", str(material.certificate_der)], check=False).returncode == 0:
-                state = replace(state, enrollment_pending=False, certificate_fingerprint=material.fingerprint, last_error="")
+                state = replace(
+                    state,
+                    enrollment_pending=False,
+                    certificate_fingerprint=material.fingerprint,
+                    provider=str(maintenance["provider"]),
+                    last_error="",
+                )
             else:
                 if password is None:
                     if generate_password:
@@ -305,9 +406,23 @@ class SecureBootService:
                 self.config.enrollment_password_path.parent.mkdir(parents=True, exist_ok=True)
                 self.config.enrollment_password_path.write_text(password + "\n", encoding="utf-8")
                 os.chmod(self.config.enrollment_password_path, 0o600)
-                state = replace(state, enrollment_pending=True, certificate_fingerprint=material.fingerprint, last_error="")
+                state = replace(
+                    state,
+                    enrollment_pending=True,
+                    certificate_fingerprint=material.fingerprint,
+                    provider=str(maintenance["provider"]),
+                    last_error="",
+                )
                 result["enrollment_password"] = password
                 result["enrollment_pending"] = True
+        else:
+            state = replace(
+                state,
+                enrollment_pending=False,
+                certificate_fingerprint=material.fingerprint,
+                provider=str(maintenance["provider"]),
+                last_error="",
+            )
         state.write(self.config.state_path)
         return result
 

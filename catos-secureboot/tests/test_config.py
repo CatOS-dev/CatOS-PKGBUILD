@@ -19,6 +19,8 @@ class ConfigTests(unittest.TestCase):
         self.assertNotIn("EFI/BOOT/BOOT*.EFI", config.efi_globs)
         self.assertEqual(config.key_dir, Path("/var/lib/catos-secureboot/keys"))
         self.assertEqual(config.firmware_boot_config_path, Path("/etc/catos/firmware-boot.conf"))
+        self.assertEqual(config.dkms_root, Path("/var/lib/dkms"))
+        self.assertEqual(config.mkinitcpio_preset_dir, Path("/etc/mkinitcpio.d"))
 
     def test_toml_overrides_paths_and_module_directories(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -28,6 +30,8 @@ class ConfigTests(unittest.TestCase):
 [secureboot]
 esp_path = "/efi"
 key_dir = "/keys"
+dkms_root = "/dkms"
+mkinitcpio_preset_dir = "/presets"
 efi_globs = ["EFI/CatOS/*.efi", "EFI/Linux/*.efi"]
 module_directories = ["updates", "extramodules", "weak-updates"]
 """.strip()
@@ -39,6 +43,8 @@ module_directories = ["updates", "extramodules", "weak-updates"]
 
         self.assertEqual(config.esp_path, Path("/efi"))
         self.assertEqual(config.key_dir, Path("/keys"))
+        self.assertEqual(config.dkms_root, Path("/dkms"))
+        self.assertEqual(config.mkinitcpio_preset_dir, Path("/presets"))
         self.assertEqual(config.efi_globs, ("EFI/CatOS/*.efi", "EFI/Linux/*.efi"))
         self.assertEqual(config.module_directories, ("updates", "extramodules", "weak-updates"))
 

@@ -7,11 +7,13 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from catos_secureboot.config import Config
 from catos_secureboot.grub import GRUB_PRELOAD_MODULES
+from catos_secureboot.keys import KeyMaterial
 from catos_secureboot.service import SecureBootService
+from catos_secureboot.state import State
 from catos_secureboot.system import CommandResult
 
 
@@ -146,6 +148,56 @@ class FakeRunner:
 
 
 class ServiceTests(unittest.TestCase):
+    def test_enable_persists_the_verified_provider_for_future_hooks(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            keys = root / "keys"
+            keys.mkdir()
+            material = KeyMaterial(
+                private_key=keys / "machine.key",
+                certificate_pem=keys / "machine.crt",
+                certificate_der=keys / "machine.der",
+                fingerprint="AABB",
+            )
+            for path in (material.private_key, material.certificate_pem, material.certificate_der):
+                path.write_bytes(b"key-material")
+            config = replace(
+                Config.defaults(),
+                key_dir=keys,
+                state_path=root / "state.json",
+                enrollment_password_path=root / "enrollment-password",
+            )
+            runner = Mock()
+            runner.run.return_value = CommandResult(0, "", "")
+            service = SecureBootService(config, runner)
+            maintenance = {
+                "efi_signed": 1,
+                "kernels_signed": 1,
+                "modules_signed": 2,
+                "deployed": 8,
+                "deployed_kernels_verified": 1,
+                "efi_registered": True,
+                "provider": "grub",
+                "boot_chain_verified": True,
+                "skipped": "",
+            }
+
+            with (
+                patch("catos_secureboot.service.os.geteuid", return_value=0),
+                patch("catos_secureboot.service.generate_key_material", return_value=material),
+                patch.object(service, "maintain", return_value=maintenance) as maintain,
+            ):
+                result = service.enable(
+                    password=None,
+                    generate_password=False,
+                    provider="grub",
+                )
+
+            maintain.assert_called_once_with(provider="grub")
+            self.assertEqual(result["provider"], "grub")
+            self.assertTrue(result["boot_chain_verified"])
+            self.assertEqual(State.load(config.state_path).provider, "grub")
+
     def test_maintain_builds_and_deploys_complete_machine_chain(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -155,16 +207,19 @@ class ServiceTests(unittest.TestCase):
             keys = root / "keys"
             vendor = root / "vendor"
             version = modules / "6.12.1-catos"
-            for path in (esp / "EFI/CatOS", boot, keys, vendor, version):
+            for path in (esp / "EFI/CatOS", esp / "EFI/systemd", boot, keys, vendor, version):
                 path.mkdir(parents=True, exist_ok=True)
             (version / "pkgbase").write_text("linux\n", encoding="utf-8")
             (version / "vmlinuz").write_bytes(b"kernel")
+            boot_kernel = boot / "vmlinuz-linux"
+            boot_kernel.write_bytes(b"stale-unsigned-kernel")
             deployed_kernel = esp / "machine-id/6.12.1-catos/linux"
             deployed_kernel.parent.mkdir(parents=True)
             deployed_kernel.write_bytes(b"deployed-kernel")
             (boot / "initramfs-linux.img").write_bytes(b"initramfs")
             second_stage = esp / "EFI/CatOS/grubx64.efi"
             write_minimal_pe(second_stage)
+            write_minimal_pe(esp / "EFI/systemd/systemd-bootx64.efi")
             sbat_source = root / "grub.sbat.csv"
             sbat_source.write_text(
                 "sbat,1,SBAT Version,sbat,1,https://github.com/rhboot/shim/blob/main/SBAT.md\n"
@@ -185,6 +240,7 @@ class ServiceTests(unittest.TestCase):
                 cmdline_path=cmdline,
                 grub_dropin_path=root / "grub-secureboot.cfg",
                 key_dir=keys,
+                state_path=root / "state.json",
                 module_root=modules,
                 canonical_kernel_globs=(str(version / "vmlinuz"),),
                 kernel_globs=(str(version / "vmlinuz"), str(deployed_kernel)),
@@ -194,6 +250,7 @@ class ServiceTests(unittest.TestCase):
             )
             runner = FakeRunner(version / "vmlinuz")
             service = SecureBootService(config, runner)
+            State(provider="grub").write(config.state_path)
 
             with (
                 patch("catos_secureboot.service.os.geteuid", return_value=0),
@@ -208,7 +265,11 @@ class ServiceTests(unittest.TestCase):
             self.assertEqual(result["deployed"], 8)
             self.assertFalse(result["efi_registered"])
             self.assertEqual(result["kernels_signed"], 1)
+            self.assertEqual(result["provider"], "grub")
+            self.assertTrue(result["boot_chain_verified"])
+            self.assertEqual(result["deployed_kernels_verified"], 1)
             self.assertTrue((version / "vmlinuz").read_bytes().endswith(b"-signed"))
+            self.assertEqual(boot_kernel.read_bytes(), (version / "vmlinuz").read_bytes())
             self.assertEqual(deployed_kernel.read_bytes(), b"deployed-kernel")
             self.assertTrue(runner.kernel_was_signed_before_mkinitcpio)
             self.assertEqual((esp / "EFI/BOOT/BOOTX64.EFI").read_bytes(), b"shim")
@@ -224,6 +285,48 @@ class ServiceTests(unittest.TestCase):
             enforced = cmdline.read_text(encoding="utf-8")
             self.assertIn("module.sig_enforce=1", enforced)
             self.assertIn("lockdown=integrity", enforced)
+
+    def test_grub_finalization_rejects_a_stale_boot_kernel_copy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            esp = root / "esp"
+            boot = root / "boot"
+            modules = root / "modules"
+            version = modules / "7.1.5-1-cachyos"
+            keys = root / "keys"
+            vendor = root / "vendor"
+            for path in (esp / "EFI/CatOS", boot, version, keys, vendor):
+                path.mkdir(parents=True, exist_ok=True)
+            canonical = version / "vmlinuz"
+            canonical.write_bytes(b"kernel-signed")
+            (version / "pkgbase").write_text("linux-cachyos\n", encoding="utf-8")
+            (boot / "vmlinuz-linux-cachyos").write_bytes(b"stale-unsigned-kernel")
+            loader = esp / "EFI/CatOS/grubx64.efi"
+            write_minimal_pe(loader)
+            (keys / "machine.key").write_bytes(b"key")
+            (keys / "machine.crt").write_bytes(b"certificate")
+            (keys / "machine.der").write_bytes(b"certificate-der")
+            (vendor / "shimx64.efi").write_bytes(b"shim")
+            (vendor / "mmx64.efi").write_bytes(b"mok-manager")
+            config = replace(
+                Config.defaults(),
+                esp_path=esp,
+                boot_path=boot,
+                key_dir=keys,
+                module_root=modules,
+                canonical_kernel_globs=(str(canonical),),
+                second_stage_candidates=("EFI/CatOS/grubx64.efi",),
+                vendor_shim=vendor / "shimx64.efi",
+                vendor_mok_manager=vendor / "mmx64.efi",
+                register_efi=False,
+            )
+            service = SecureBootService(config, FakeRunner())
+
+            with (
+                patch("catos_secureboot.service.os.geteuid", return_value=0),
+                self.assertRaisesRegex(RuntimeError, "stale or differs"),
+            ):
+                service.finalize_efi(second_stage=loader, provider="grub")
 
     def test_prepare_never_touches_esp_kernel_or_efi_loader(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

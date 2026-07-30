@@ -12,6 +12,7 @@ The package does not bundle a private release key. It packages a pinned, matchin
 
 ```text
 catos-secureboot enable
+catos-secureboot enable --provider grub
 catos-secureboot enable --generate-enrollment-password
 catos-secureboot status
 catos-secureboot verify
@@ -22,16 +23,17 @@ catos-secureboot maintain
 
 1. creates a 3072-bit per-machine RSA key and X.509 certificate;
 2. enforces `module.sig_enforce=1` and integrity lockdown in the installed boot configuration;
-3. signs modules under `updates/` and `extramodules/`, then runs `depmod` for affected kernel versions;
+3. resolves DKMS build records to their actual installed paths anywhere under `/usr/lib/modules/<version>/`, also includes configured legacy external-module directories, signs those modules, and runs `depmod` for affected kernel versions;
 4. signs canonical installed kernels under `/usr/lib/modules/*/vmlinuz` before any provider copies or packages them;
-5. refreshes only the selected provider: Limine through `limine-mkinitcpio`, GRUB through `mkinitcpio` and `grub-mkconfig`, systemd-boot through `kernel-install --entry-type=all add-all`, or the direct UKI provider through `catos-firmware-boot-update --force`;
-6. for systemd-boot Type #1 entries, copies the already signed canonical kernel as the final payload; for UKI layouts, generates the finished image before signing it;
-7. signs the selected bootloader or every direct CatOS UKI with the machine MOK;
-8. atomically deploys shim, MokManager, the signed second stage and the machine certificate; direct UKIs are installed as `grubx64.efi` beside a dedicated shim for each kernel package;
-9. registers the shim entry or per-kernel UKI shim entries in firmware and submits the machine certificate to `mokutil`;
-10. records `enrollment-pending` until MokManager enrollment completes.
+5. records the selected provider; for GRUB, atomically deploys the already signed canonical kernel to the path selected by the matching mkinitcpio preset before refreshing initramfs and `grub.cfg`;
+6. refreshes only the selected provider: Limine through `limine-mkinitcpio`, GRUB through `mkinitcpio` and `grub-mkconfig`, systemd-boot through `kernel-install --entry-type=all add-all`, or the direct UKI provider through `catos-firmware-boot-update --force`;
+7. verifies that every deployed GRUB or systemd-boot Type #1 kernel is byte-for-byte identical to the signed canonical kernel and is signed by the machine MOK; for UKI layouts, verifies the finished signed images;
+8. signs the selected bootloader or every direct CatOS UKI with the machine MOK;
+9. atomically deploys shim, MokManager, the signed second stage and the machine certificate; direct UKIs are installed as `grubx64.efi` beside a dedicated shim for each kernel package;
+10. registers the shim entry or per-kernel UKI shim entries in firmware and submits the machine certificate to `mokutil`;
+11. records `enrollment-pending` until MokManager enrollment completes.
 
-For unattended installation, Calamares may use `--generate-enrollment-password` and display the returned one-time password. The password is stored root-only at `/var/lib/catos-secureboot/enrollment-password` until enrollment is observed.
+For unattended installation, Calamares passes its selected provider through `--provider`, requires a verified final boot chain, and may use `--generate-enrollment-password` to display the returned one-time password. The password is stored root-only at `/var/lib/catos-secureboot/enrollment-password` until enrollment is observed.
 
 ## Configuration
 
@@ -45,4 +47,4 @@ The independent `efistub` provider remains outside automatic MOK setup. It regis
 
 ## Update integration
 
-The pacman hooks split the lifecycle into two ordered stages. The early stage runs after DKMS and before boot artifact generation, signs external modules and canonical kernels, and never touches deployed kernel copies. The provider generator then consumes those final bytes: Limine records its hash, systemd `kernel-install` copies a Type #1 kernel or builds a Type #2 UKI, the direct UKI provider rebuilds `catos-*.efi`, and GRUB regenerates initramfs/configuration. The final EFI stage signs final EFI payloads, wraps direct UKIs with per-kernel shim chains, and verifies that any systemd-boot Type #1 `linux` copy is byte-for-byte identical to the signed canonical kernel. Limine kernel copies and their recorded hashes are not modified by the final stage.
+The pacman hooks split the lifecycle into two ordered stages. The early stage runs after DKMS and before boot artifact generation, signs DKMS modules at their real installed paths and signs canonical kernels without touching deployed kernel copies. The provider generator then consumes those final bytes: Limine records its hash, systemd `kernel-install` copies a Type #1 kernel or builds a Type #2 UKI, the direct UKI provider rebuilds `catos-*.efi`, and Arch's mkinitcpio ALPM script copies the signed canonical kernel to the GRUB `/boot` path before regenerating initramfs. The final EFI stage rejects stale or unsigned GRUB and systemd-boot Type #1 kernel copies, signs final EFI payloads, and wraps direct UKIs with per-kernel shim chains. Limine kernel copies and their recorded hashes are not modified by the final stage.

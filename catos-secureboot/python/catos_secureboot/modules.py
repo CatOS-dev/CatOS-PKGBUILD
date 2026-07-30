@@ -10,12 +10,41 @@ from .system import Runner
 
 
 MODULE_SUFFIXES = (".ko", ".ko.zst", ".ko.xz", ".ko.gz")
+_COMPRESSED_SUFFIXES = (".zst", ".xz", ".gz")
 
 
-def discover_external_modules(module_root: Path, directories: tuple[str, ...]) -> list[Path]:
+def _module_name(path: Path) -> str:
+    name = path.name
+    for suffix in _COMPRESSED_SUFFIXES:
+        if name.endswith(suffix):
+            name = name[: -len(suffix)]
+            break
+    if not name.endswith(".ko"):
+        return ""
+    return name[:-3].replace("-", "_")
+
+
+def _installed_module_index(version_root: Path) -> dict[str, list[Path]]:
+    result: dict[str, list[Path]] = {}
+    for path in version_root.rglob("*"):
+        if not path.is_file() or not path.name.endswith(MODULE_SUFFIXES):
+            continue
+        name = _module_name(path)
+        if name:
+            result.setdefault(name, []).append(path)
+    return result
+
+
+def discover_external_modules(
+    module_root: Path,
+    directories: tuple[str, ...],
+    *,
+    dkms_root: Path = Path("/var/lib/dkms"),
+) -> list[Path]:
     modules: set[Path] = set()
     if not module_root.is_dir():
         return []
+
     for version in module_root.iterdir():
         if not version.is_dir():
             continue
@@ -26,6 +55,25 @@ def discover_external_modules(module_root: Path, directories: tuple[str, ...]) -
             for path in root.rglob("*"):
                 if path.is_file() and path.name.endswith(MODULE_SUFFIXES):
                     modules.add(path)
+
+    indexes: dict[str, dict[str, list[Path]]] = {}
+    if dkms_root.is_dir():
+        for build_module_dir in dkms_root.glob("*/*/*/*/module"):
+            if not build_module_dir.is_dir():
+                continue
+            kernel_version = build_module_dir.parents[1].name
+            version_root = module_root / kernel_version
+            if not version_root.is_dir():
+                continue
+            installed = indexes.get(kernel_version)
+            if installed is None:
+                installed = _installed_module_index(version_root)
+                indexes[kernel_version] = installed
+            for build_module in build_module_dir.iterdir():
+                if not build_module.is_file() or not build_module.name.endswith(MODULE_SUFFIXES):
+                    continue
+                modules.update(installed.get(_module_name(build_module), ()))
+
     return sorted(modules, key=lambda path: str(path))
 
 

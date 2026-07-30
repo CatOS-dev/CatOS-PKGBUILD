@@ -16,6 +16,8 @@ class Config:
     state_path: Path
     enrollment_password_path: Path
     module_root: Path
+    dkms_root: Path
+    mkinitcpio_preset_dir: Path
     vendor_shim: Path
     vendor_mok_manager: Path
     efi_globs: tuple[str, ...]
@@ -39,6 +41,8 @@ class Config:
             state_path=Path("/var/lib/catos-secureboot/state.json"),
             enrollment_password_path=Path("/var/lib/catos-secureboot/enrollment-password"),
             module_root=Path("/usr/lib/modules"),
+            dkms_root=Path("/var/lib/dkms"),
+            mkinitcpio_preset_dir=Path("/etc/mkinitcpio.d"),
             vendor_shim=Path("/usr/share/catos-secureboot/vendor/shimx64.efi"),
             vendor_mok_manager=Path("/usr/share/catos-secureboot/vendor/mmx64.efi"),
             efi_globs=(
@@ -86,6 +90,8 @@ class Config:
             "state_path",
             "enrollment_password_path",
             "module_root",
+            "dkms_root",
+            "mkinitcpio_preset_dir",
             "vendor_shim",
             "vendor_mok_manager",
         ):

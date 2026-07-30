@@ -13,6 +13,7 @@ class State:
     version: int = 1
     enrollment_pending: bool = False
     certificate_fingerprint: str = ""
+    provider: str = ""
     last_error: str = ""
     updated_at: str = ""
 
@@ -25,6 +26,7 @@ class State:
             version=int(data.get("version", 1)),
             enrollment_pending=bool(data.get("enrollment_pending", False)),
             certificate_fingerprint=str(data.get("certificate_fingerprint", "")),
+            provider=str(data.get("provider", "")),
             last_error=str(data.get("last_error", "")),
             updated_at=str(data.get("updated_at", "")),
         )

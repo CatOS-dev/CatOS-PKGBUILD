@@ -25,6 +25,11 @@ def parser() -> argparse.ArgumentParser:
     password = enable.add_mutually_exclusive_group()
     password.add_argument("--password-file", type=Path)
     password.add_argument("--generate-enrollment-password", action="store_true")
+    enable.add_argument(
+        "--provider",
+        choices=("grub", "limine", "systemd-boot", "uki"),
+        help="bind future maintenance hooks to the installed boot provider",
+    )
     enable.add_argument("--no-enroll", action="store_true", help="prepare signatures without writing MokNew")
     enable.add_argument("--json", action="store_true")
 
@@ -83,6 +88,7 @@ def main(arguments: list[str] | None = None) -> int:
             password=password,
             generate_password=options.generate_enrollment_password,
             enroll=not options.no_enroll,
+            provider=options.provider,
         )
         emit(payload, options.json)
         return 0
