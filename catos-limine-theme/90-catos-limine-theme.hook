@@ -1,0 +1,12 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = catos-limine-theme
+Target = limine
+Target = limine-tool
+
+[Action]
+Description = Synchronizing the CatOS Limine theme...
+When = PostTransaction
+Exec = /usr/lib/catos-limine-theme/apply

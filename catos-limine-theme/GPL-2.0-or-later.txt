@@ -1,0 +1,2 @@
+The bundled 8x16 bitmap font is derived from default8x16.psfu.gz from the kbd project.
+The kbd project is licensed under GPL-2.0-or-later. The complete corresponding license is available in /usr/share/licenses/common/GPL2/license.txt on Arch Linux systems.

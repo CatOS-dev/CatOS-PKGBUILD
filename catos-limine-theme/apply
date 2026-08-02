@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root=/
+esp=
+esp_explicit=0
+
+usage() {
+    printf 'Usage: catos-limine-theme apply [--root ROOT] [--esp ESP_PATH]\n'
+}
+
+while (($#)); do
+    case "$1" in
+        apply)
+            shift
+            ;;
+        --root)
+            (($# >= 2)) || { usage >&2; exit 2; }
+            root=$2
+            shift 2
+            ;;
+        --esp)
+            (($# >= 2)) || { usage >&2; exit 2; }
+            esp=$2
+            esp_explicit=1
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            printf 'catos-limine-theme: unknown argument: %s\n' "$1" >&2
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
+
+[[ $root == /* && -d $root ]] || {
+    printf 'catos-limine-theme: root must be an existing absolute directory: %s\n' "$root" >&2
+    exit 1
+}
+root=${root%/}
+[[ -n $root ]] || root=/
+
+rooted() {
+    local path=$1
+    [[ $path == /* && $path != *'/../'* && $path != */.. ]] || return 1
+    if [[ $root == / ]]; then
+        printf '%s\n' "$path"
+    else
+        printf '%s%s\n' "$root" "$path"
+    fi
+}
+
+parse_esp_path() {
+    local config=$1 line value
+    [[ -f $config && ! -L $config ]] || return 1
+    line=$(grep -E '^[[:space:]]*ESP_PATH[[:space:]]*=' "$config" | tail -n 1 || true)
+    [[ -n $line ]] || return 1
+    value=${line#*=}
+    value=${value#"${value%%[![:space:]]*}"}
+    value=${value%"${value##*[![:space:]]}"}
+    if [[ $value == \"*\" && $value == *\" ]]; then
+        value=${value:1:${#value}-2}
+    elif [[ $value == \'*\' && $value == *\' ]]; then
+        value=${value:1:${#value}-2}
+    fi
+    [[ $value == /* && $value != *$'\n'* ]] || return 1
+    printf '%s\n' "$value"
+}
+
+if [[ -z $esp ]]; then
+    esp=$(parse_esp_path "$(rooted /etc/default/limine)" || true)
+fi
+if [[ -z $esp ]]; then
+    for candidate in /efi /boot /boot/efi /limine; do
+        candidate_path=$(rooted "$candidate") || continue
+        if [[ -f $candidate_path/limine.conf && ! -L $candidate_path/limine.conf ]]; then
+            esp=$candidate
+            break
+        fi
+    done
+fi
+
+if [[ -z $esp ]]; then
+    printf 'catos-limine-theme: no installed Limine configuration found; skipping\n'
+    exit 0
+fi
+esp_path=$(rooted "$esp") || {
+    printf 'catos-limine-theme: invalid ESP path: %s\n' "$esp" >&2
+    exit 1
+}
+config=$esp_path/limine.conf
+if [[ ! -f $config || -L $config ]]; then
+    if ((esp_explicit)); then
+        printf 'catos-limine-theme: Limine configuration is missing or unsafe: %s\n' "$config" >&2
+        exit 1
+    fi
+    printf 'catos-limine-theme: Limine is not installed at %s; skipping\n' "$esp"
+    exit 0
+fi
+
+source_dir=$(rooted /usr/share/limine/themes/catos)
+[[ -d $source_dir && ! -L $source_dir ]] || {
+    printf 'catos-limine-theme: packaged theme directory is missing: %s\n' "$source_dir" >&2
+    exit 1
+}
+for asset in wallpaper.jpg font.bin theme.conf; do
+    [[ -f $source_dir/$asset && ! -L $source_dir/$asset ]] || {
+        printf 'catos-limine-theme: packaged theme asset is missing or unsafe: %s\n' "$asset" >&2
+        exit 1
+    }
+done
+
+target_dir=$esp_path/EFI/limine/themes/catos
+install -d -m 0755 "$target_dir"
+for asset in wallpaper.jpg font.bin theme.conf; do
+    install -m 0644 "$source_dir/$asset" "$target_dir/$asset"
+done
+
+begin='### BEGIN CATOS LIMINE THEME'
+end='### END CATOS LIMINE THEME'
+begin_count=$(grep -Fxc "$begin" "$config" || true)
+end_count=$(grep -Fxc "$end" "$config" || true)
+if ((begin_count != end_count || begin_count > 1)); then
+    printf 'catos-limine-theme: malformed managed theme block in %s\n' "$config" >&2
+    exit 1
+fi
+
+cleaned=$(mktemp "$config.catos-theme-clean.XXXXXX")
+temporary=$(mktemp "$config.catos-theme.XXXXXX")
+trap 'rm -f "$cleaned" "$temporary"' EXIT
+awk -v begin="$begin" -v end="$end" '
+    $0 == begin { managed = 1; next }
+    $0 == end { managed = 0; next }
+    !managed { print }
+' "$config" > "$cleaned"
+
+entry_line=$(grep -n '^/' "$cleaned" | head -n 1 | cut -d: -f1 || true)
+if [[ -n $entry_line ]]; then
+    head -n "$((entry_line - 1))" "$cleaned" > "$temporary"
+else
+    cat "$cleaned" > "$temporary"
+fi
+while [[ -s $temporary ]] && [[ $(tail -c 1 "$temporary" | wc -l) -eq 0 ]]; do
+    printf '\n' >> "$temporary"
+done
+{
+    printf '%s\n' "$begin"
+    cat "$source_dir/theme.conf"
+    printf '%s\n' "$end"
+} >> "$temporary"
+if [[ -n $entry_line ]]; then
+    tail -n "+$entry_line" "$cleaned" >> "$temporary"
+fi
+chmod 0644 "$temporary"
+if cmp -s "$temporary" "$config"; then
+    rm -f "$temporary"
+else
+    mv -f "$temporary" "$config"
+fi
+rm -f "$cleaned"
+trap - EXIT
+printf 'catos-limine-theme: applied CatOS theme to %s\n' "$esp"

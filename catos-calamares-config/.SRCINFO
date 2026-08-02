@@ -1,7 +1,7 @@
 pkgbase = catos-calamares-config
 	pkgdesc = Calamares configuration for CatOS
 	pkgver = 26.08
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/CatOS-dev/catos-calamares-config
 	arch = any
 	license = GPL3

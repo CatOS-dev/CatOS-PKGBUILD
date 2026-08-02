@@ -1,0 +1,37 @@
+pkgname=catos-limine-theme
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='CatOS visual theme for the Limine boot menu'
+arch=('any')
+url='https://github.com/CatOS-dev/catos-limine-theme'
+license=('GPL-2.0-or-later' 'LicenseRef-Pexels')
+depends=('bash' 'limine')
+source=('apply'
+        '90-catos-limine-theme.hook'
+        'font.bin'
+        'theme.conf'
+        'wallpaper.jpg'
+        'README.md'
+        'GPL-2.0-or-later.txt'
+        'LicenseRef-Pexels.txt')
+sha256sums=('c060ef290762b9d03c76fc10e61a67026ba0c10ad3d134ed3923901b8b206765'
+            '13ba36fd757a5b92d7e59b6cfdc28383471be823b3066a8b1b7b788d6c64fc5b'
+            '602906c22a6d9e1dcf04cffe4fcfa4c9f5239762d670390b9d069bca5588d593'
+            'f48b5e4d66293cb19ea367a3dcb78816a3913585b43c803504323cc6bb7a80a4'
+            '8cf841f2c90daee9a7ae8211656370a5cfd16a771c26958ecd208875895653fa'
+            '243243ae5edd1bcde177ef15c3b3c373062a9f123cdf8f12f0e00052ae59f85f'
+            '0917b82e94a8f3fb0eef9b7fbee6d50c774bb85240ce7bb9a7bf1380e8bc3493'
+            '158cc6f282228300c567451db3c1610afc8cf7e276ab08f2e21ae3012c07aac5')
+
+package() {
+  install -Dm755 apply "$pkgdir/usr/lib/catos-limine-theme/apply"
+  install -d "$pkgdir/usr/bin"
+  ln -s ../lib/catos-limine-theme/apply "$pkgdir/usr/bin/catos-limine-theme"
+  install -Dm644 90-catos-limine-theme.hook     "$pkgdir/usr/share/libalpm/hooks/90-catos-limine-theme.hook"
+  install -Dm644 font.bin     "$pkgdir/usr/share/limine/themes/catos/font.bin"
+  install -Dm644 theme.conf     "$pkgdir/usr/share/limine/themes/catos/theme.conf"
+  install -Dm644 wallpaper.jpg     "$pkgdir/usr/share/limine/themes/catos/wallpaper.jpg"
+  install -Dm644 README.md     "$pkgdir/usr/share/doc/$pkgname/README.md"
+  install -Dm644 GPL-2.0-or-later.txt     "$pkgdir/usr/share/licenses/$pkgname/GPL-2.0-or-later.txt"
+  install -Dm644 LicenseRef-Pexels.txt     "$pkgdir/usr/share/licenses/$pkgname/LicenseRef-Pexels.txt"
+}
