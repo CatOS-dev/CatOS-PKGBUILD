@@ -1,11 +1,11 @@
 pkgname=catos-xfce-settings
 pkgver=2.0
-pkgrel=4
+pkgrel=5
 pkgdesc="Default Xfce settings for CatOS"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-xfce-settings'
 license=('GPL')
-depends=('catos-branding')
+depends=('catos-branding' 'tela-circle-icon-theme-standard')
 makedepends=('git')
 source=('git+https://github.com/CatOS-dev/catos-xfce-settings.git')
 sha256sums=('SKIP')

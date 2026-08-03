@@ -1,11 +1,12 @@
 pkgbase = catos-cinnamon-settings
 	pkgdesc = CatOS Cinnamon settings
 	pkgver = 2.0
-	pkgrel = 4
+	pkgrel = 5
 	url = https://catos.info
 	arch = any
 	license = GPL3
 	depends = catos-branding
+	depends = tela-circle-icon-theme-blue
 	source = 99_catos-cinnamon.gschema.override
 	sha256sums = 8c686daf8bd4128513307b54a18ffda84beca0c34b09ba8ad2b7c58b157fbacc
 

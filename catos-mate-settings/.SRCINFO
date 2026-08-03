@@ -1,11 +1,12 @@
 pkgbase = catos-mate-settings
 	pkgdesc = CatOS MATE settings
 	pkgver = 2.0
-	pkgrel = 4
+	pkgrel = 5
 	url = https://catos.info
 	arch = any
 	license = GPL
 	depends = catos-branding
+	depends = tela-circle-icon-theme-blue
 	source = 99_catos-mate.gschema.override
 	source = catos.layout
 	sha256sums = 8e950faf59983c2f559a2670beccb4784f386f7e9f1cf1c599364d79ebd1e370

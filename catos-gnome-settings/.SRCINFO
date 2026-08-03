@@ -1,12 +1,13 @@
 pkgbase = catos-gnome-settings
 	pkgdesc = CatOS GNOME settings
 	pkgver = 2.0
-	pkgrel = 9
+	pkgrel = 10
 	url = https://github.com/CatOS-dev/catos-gnome-settings
 	arch = any
 	license = GPL
 	makedepends = git
 	depends = catos-branding
+	depends = tela-circle-icon-theme-blue
 	source = git+https://github.com/CatOS-dev/catos-gnome-settings.git
 	sha256sums = SKIP
 

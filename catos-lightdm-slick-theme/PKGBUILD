@@ -1,13 +1,12 @@
 pkgname=catos-lightdm-slick-theme
 pkgver=3.2
-pkgrel=4
+pkgrel=5
 pkgdesc='CatOS theme for lightdm-slick-greeter'
 arch=('any')
 url='https://catos.info'
 license=('GPL3')
-depends=('lightdm-slick-greeter' 'catos-branding')
-optdepends=('catos-tela-icon-theme-blue: icon theme used by the greeter'
-            'catos-bibata-cursor: cursor theme used by the greeter')
+depends=('lightdm-slick-greeter' 'catos-branding' 'tela-circle-icon-theme-blue')
+optdepends=('catos-bibata-cursor: cursor theme used by the greeter')
 backup=('etc/lightdm/slick-greeter.conf'
         'etc/lightdm/lightdm.conf.d/10-catos-slick.conf')
 source=('slick-greeter.conf' '10-catos-slick.conf')

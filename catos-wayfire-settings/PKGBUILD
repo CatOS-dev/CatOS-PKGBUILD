@@ -1,6 +1,6 @@
 pkgname=catos-wayfire-settings
 pkgver=1.0.0
-pkgrel=6
+pkgrel=7
 pkgdesc="CatOS ready-to-use Wayfire session preset"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-wayfire-settings'
@@ -11,6 +11,7 @@ depends=(
   'wf-shell'
   'wcm'
   'catos-branding'
+  'tela-circle-icon-theme-blue'
   'fuzzel'
   'foot'
   'swayidle'
@@ -37,7 +38,6 @@ optdepends=(
   'xdg-user-dirs: standard user directory discovery'
   'catos-gtk-settings: CatOS GTK appearance'
   'catos-bibata-cursor: CatOS cursor theme'
-  'catos-tela-icon-theme-blue: CatOS icon theme'
 )
 makedepends=('git')
 source=("git+https://github.com/CatOS-dev/catos-wayfire-settings.git")

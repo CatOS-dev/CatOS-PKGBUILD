@@ -2,12 +2,12 @@
 
 pkgname=catos-budgie-settings
 pkgver=2.0
-pkgrel=5
+pkgrel=6
 pkgdesc="CatOS Budgie settings"
 arch=('any')
 url='https://catos.info'
 license=('GPL3')
-depends=('catos-branding')
+depends=('catos-branding' 'tela-circle-icon-theme-blue')
 source=('99_catos-budgie.gschema.override')
 sha256sums=('7681dc5dff175fbaee1ccd239bc95733d483dbaf635de2101990b0fc1a82839d')
 

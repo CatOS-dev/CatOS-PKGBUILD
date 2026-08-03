@@ -1,11 +1,12 @@
 pkgname=catos-gtk-settings
 pkgver=1.0
-pkgrel=4
+pkgrel=5
 pkgdesc="Default GTK settings for CatOS"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-gtk-settings'
 license=('GPL')
-depends=('catos-branding' 'catos-graphite-gtk-theme>=1.0-3')
+depends=('catos-branding' 'catos-graphite-gtk-theme>=1.0-3'
+         'tela-circle-icon-theme-blue' 'tela-circle-icon-theme-standard')
 makedepends=('git')
 source=('git+https://github.com/CatOS-dev/catos-gtk-settings.git')
 sha256sums=('SKIP')

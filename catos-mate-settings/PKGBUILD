@@ -1,11 +1,11 @@
 pkgname=catos-mate-settings
 pkgver=2.0
-pkgrel=4
+pkgrel=5
 pkgdesc="CatOS MATE settings"
 arch=('any')
 url='https://catos.info'
 license=('GPL')
-depends=('catos-branding')
+depends=('catos-branding' 'tela-circle-icon-theme-blue')
 source=('99_catos-mate.gschema.override' 'catos.layout')
 sha256sums=('8e950faf59983c2f559a2670beccb4784f386f7e9f1cf1c599364d79ebd1e370'
             '6880e79f10b70c70e27691582513774d718b98fb53a6e8eed360c9ec9c7393df')

@@ -1,7 +1,7 @@
 pkgbase = catos-wayfire-settings
 	pkgdesc = CatOS ready-to-use Wayfire session preset
 	pkgver = 1.0.0
-	pkgrel = 6
+	pkgrel = 7
 	url = https://github.com/CatOS-dev/catos-wayfire-settings
 	arch = any
 	license = GPL-3.0-or-later
@@ -11,6 +11,7 @@ pkgbase = catos-wayfire-settings
 	depends = wf-shell
 	depends = wcm
 	depends = catos-branding
+	depends = tela-circle-icon-theme-blue
 	depends = fuzzel
 	depends = foot
 	depends = swayidle
@@ -35,7 +36,6 @@ pkgbase = catos-wayfire-settings
 	optdepends = xdg-user-dirs: standard user directory discovery
 	optdepends = catos-gtk-settings: CatOS GTK appearance
 	optdepends = catos-bibata-cursor: CatOS cursor theme
-	optdepends = catos-tela-icon-theme-blue: CatOS icon theme
 	source = git+https://github.com/CatOS-dev/catos-wayfire-settings.git
 	sha256sums = SKIP
 

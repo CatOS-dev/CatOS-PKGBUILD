@@ -1,10 +1,11 @@
 pkgname=catos-kde-settings
 pkgver=2.1
-pkgrel=1
+pkgrel=2
 pkgdesc="CatOS KDE Settings"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-kde-settings'
 license=('GPL')
+depends=('catos-branding')
 makedepends=('git')
 source=("git+https://github.com/CatOS-dev/catos-kde-settings.git")
 sha256sums=('SKIP')
