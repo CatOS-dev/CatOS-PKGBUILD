@@ -1,6 +1,6 @@
 pkgname=catos-gnome-settings
 pkgver=2.0
-pkgrel=8
+pkgrel=9
 pkgdesc="CatOS GNOME settings"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-gnome-settings'
