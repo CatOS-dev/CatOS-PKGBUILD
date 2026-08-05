@@ -1,0 +1,34 @@
+# Maintainer: Aromatic <symwww@outlook.com>
+pkgname=catos-niri-utils
+pkgver=0.1.0
+pkgrel=1
+pkgdesc='CatOS command-line utilities for the Niri DMS desktop'
+arch=('any')
+url='https://github.com/CatOS-dev/catos-niri-dms'
+license=('GPL')
+depends=(
+  'bash'
+  'niri'
+  'dms-shell-niri>=1.5.3'
+  'jq'
+  'fuzzel'
+  'wl-clipboard'
+  'libnotify'
+  'satty'
+)
+source=(
+  'catos-niri-keybinds'
+  'catos-niri-pick'
+  'catos-screenshot-edit'
+)
+sha256sums=(
+  '4dd96a46a580fbb8d122dce4d863c5d4848027b56ca01638359c2a50c7b943bf'
+  '57db67f80e76347c0ff29d9d2d4529f3d8a70a4066e207e5fd1b2155d9d8a8fb'
+  '22db00373b1514687c51bde7326c144587f333c022635f06325a64480e4031e3'
+)
+
+package() {
+  install -Dm755 catos-niri-keybinds "$pkgdir/usr/bin/catos-niri-keybinds"
+  install -Dm755 catos-niri-pick "$pkgdir/usr/bin/catos-niri-pick"
+  install -Dm755 catos-screenshot-edit "$pkgdir/usr/bin/catos-screenshot-edit"
+}

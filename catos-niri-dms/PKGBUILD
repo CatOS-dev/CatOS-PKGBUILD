@@ -1,5 +1,5 @@
 pkgname=catos-niri-dms
-pkgver=1.2.0
+pkgver=1.2.1
 pkgrel=1
 pkgdesc="Complete CatOS Niri + DMS Profile"
 arch=('any')
@@ -13,15 +13,14 @@ depends=(
   'xdg-desktop-portal-gnome'
   'gnome-keyring'
   'dms-shell-niri>=1.5.3'
+  'catos-niri-utils'
   'matugen'
   'adw-gtk-theme'
   'qt6ct-kde'
   'qt6-multimedia'
   'fuzzel'
   'satty'
-  'jq'
   'wl-clipboard'
-  'libnotify'
   'fcitx5'
   'btop'
   'cava'

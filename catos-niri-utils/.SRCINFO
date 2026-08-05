@@ -1,0 +1,23 @@
+pkgbase = catos-niri-utils
+	pkgdesc = CatOS command-line utilities for the Niri DMS desktop
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/CatOS-dev/catos-niri-dms
+	arch = any
+	license = GPL
+	depends = bash
+	depends = niri
+	depends = dms-shell-niri>=1.5.3
+	depends = jq
+	depends = fuzzel
+	depends = wl-clipboard
+	depends = libnotify
+	depends = satty
+	source = catos-niri-keybinds
+	source = catos-niri-pick
+	source = catos-screenshot-edit
+	sha256sums = 4dd96a46a580fbb8d122dce4d863c5d4848027b56ca01638359c2a50c7b943bf
+	sha256sums = 57db67f80e76347c0ff29d9d2d4529f3d8a70a4066e207e5fd1b2155d9d8a8fb
+	sha256sums = 22db00373b1514687c51bde7326c144587f333c022635f06325a64480e4031e3
+
+pkgname = catos-niri-utils
