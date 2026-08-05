@@ -1,11 +1,11 @@
 pkgname=catos-kde-settings
-pkgver=2.1
-pkgrel=2
+pkgver=2.2
+pkgrel=1
 pkgdesc="CatOS KDE Settings"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-kde-settings'
 license=('GPL')
-depends=('catos-branding')
+depends=('catos-branding' 'breeze-cursors')
 makedepends=('git')
 source=("git+https://github.com/CatOS-dev/catos-kde-settings.git")
 sha256sums=('SKIP')

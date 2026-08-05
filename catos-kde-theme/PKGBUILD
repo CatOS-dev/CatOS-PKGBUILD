@@ -1,11 +1,11 @@
 pkgname=catos-kde-theme
-pkgver=1.1
+pkgver=1.2
 pkgrel=1
 pkgdesc="CatOS KDE theme"
 arch=('any')
 url='https://github.com/CatOS-dev/catos-kde-theme'
 license=('GPL')
-depends=('catos-branding')
+depends=('catos-branding' 'breeze-cursors')
 makedepends=('git')
 source=('git+https://github.com/CatOS-dev/catos-kde-theme.git')
 sha256sums=('SKIP')
