@@ -1,7 +1,7 @@
 pkgbase = catos-secureboot
 	pkgdesc = CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager
 	pkgver = 0.3.1
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot
 	arch = x86_64
 	license = GPL-3.0-or-later

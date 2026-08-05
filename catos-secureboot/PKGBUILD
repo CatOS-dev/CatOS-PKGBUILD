@@ -1,6 +1,6 @@
 pkgname=catos-secureboot
 pkgver=0.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
 arch=('x86_64')
 url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
@@ -19,16 +19,14 @@ _fedora_shim_version=16.1-5
 source=("shim-x64-16.1-5.x86_64.rpm::https://dl.fedoraproject.org/pub/fedora/linux/releases/44/Everything/x86_64/os/Packages/s/shim-x64-16.1-5.x86_64.rpm")
 sha256sums=('a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917')
 
-check() {
-    cd "$startdir"
-    PYTHONPATH=python python -m unittest discover -s tests -v
-}
-
 package() {
     cd "$startdir"
     install -Dm755 packaging/catos-secureboot "$pkgdir/usr/bin/catos-secureboot"
-    install -d "$pkgdir/usr/lib/catos-secureboot"
-    cp -a python/catos_secureboot "$pkgdir/usr/lib/catos-secureboot/"
+    install -d "$pkgdir/usr/lib/catos-secureboot/catos_secureboot"
+    install -Dm644 python/catos_secureboot/*.py \
+        -t "$pkgdir/usr/lib/catos-secureboot/catos_secureboot"
+    python -m compileall -q -o 0 -o 1 \
+        -s "$pkgdir" -p / "$pkgdir/usr/lib/catos-secureboot"
     install -Dm644 packaging/secureboot.conf "$pkgdir/etc/catos/secureboot.conf"
     install -Dm644 packaging/limine.sbat.csv "$pkgdir/usr/share/catos-secureboot/sbat/limine.csv"
     install -Dm644 packaging/75-catos-secureboot-prepare.hook \

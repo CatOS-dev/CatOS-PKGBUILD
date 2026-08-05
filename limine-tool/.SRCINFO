@@ -1,7 +1,7 @@
 pkgbase = limine-tool
 	pkgdesc = Rust multicall Limine entry, install, and mkinitcpio integration tool
 	pkgver = 0.1.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/CatOS-dev/limine-tool
 	arch = x86_64
 	license = GPL-3.0-only

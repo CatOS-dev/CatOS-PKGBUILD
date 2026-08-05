@@ -1,7 +1,7 @@
 pkgbase = catos-snapper-config
 	pkgdesc = CatOS Snapper configuration and transaction snapshot policy
 	pkgver = 1.1.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS/catos-snapper-support
 	install = catos-snapper-config.install
 	arch = any

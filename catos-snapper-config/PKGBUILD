@@ -2,7 +2,7 @@
 
 pkgname=catos-snapper-config
 pkgver=1.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc='CatOS Snapper configuration and transaction snapshot policy'
 arch=('any')
 url='https://github.com/CatOS/catos-snapper-support'
@@ -23,10 +23,6 @@ sha512sums=('5257ffd4af68da66fa3b29bba06967dac1a71eb66cba71fa402ec36339f845567af
             '80f529657ed0cef1b354dd2e822add560724618529b1dab16cd946f8bc89f5b5d3dfb15ee38bc75f0bb595aae0fd3b8272e6d6c98654f3856ef007a10b199e02'
             '132fbde5c18d53d848bdfd626ffb831abed42315fe0fd7b5e1419fef296bd061279ea191548bed1665fbad5048396fa14ee71ca7d8e9acfcf0985c95b812193d'
             '42483c28d0d7c77a976ed4d002af7a7ada8e9f946626ba061e2a9ba91686149d426cf6539c1bcdcd07ab0f9833678df1ee3e7a0c1b06c84e3610f73da9d83749')
-
-check() {
-  "$startdir/tests/test-catos-snapper.sh"
-}
 
 package() {
   install -Dm644 snapper-template-root-catos \

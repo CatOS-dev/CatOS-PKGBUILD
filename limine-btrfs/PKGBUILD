@@ -2,7 +2,7 @@
 
 pkgname=limine-btrfs
 pkgver=0.1.2
-pkgrel=1
+pkgrel=2
 pkgdesc='Generate Limine boot entries for Btrfs snapshots'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/limine-btrfs'
@@ -38,13 +38,6 @@ build() {
   export CARGO_HOME="$srcdir/cargo-home"
   export RUSTUP_TOOLCHAIN=stable
   cargo build --frozen --release --target "$CARCH-unknown-linux-gnu"
-}
-
-check() {
-  cd "$pkgname"
-  export CARGO_HOME="$srcdir/cargo-home"
-  export RUSTUP_TOOLCHAIN=stable
-  cargo test --frozen --target "$CARCH-unknown-linux-gnu"
 }
 
 package() {

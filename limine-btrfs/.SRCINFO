@@ -1,7 +1,7 @@
 pkgbase = limine-btrfs
 	pkgdesc = Generate Limine boot entries for Btrfs snapshots
 	pkgver = 0.1.2
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/limine-btrfs
 	arch = x86_64
 	license = GPL-3.0-only
