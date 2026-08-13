@@ -1,0 +1,57 @@
+pkgname=catos-hyprland-noctaliav5
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="CatOS Hyprland desktop profile powered by Noctalia v5"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-hyprland-noctalia-v5"
+license=('MIT')
+makedepends=('git')
+checkdepends=('python')
+depends=(
+  'adw-gtk-theme'
+  'breeze'
+  'breeze-gtk'
+  'breeze5'
+  'brightnessctl'
+  'catos-bibata-cursor'
+  'catdot'
+  'cava'
+  'dconf'
+  'gnome-keyring'
+  'grim'
+  'hyprland'
+  'kitty'
+  'nautilus'
+  'noctalia'
+  'papirus-icon-theme'
+  'playerctl'
+  'qt6-multimedia'
+  'qt6ct-kde'
+  'slurp'
+  'swappy'
+  'wireplumber'
+  'wtype'
+  'xdg-desktop-portal-gtk'
+  'xdg-desktop-portal-hyprland'
+)
+source=("${pkgname}::git+https://github.com/CatOS-dev/catos-hyprland-noctalia-v5.git")
+sha256sums=('SKIP')
+
+check() {
+  cd "${srcdir}/${pkgname}"
+
+  catdot validate "${PWD}/usr/share/catdot/profiles"
+  local xdg_runtime_dir="${srcdir}/.xdg-runtime"
+  install -dm700 "$xdg_runtime_dir"
+  XDG_RUNTIME_DIR="$xdg_runtime_dir" Hyprland --verify-config -c "${PWD}/usr/share/${pkgname}/.config/hypr/hyprland.lua"
+  CATDOT_BIN="$(command -v catdot)" python -m unittest discover -s tests -v
+}
+
+package() {
+  cd "${srcdir}/${pkgname}"
+
+  install -d "${pkgdir}/usr"
+  cp -a usr/. "${pkgdir}/usr/"
+  install -Dm644 LICENSE-noctalia \
+    "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE-noctalia"
+}

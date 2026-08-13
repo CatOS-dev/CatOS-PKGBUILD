@@ -1,11 +1,12 @@
 pkgname=catos-niri-noctaliav5
-pkgver=1.0.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="CatOS Niri desktop profile powered by Noctalia v5"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-niri-noctaliav5"
 license=('GPL-3.0-only')
 makedepends=('git')
+checkdepends=('python')
 depends=(
   'adw-gtk-theme'
   'brightnessctl'
@@ -20,8 +21,10 @@ depends=(
   'orca'
   'playerctl'
   'polkit-gnome'
+  'power-profiles-daemon'
   'qt5ct'
   'qt6ct'
+  'tela-circle-icon-theme-all'
   'wireplumber'
   'xdg-desktop-portal-gnome'
   'xdg-desktop-portal-gtk'
@@ -29,6 +32,14 @@ depends=(
 )
 source=('git+https://github.com/CatOS-dev/catos-niri-noctaliav5.git')
 sha256sums=('SKIP')
+
+check() {
+  cd "${srcdir}/${pkgname}"
+
+  catdot validate "${PWD}/usr/share/catdot/profiles"
+  niri validate -c "${PWD}/usr/share/${pkgname}/.config/niri/config.kdl"
+  CATDOT_BIN="$(command -v catdot)" python -m unittest discover -s tests -v
+}
 
 package() {
   cd "${srcdir}/${pkgname}"
