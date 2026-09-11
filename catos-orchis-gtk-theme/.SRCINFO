@@ -1,7 +1,7 @@
 pkgbase = catos-orchis-gtk-theme
 	pkgdesc = A Material Design theme for GNOME/GTK based desktop environments
 	pkgver = 2.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/vinceliuice/Orchis-theme
 	install = catos-orchis-gtk-theme.install
 	arch = any

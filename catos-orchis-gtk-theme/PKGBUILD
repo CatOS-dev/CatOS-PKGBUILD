@@ -1,7 +1,7 @@
 # Maintainer: Mark Wagie <mark dot wagie at proton dot me>
 pkgname=catos-orchis-gtk-theme
 pkgver=2.0
-pkgrel=3
+pkgrel=4
 pkgdesc="A Material Design theme for GNOME/GTK based desktop environments"
 arch=('any')
 url='https://github.com/vinceliuice/Orchis-theme'
