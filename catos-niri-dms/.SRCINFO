@@ -1,7 +1,7 @@
 pkgbase = catos-niri-dms
 	pkgdesc = Complete CatOS Niri + DMS Profile
 	pkgver = 1.2.1
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-niri-dms
 	arch = any
 	license = MIT
@@ -12,7 +12,7 @@ pkgbase = catos-niri-dms
 	depends = xdg-desktop-portal-gtk
 	depends = xdg-desktop-portal-gnome
 	depends = gnome-keyring
-	depends = dms-shell-niri>=1.5.3
+	depends = dms-shell>=1.6.2
 	depends = catos-niri-utils
 	depends = matugen
 	depends = adw-gtk-theme

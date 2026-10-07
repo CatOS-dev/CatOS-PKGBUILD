@@ -1,13 +1,13 @@
 pkgbase = catos-niri-utils
 	pkgdesc = CatOS command-line utilities for the Niri DMS desktop
 	pkgver = 0.1.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-niri-dms
 	arch = any
 	license = GPL
 	depends = bash
 	depends = niri
-	depends = dms-shell-niri>=1.5.3
+	depends = dms-shell>=1.6.2
 	depends = jq
 	depends = fuzzel
 	depends = wl-clipboard

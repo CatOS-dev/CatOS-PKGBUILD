@@ -1,6 +1,6 @@
 pkgname=catos-niri-dms
 pkgver=1.2.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Complete CatOS Niri + DMS Profile"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-niri-dms"
@@ -12,7 +12,7 @@ depends=(
   'xdg-desktop-portal-gtk'
   'xdg-desktop-portal-gnome'
   'gnome-keyring'
-  'dms-shell-niri>=1.5.3'
+  'dms-shell>=1.6.2'
   'catos-niri-utils'
   'matugen'
   'adw-gtk-theme'

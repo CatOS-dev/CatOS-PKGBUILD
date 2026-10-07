@@ -1,12 +1,12 @@
 pkgbase = catos-hyprland-dms
 	pkgdesc = CatOS Catdot Profile: Hyprland + DMS + Ghostty
 	pkgver = 1.0
-	pkgrel = 5
+	pkgrel = 6
 	url = https://www.catos.info/
 	arch = any
 	license = MIT
 	depends = catdot
-	depends = dms-shell-hyprland>=1.5.1
+	depends = dms-shell>=1.6.2
 	depends = hyprland>=0.55
 	depends = xdg-desktop-portal-gtk
 	depends = xdg-desktop-portal-hyprland

@@ -1,7 +1,7 @@
 # Maintainer: Aromatic <symwww@outlook.com>
 pkgname=catos-niri-utils
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 pkgdesc='CatOS command-line utilities for the Niri DMS desktop'
 arch=('any')
 url='https://github.com/CatOS-dev/catos-niri-dms'
@@ -9,7 +9,7 @@ license=('GPL')
 depends=(
   'bash'
   'niri'
-  'dms-shell-niri>=1.5.3'
+  'dms-shell>=1.6.2'
   'jq'
   'fuzzel'
   'wl-clipboard'
