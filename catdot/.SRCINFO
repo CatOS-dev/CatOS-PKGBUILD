@@ -10,6 +10,8 @@ pkgbase = catdot
 	depends = pacman
 	depends = sudo
 	source = git+https://github.com/CatOS-dev/catdot.git
+	source = catdot-vendor.tar.zst
 	sha256sums = SKIP
+	sha256sums = 02f2e69cf13f94b4f74f1cca6f20f0f4a585e98334299b7c951bc521e8685a51
 
 pkgname = catdot
