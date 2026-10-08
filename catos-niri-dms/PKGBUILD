@@ -1,6 +1,6 @@
 pkgname=catos-niri-dms
 pkgver=1.2.1
-pkgrel=2
+pkgrel=3
 pkgdesc="Complete CatOS Niri + DMS Profile"
 arch=('any')
 url="https://github.com/CatOS-dev/catos-niri-dms"

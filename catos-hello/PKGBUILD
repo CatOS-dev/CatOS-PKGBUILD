@@ -1,34 +1,21 @@
 # Maintainer: Aromatic <symwww@outlook.com>
 pkgname=catos-hello
-pkgver=0.2.0
+pkgver=0.1.1
 pkgrel=1
-pkgdesc="CatOS Hello welcome application and mount/boot recovery backend"
+pkgdesc='CatOS Hello welcome application'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/catos-hello'
 license=('GPL')
-depends=('qt6-base' 'rate-mirrors' 'lshw' 'inxi' 'lsb-release' 'btrfs-progs')
-makedepends=('git' 'cmake' 'gcc' 'make' 'qt6-tools' 'qt5-translations' 'rust' 'rust-musl')
+depends=('qt6-base' 'rate-mirrors' 'lshw' 'inxi' 'lsb-release')
+makedepends=('git' 'cmake' 'gcc' 'make' 'qt6-tools' 'qt5-translations')
 source=("${pkgname}::git+https://github.com/CatOS-dev/catos-hello.git")
 sha256sums=('SKIP')
 
-prepare() {
-    export CARGO_HOME="$srcdir/cargo-home"
-    mkdir -p "$CARGO_HOME"
-
-    cd "$pkgname/apps/system"
-    cargo fetch --locked
-}
-
 build() {
-    export CARGO_HOME="$srcdir/cargo-home"
-
-    cmake \
-        -S "$pkgname" \
-        -B build \
+    cmake -S "$pkgname" -B build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTS=OFF \
-        -DCATOS_SYSTEM_OFFLINE=ON
+        -DBUILD_TESTS=OFF
     cmake --build build
 }
 

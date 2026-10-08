@@ -1,6 +1,6 @@
 pkgbase = catos-hello
-	pkgdesc = CatOS Hello welcome application and mount/boot recovery backend
-	pkgver = 0.2.0
+	pkgdesc = CatOS Hello welcome application
+	pkgver = 0.1.1
 	pkgrel = 1
 	url = https://github.com/CatOS-dev/catos-hello
 	arch = x86_64
@@ -11,14 +11,11 @@ pkgbase = catos-hello
 	makedepends = make
 	makedepends = qt6-tools
 	makedepends = qt5-translations
-	makedepends = rust
-	makedepends = rust-musl
 	depends = qt6-base
 	depends = rate-mirrors
 	depends = lshw
 	depends = inxi
 	depends = lsb-release
-	depends = btrfs-progs
 	source = catos-hello::git+https://github.com/CatOS-dev/catos-hello.git
 	sha256sums = SKIP
 
