@@ -2,8 +2,8 @@
 # Contributor: Rustmilian Rustmilian@proton.me
 
 pkgname=('catos-calamares')
-pkgver=26.08
-pkgrel=3
+pkgver=26.10
+pkgrel=1
 pkgdesc='Distribution-independent installer framework'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/calamares'
