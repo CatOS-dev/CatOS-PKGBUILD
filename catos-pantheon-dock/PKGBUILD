@@ -1,0 +1,25 @@
+pkgname=catos-pantheon-dock
+pkgver=8.3.3
+pkgrel=1
+pkgdesc='Native Wayland dock for Pantheon on CatOS'
+arch=('x86_64')
+options=('!debug')
+url='https://github.com/elementary/dock'
+license=('GPL-3.0-or-later')
+depends=('gtk4' 'granite7' 'libadwaita' 'glib2' 'wayland' 'libx11')
+makedepends=('meson' 'ninja' 'vala' 'gettext' 'pkgconf')
+source=("dock-${pkgver}.tar.gz::https://codeload.github.com/elementary/dock/tar.gz/refs/tags/${pkgver}"
+        'io.elementary.dock-autostart.desktop')
+sha256sums=('e397d49110a91ef352e17c78b423aa966b8b12ea67c60765eea540abcd8c5cd5'
+            'c0abfd7f219d3badc91cf2960c9ac21e9ca18690bedc857ebc166d3dfcaa4e18')
+
+build() {
+  meson setup build "${srcdir}/dock-${pkgver}" --prefix=/usr --libdir=lib --buildtype=release
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build --no-rebuild
+  install -Dm644 "${srcdir}/io.elementary.dock-autostart.desktop" \
+    "${pkgdir}/etc/xdg/autostart/io.elementary.dock.desktop"
+}

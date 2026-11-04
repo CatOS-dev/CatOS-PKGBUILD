@@ -1,0 +1,8 @@
+[org.gnome.desktop.background:Pantheon]
+picture-options='zoom'
+picture-uri='file:///usr/share/backgrounds/odin.jpg'
+picture-uri-dark='file:///usr/share/backgrounds/odin-dark.jpg'
+
+[org.gnome.desktop.interface:Pantheon]
+gtk-theme='io.elementary.stylesheet.blueberry'
+icon-theme='elementary'

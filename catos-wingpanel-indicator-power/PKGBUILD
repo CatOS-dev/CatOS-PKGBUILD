@@ -1,0 +1,30 @@
+pkgname=catos-wingpanel-indicator-power
+pkgver=8.0.2
+pkgrel=1
+pkgdesc='Power indicator with matching schema for Pantheon Wingpanel 9 on CatOS'
+arch=('x86_64')
+options=('!debug')
+url='https://github.com/elementary/panel-power'
+license=('GPL-3.0-or-later')
+provides=("wingpanel-indicator-power=${pkgver}")
+conflicts=('wingpanel-indicator-power')
+depends=('wingpanel' 'gtk4' 'granite7' 'libgee' 'libgtop' 'libnotify' 'systemd-libs' 'glib2')
+makedepends=('meson' 'ninja' 'vala' 'gettext' 'pkgconf')
+_commit=8a11cb2fe8f0848d05c60528c85273da4a014d0e
+source=("panel-power-${_commit}.tar.gz::https://codeload.github.com/elementary/panel-power/tar.gz/${_commit}")
+sha256sums=('05580c726137c8e7ff23b458a649383d02cfdaf919f361f11da00ad3d6133f92')
+
+prepare() {
+  cd "${srcdir}/panel-power-${_commit}"
+  sed -i 's/Wingpanel\.ServerType/Wingpanel.IndicatorManager.ServerType/g' src/Indicator.vala
+}
+
+build() {
+  meson setup build "${srcdir}/panel-power-${_commit}" \
+    --prefix=/usr --libdir=lib --buildtype=release
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build --no-rebuild
+}

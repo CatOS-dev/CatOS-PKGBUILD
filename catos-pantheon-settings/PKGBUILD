@@ -1,0 +1,15 @@
+pkgname=catos-pantheon-settings
+pkgver=1.0
+pkgrel=1
+pkgdesc='Pantheon desktop-only theme and wallpaper defaults for CatOS'
+arch=('any')
+url='https://catos.info'
+license=('CC0-1.0')
+depends=('elementary-wallpapers' 'gtk-theme-elementary' 'elementary-icon-theme')
+source=('50-catos-pantheon.gschema.override')
+sha256sums=('f1560e6c54b5e34ac516fb3238ddf808c2d659fe33fb268125b68fd9e7467eba')
+
+package() {
+  install -Dm644 "${srcdir}/50-catos-pantheon.gschema.override" \
+    "${pkgdir}/usr/share/glib-2.0/schemas/50-catos-pantheon.gschema.override"
+}

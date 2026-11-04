@@ -1,0 +1,32 @@
+pkgname=catos-pantheon-applications-menu
+pkgver=8.0.4
+pkgrel=1
+pkgdesc='GTK4 applications menu for Pantheon Wingpanel 9 on CatOS'
+arch=('x86_64')
+options=('!debug')
+url='https://github.com/elementary/applications-menu'
+license=('GPL-3.0-only')
+provides=("pantheon-applications-menu=${pkgver}")
+conflicts=('pantheon-applications-menu')
+depends=('wingpanel' 'gtk4' 'granite7' 'libadwaita' 'json-glib' 'libgee' 'switchboard' 'glib2')
+makedepends=('meson' 'ninja' 'vala' 'gettext' 'pkgconf' 'bc')
+_commit=0b152385a65de55b533fc13e406ee6d32910942a
+source=("applications-menu-${_commit}.tar.gz::https://codeload.github.com/elementary/applications-menu/tar.gz/${_commit}")
+sha256sums=('e8c648d03bf47ab88507403fded47637da8b915df90cdddbceec71d295744b21')
+
+prepare() {
+  cd "${srcdir}/applications-menu-${_commit}"
+  sed -i 's/Wingpanel\.ServerType/Wingpanel.IndicatorManager.ServerType/g' src/Indicator.vala
+  # The old upstream test target does not compile against Wingpanel 9.
+  sed -i "/^subdir ('test')$/d" src/meson.build
+}
+
+build() {
+  meson setup build "${srcdir}/applications-menu-${_commit}" \
+    --prefix=/usr --libdir=lib --buildtype=release -Dwith-zeitgeist=false
+  meson compile -C build
+}
+
+package() {
+  DESTDIR="${pkgdir}" meson install -C build --no-rebuild
+}

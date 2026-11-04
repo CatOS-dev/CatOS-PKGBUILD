@@ -1,0 +1,28 @@
+pkgbase = catos-pantheon-applications-menu
+	pkgdesc = GTK4 applications menu for Pantheon Wingpanel 9 on CatOS
+	pkgver = 8.0.4
+	pkgrel = 1
+	url = https://github.com/elementary/applications-menu
+	arch = x86_64
+	license = GPL-3.0-only
+	makedepends = meson
+	makedepends = ninja
+	makedepends = vala
+	makedepends = gettext
+	makedepends = pkgconf
+	makedepends = bc
+	depends = wingpanel
+	depends = gtk4
+	depends = granite7
+	depends = libadwaita
+	depends = json-glib
+	depends = libgee
+	depends = switchboard
+	depends = glib2
+	provides = pantheon-applications-menu=8.0.4
+	conflicts = pantheon-applications-menu
+	options = !debug
+	source = applications-menu-0b152385a65de55b533fc13e406ee6d32910942a.tar.gz::https://codeload.github.com/elementary/applications-menu/tar.gz/0b152385a65de55b533fc13e406ee6d32910942a
+	sha256sums = e8c648d03bf47ab88507403fded47637da8b915df90cdddbceec71d295744b21
+
+pkgname = catos-pantheon-applications-menu

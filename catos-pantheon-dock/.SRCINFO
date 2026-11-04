@@ -1,0 +1,25 @@
+pkgbase = catos-pantheon-dock
+	pkgdesc = Native Wayland dock for Pantheon on CatOS
+	pkgver = 8.3.3
+	pkgrel = 1
+	url = https://github.com/elementary/dock
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = meson
+	makedepends = ninja
+	makedepends = vala
+	makedepends = gettext
+	makedepends = pkgconf
+	depends = gtk4
+	depends = granite7
+	depends = libadwaita
+	depends = glib2
+	depends = wayland
+	depends = libx11
+	options = !debug
+	source = dock-8.3.3.tar.gz::https://codeload.github.com/elementary/dock/tar.gz/refs/tags/8.3.3
+	source = io.elementary.dock-autostart.desktop
+	sha256sums = e397d49110a91ef352e17c78b423aa966b8b12ea67c60765eea540abcd8c5cd5
+	sha256sums = c0abfd7f219d3badc91cf2960c9ac21e9ca18690bedc857ebc166d3dfcaa4e18
+
+pkgname = catos-pantheon-dock

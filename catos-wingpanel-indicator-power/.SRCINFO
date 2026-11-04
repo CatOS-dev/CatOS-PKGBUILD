@@ -1,0 +1,27 @@
+pkgbase = catos-wingpanel-indicator-power
+	pkgdesc = Power indicator with matching schema for Pantheon Wingpanel 9 on CatOS
+	pkgver = 8.0.2
+	pkgrel = 1
+	url = https://github.com/elementary/panel-power
+	arch = x86_64
+	license = GPL-3.0-or-later
+	makedepends = meson
+	makedepends = ninja
+	makedepends = vala
+	makedepends = gettext
+	makedepends = pkgconf
+	depends = wingpanel
+	depends = gtk4
+	depends = granite7
+	depends = libgee
+	depends = libgtop
+	depends = libnotify
+	depends = systemd-libs
+	depends = glib2
+	provides = wingpanel-indicator-power=8.0.2
+	conflicts = wingpanel-indicator-power
+	options = !debug
+	source = panel-power-8a11cb2fe8f0848d05c60528c85273da4a014d0e.tar.gz::https://codeload.github.com/elementary/panel-power/tar.gz/8a11cb2fe8f0848d05c60528c85273da4a014d0e
+	sha256sums = 05580c726137c8e7ff23b458a649383d02cfdaf919f361f11da00ad3d6133f92
+
+pkgname = catos-wingpanel-indicator-power

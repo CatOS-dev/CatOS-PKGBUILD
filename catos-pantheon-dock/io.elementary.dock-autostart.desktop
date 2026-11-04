@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Pantheon Dock
+Exec=io.elementary.dock
+OnlyShowIn=Pantheon;
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
