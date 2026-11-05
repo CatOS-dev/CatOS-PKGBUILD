@@ -4,6 +4,7 @@ from importlib.machinery import SourceFileLoader
 from importlib.util import module_from_spec, spec_from_loader
 from pathlib import Path
 import json
+import io
 import os
 import subprocess
 import sys
@@ -96,6 +97,93 @@ class FirmwareBootUpdateTests(unittest.TestCase):
                 mock.patch.object(module, "run", side_effect=programs.run),
             ):
                 yield root, config, programs
+
+    def run_main(self, root, config, arguments):
+        configuration = root / "firmware-boot.conf"
+        module.save_configuration(configuration, config)
+        with (
+            mock.patch.object(sys, "argv", ["catos-firmware-boot-update", "--config", str(configuration), *arguments]),
+            mock.patch.object(module, "LOCK_PATH", root / "lock"),
+            mock.patch.object(module, "INSTALL_MARKER", root / "installing"),
+        ):
+            self.assertEqual(module.main(), 0)
+        return configuration
+
+    def test_describe_is_read_only_and_does_not_require_initramfs_or_firmware(self):
+        with self.environment() as (root, config, programs):
+            with mock.patch.object(sys, "stdout", new_callable=io.StringIO) as output:
+                configuration = self.run_main(root, config, ["--describe"])
+            data = json.loads(output.getvalue())
+            self.assertEqual(data["esp"], str(config.esp_path))
+            self.assertEqual(data["cmdline"], "root=UUID=test rw")
+            self.assertEqual(module.load_configuration(configuration), config)
+            self.assertEqual(programs.calls, [])
+            self.assertFalse((root / "lock").exists())
+            self.assertFalse(config.esp_path.exists())
+
+    def test_cli_deploys_all_kernels_and_saves_settings_for_hooks(self):
+        with self.environment("efistub") as (root, config, programs):
+            destination = root / "new output"
+            configuration = self.run_main(root, config, ["--method", "efistub", "--output-root", str(destination),
+                "--efi-disk", "", "--efi-partition", "0", "--save-config", "--no-variables"])
+            saved = module.load_configuration(configuration)
+            self.assertEqual(saved.esp_path, destination)
+            self.assertEqual(saved.method, "efistub")
+            self.assertEqual(saved.efi_disk, "")
+            self.assertEqual(saved.efi_partition, 0)
+            self.assertEqual([call[0] for call in programs.calls], ["mkinitcpio"])
+            self.assertEqual(set(module.load_state(saved)["kernels"]), {"linux"})
+            self.assertFalse(config.esp_path.exists())
+
+    def test_configure_only_preserves_other_settings_and_uses_standard_ini_parser(self):
+        with self.environment() as (root, config, programs):
+            configuration = self.run_main(root, config, ["--configure-only", "--label-prefix", "CatOS, \"Linux\" % test",
+                "--cmdline=root=UUID=test rw quiet"])
+            saved = module.load_configuration(configuration)
+            self.assertEqual(saved.label_prefix, 'CatOS, "Linux" % test')
+            self.assertEqual(saved.default_kernel, "linux")
+            self.assertEqual(saved.esp_path, config.esp_path)
+            self.assertEqual(module.CMDLINE_PATH.read_text(), "root=UUID=test rw quiet\n")
+            self.assertEqual(programs.calls, [])
+            self.assertFalse(config.esp_path.exists())
+
+    def test_failed_deployment_does_not_enable_new_configuration(self):
+        with self.environment() as (root, config, programs):
+            configuration = root / "firmware-boot.conf"
+            module.save_configuration(configuration, config)
+            before = configuration.read_bytes()
+            with (
+                mock.patch.object(sys, "argv", ["tool", "--config", str(configuration), "--method", "efistub", "--save-config"]),
+                mock.patch.object(module, "LOCK_PATH", root / "lock"),
+                mock.patch.object(module, "INSTALL_MARKER", root / "installing"),
+                mock.patch.object(module, "update", side_effect=module.FirmwareBootError("generation failed")),
+            ):
+                with self.assertRaisesRegex(module.FirmwareBootError, "generation failed"):
+                    module.main()
+            self.assertEqual(configuration.read_bytes(), before)
+            self.assertEqual(programs.calls, [])
+
+    def test_registration_in_a_subdirectory_uses_caller_supplied_firmware_paths(self):
+        with self.environment("efistub", register=True) as (root, config, programs):
+            config = replace(config, firmware_directory="/boot-files/nested")
+            module.update(config)
+            creates = [call for call in programs.calls if "--create-only" in call]
+            self.assertEqual(len(creates), 1)
+            self.assertTrue(creates[0][creates[0].index("--loader") + 1].startswith("\\boot-files\\nested\\EFI\\CatOS\\linux\\"))
+            self.assertIn("initrd=\\boot-files\\nested\\EFI\\CatOS\\linux\\", creates[0][-1])
+            self.assertEqual(set(module.load_state(config)["kernels"]), {"linux"})
+
+    def test_stub_registration_rejects_unparseable_initrd_path_without_restricting_deployment(self):
+        with self.environment("efistub", register=True) as (root, config, programs):
+            config = replace(config, firmware_directory="/boot files")
+            with self.assertRaisesRegex(module.FirmwareBootError, "cannot contain spaces"):
+                module.update(config)
+            self.assertEqual(programs.calls, [])
+            self.assertFalse(config.esp_path.exists())
+            programs.allow_firmware = False
+            module.update(config, no_variables=True)
+            self.assertEqual([call[0] for call in programs.calls], ["mkinitcpio"])
+            self.assertEqual(set(module.load_state(config)["kernels"]), {"linux"})
 
     def test_configuration_allows_plain_output_directory_without_disk(self):
         with tempfile.TemporaryDirectory() as temporary:

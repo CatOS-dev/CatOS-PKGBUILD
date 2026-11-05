@@ -18,6 +18,7 @@ label_prefix = CatOS
 default_kernel = linux
 efi_disk =
 efi_partition = 0
+firmware_directory = /
 install_fallback = no
 ```
 
@@ -39,7 +40,9 @@ come from `/etc/kernel/cmdline`. Multiple versions of the same package receive
 separate names containing the kernel version.
 
 Providing both `efi_disk` and a positive `efi_partition` requests firmware
-registration through `efibootmgr`. These values are supplied by the caller, not
+registration through `efibootmgr`. `firmware_directory` is the absolute directory
+within that partition corresponding to the output root; the caller supplies it
+when deploying into a subdirectory. These values are supplied by the caller, not
 discovered or used to validate the output directory. Leaving them unset performs
 file deployment only. `--no-variables` suppresses all firmware access even when
 coordinates are configured. Enabling `install_fallback` explicitly copies the
@@ -56,6 +59,22 @@ catos-firmware-boot-update --verify --no-variables
 `--force` runs during the Calamares installation marker. The pacman hook calls
 `--hook` for kernel, initcpio and firmware changes. Both manual invocations and
 hooks use the same generation path and configuration.
+
+The GUI uses the same executable to read and change settings; it does not parse
+INI or build images independently:
+
+```sh
+catos-firmware-boot-update --describe
+catos-firmware-boot-update --configure-only --cmdline='root=UUID=example rw'
+catos-firmware-boot-update --method uki --output-root /any/directory --efi-disk '' --efi-partition 0 --no-variables --save-config
+```
+
+`--describe` prints JSON without writes, firmware access, or image generation.
+`--configure-only` updates the native configuration using Python's INI parser;
+`--cmdline` updates `/etc/kernel/cmdline`. Configuration changes preserve unrelated
+INI sections and keys. Deployment overrides are persisted with `--save-config`
+only after generation and verification succeed. `--method` without `--save-config`
+lets a rebuild target a specific method without changing the hook's selected method.
 
 Firmware entries are created before old owned entries are retired. Existing
 boot order is preserved and an owned replacement keeps its predecessor's slot.

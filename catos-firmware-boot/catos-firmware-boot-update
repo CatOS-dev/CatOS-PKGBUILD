@@ -36,6 +36,7 @@ class Configuration:
     label_prefix: str
     default_kernel: str
     install_fallback: bool = False
+    firmware_directory: str = "/"
 
 
 @dataclass(frozen=True)
@@ -80,6 +81,7 @@ def load_configuration(path: Path = CONFIG_PATH) -> Configuration:
         label_prefix=section.get("label_prefix", "CatOS").strip() or "CatOS",
         default_kernel=section.get("default_kernel", "linux").strip() or "linux",
         install_fallback=section.getboolean("install_fallback", fallback=False),
+        firmware_directory=section.get("firmware_directory", "/"),
     )
 
 
@@ -273,6 +275,10 @@ def efistub_directory(configuration: Configuration, kernel: Kernel) -> Path:
     return configuration.esp_path / "EFI/CatOS" / kernel.name
 
 
+def firmware_path(configuration: Configuration, path: Path) -> str:
+    return loader_path(Path(configuration.firmware_directory.lstrip("/")) / path.relative_to(configuration.esp_path))
+
+
 def machine_secure_boot_managed(
     configuration: Configuration,
     key_path: Path = SECURE_BOOT_KEY_PATH,
@@ -341,6 +347,8 @@ def update(configuration: Configuration, *, no_variables: bool = False) -> None:
         raise FirmwareBootError(f"kernel command line is missing: {CMDLINE_PATH}")
     kernels = discover_kernels()
     cmdline = CMDLINE_PATH.read_text(encoding="utf-8").strip()
+    if configuration.method == "efistub" and configuration.efi_disk and not no_variables and " " in configuration.firmware_directory:
+        raise FirmwareBootError("EFI-stub initrd firmware paths cannot contain spaces")
     configuration.esp_path.mkdir(parents=True, exist_ok=True)
     state = load_state(configuration)
     desired: set[str] = set()
@@ -364,7 +372,7 @@ def update(configuration: Configuration, *, no_variables: bool = False) -> None:
             else:
                 output, initrd = build_efistub(configuration, kernel, initramfs)
                 paths = [output, initrd]
-                options = f"initrd={loader_path(initrd.relative_to(configuration.esp_path))} {cmdline}"
+                options = f"initrd={firmware_path(configuration, initrd)} {cmdline}"
             files = [str(path.relative_to(configuration.esp_path)) for path in paths]
             outputs[kernel.name] = output
             deployed[kernel.name] = files
@@ -372,7 +380,7 @@ def update(configuration: Configuration, *, no_variables: bool = False) -> None:
             state["files"].update({relative: digest(path) for relative, path in zip(files, paths)})
             save_state(configuration, state)
             pending.append(({"label": f"{configuration.label_prefix} {kernel.name}",
-                "loader": loader_path(output.relative_to(configuration.esp_path)), "options": options,
+                "loader": firmware_path(configuration, output), "options": options,
                 "disk": configuration.efi_disk, "partition": configuration.efi_partition}, files))
     if configuration.method == "uki" and configuration.install_fallback and not machine_secure_boot_managed(configuration):
         default = selected_default(kernels, configuration.default_kernel)
@@ -390,37 +398,123 @@ def update(configuration: Configuration, *, no_variables: bool = False) -> None:
     verify(configuration, kernels, require_entries=register)
 
 
+def save_configuration(path: Path, configuration: Configuration) -> None:
+    parser = configparser.ConfigParser(interpolation=None)
+    parser.read(path)
+    if not parser.has_section("boot"):
+        parser.add_section("boot")
+    parser["boot"].update({
+        "method": configuration.method,
+        "esp_path": str(configuration.esp_path),
+        "efi_disk": configuration.efi_disk,
+        "efi_partition": str(configuration.efi_partition),
+        "label_prefix": configuration.label_prefix,
+        "default_kernel": configuration.default_kernel,
+        "install_fallback": "yes" if configuration.install_fallback else "no",
+        "firmware_directory": configuration.firmware_directory,
+    })
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as stream:
+        temporary = Path(stream.name)
+        try:
+            parser.write(stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+
+def describe(configuration: Configuration) -> dict:
+    return {
+        "loader": configuration.method, "esp": str(configuration.esp_path),
+        "efi_disk": configuration.efi_disk, "efi_partition": configuration.efi_partition,
+        "label_prefix": configuration.label_prefix, "default_kernel": configuration.default_kernel,
+        "fallback": configuration.install_fallback, "firmware_directory": configuration.firmware_directory,
+        "cmdline": CMDLINE_PATH.read_text(encoding="utf-8").strip() if CMDLINE_PATH.is_file() else "",
+    }
+
+
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Maintain CatOS direct UEFI boot artifacts")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="configuration file")
     parser.add_argument("--force", action="store_true", help="run even during Calamares installation")
     parser.add_argument("--hook", action="store_true", help="consume pacman hook targets from stdin")
     parser.add_argument("--no-variables", action="store_true", help="deploy files without reading or writing firmware variables")
-    parser.add_argument("--verify", action="store_true", help="verify without rebuilding")
-    return parser.parse_args()
+    action = parser.add_mutually_exclusive_group()
+    action.add_argument("--verify", action="store_true", help="verify without rebuilding")
+    action.add_argument("--describe", action="store_true", help="print configuration as JSON without making changes")
+    action.add_argument("--configure-only", action="store_true", help="save settings without building")
+    parser.add_argument("--save-config", action="store_true", help="save settings after a successful deployment")
+    parser.add_argument("--method", choices=("disabled", "uki", "efistub"))
+    parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--efi-disk")
+    parser.add_argument("--efi-partition", type=int)
+    parser.add_argument("--firmware-directory")
+    parser.add_argument("--label-prefix")
+    parser.add_argument("--default-kernel")
+    parser.add_argument("--install-fallback", choices=("yes", "no"))
+    parser.add_argument("--cmdline", help="save kernel parameters with --configure-only")
+    arguments = parser.parse_args()
+    if arguments.cmdline is not None and not arguments.configure_only:
+        parser.error("--cmdline requires --configure-only")
+    return arguments
 
 
 def main() -> int:
     arguments = parse_arguments()
     if arguments.hook:
         sys.stdin.read()
-    if INSTALL_MARKER.exists() and not arguments.force:
-        print("catos-firmware-boot: deferred while bootloadu is preparing the installed system")
-        return 0
     configuration = load_configuration(arguments.config)
-    if configuration.method == "disabled":
+    overrides = {key: value for key, value in {
+        "method": arguments.method, "esp_path": arguments.output_root,
+        "efi_disk": arguments.efi_disk, "efi_partition": arguments.efi_partition,
+        "label_prefix": arguments.label_prefix, "default_kernel": arguments.default_kernel,
+        "firmware_directory": arguments.firmware_directory,
+        "install_fallback": None if arguments.install_fallback is None else arguments.install_fallback == "yes",
+    }.items() if value is not None}
+    configuration = replace(configuration, **overrides)
+    if not configuration.esp_path.is_absolute():
+        raise FirmwareBootError("output root must be an absolute path")
+    if bool(configuration.efi_disk) != (configuration.efi_partition > 0) or configuration.efi_partition < 0:
+        raise FirmwareBootError("provide both a disk and a positive partition number")
+    firmware_directory = Path(configuration.firmware_directory)
+    if not firmware_directory.is_absolute() or ".." in firmware_directory.parts or "\\" in configuration.firmware_directory:
+        raise FirmwareBootError("firmware directory must be an absolute path without parent traversal")
+    for value in (configuration.firmware_directory, str(configuration.esp_path), configuration.efi_disk, configuration.label_prefix, configuration.default_kernel, arguments.cmdline or ""):
+        if any(ord(character) < 32 or ord(character) == 127 for character in value):
+            raise FirmwareBootError("settings must contain a single line")
+    if arguments.describe:
+        print(json.dumps(describe(configuration)))
         return 0
+    if INSTALL_MARKER.exists() and not arguments.force:
+        if arguments.hook:
+            print("catos-firmware-boot: deferred while bootloadu is preparing the installed system")
+            return 0
+        raise FirmwareBootError("installation is currently in progress")
     LOCK_PATH.parent.mkdir(parents=True, exist_ok=True)
     with LOCK_PATH.open("a+") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        if arguments.verify:
-            verify(
-                configuration,
-                discover_kernels(),
-                require_entries=bool(configuration.efi_disk and configuration.efi_partition > 0) and not arguments.no_variables and not machine_secure_boot_managed(configuration),
-            )
-        else:
-            update(configuration, no_variables=arguments.no_variables)
+        if arguments.configure_only:
+            if arguments.cmdline is not None:
+                CMDLINE_PATH.parent.mkdir(parents=True, exist_ok=True)
+                with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=CMDLINE_PATH.parent, delete=False) as stream:
+                    temporary = Path(stream.name)
+                    try:
+                        stream.write(arguments.cmdline + "\n")
+                        stream.flush()
+                        os.fsync(stream.fileno())
+                        os.replace(temporary, CMDLINE_PATH)
+                    finally:
+                        temporary.unlink(missing_ok=True)
+            save_configuration(arguments.config, configuration)
+        elif configuration.method != "disabled":
+            if arguments.verify:
+                verify(configuration, discover_kernels(), require_entries=bool(configuration.efi_disk) and not arguments.no_variables and not machine_secure_boot_managed(configuration))
+            else:
+                update(configuration, no_variables=arguments.no_variables)
+                if arguments.save_config:
+                    save_configuration(arguments.config, configuration)
     return 0
 
 
