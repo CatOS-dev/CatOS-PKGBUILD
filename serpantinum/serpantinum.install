@@ -1,0 +1,5 @@
+post_install() {
+  echo "==> Serpantinum binaries are installed."
+  echo "==> Select a compositor configuration using Catdot or configure it yourself."
+  echo "==> Documentation: https://serpantinum.dev/configure/compositors/niri/"
+}

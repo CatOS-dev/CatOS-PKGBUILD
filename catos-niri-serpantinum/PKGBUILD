@@ -1,0 +1,42 @@
+pkgname=catos-niri-serpantinum
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Complete CatOS Niri + Serpantinum Catdot Profile"
+arch=('any')
+url="https://github.com/CatOS-dev/catos-niri-serpantinum"
+license=('AGPL-3.0-or-later')
+makedepends=('git')
+checkdepends=('catdot' 'niri' 'python')
+depends=(
+  'catdot'
+  'niri'
+  'serpantinum'
+  'xwayland-satellite'
+  'xdg-desktop-portal-gnome'
+  'xdg-desktop-portal-gtk'
+  'polkit-gnome'
+  'gnome-keyring'
+  'fcitx5'
+  'firefox'
+  'catos-niri-utils'
+  'catos-bibata-cursor'
+  'tela-circle-icon-theme-all'
+  'adw-gtk-theme'
+)
+source=('git+https://github.com/CatOS-dev/catos-niri-serpantinum.git')
+sha256sums=('SKIP')
+
+check() {
+  cd "$srcdir/$pkgname"
+
+  catdot validate "$PWD/usr/share/catdot/profiles"
+  niri validate -c "$PWD/usr/share/$pkgname/.config/niri/config.kdl"
+  python -m json.tool "$PWD/usr/share/$pkgname/.config/serpantinum/settings.json" >/dev/null
+}
+
+package() {
+  cd "$srcdir/$pkgname"
+
+  install -d "$pkgdir/usr"
+  cp -a usr/. "$pkgdir/usr/"
+}
