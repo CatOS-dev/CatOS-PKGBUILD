@@ -1,0 +1,29 @@
+# Maintainer: Aromatic05
+pkgname=catos-hardware-manager
+pkgver=0.2.0
+pkgrel=1
+pkgdesc='Graphical hardware discovery, driver and support profile manager for CatOS'
+arch=('x86_64')
+url='https://github.com/CatOS-dev/catos-hardware-manager'
+license=('unknown')
+depends=('chwd' 'qt6-base' 'qt6-svg' 'yaml-cpp' 'systemd-libs' 'polkit' 'pacman' 'systemd')
+makedepends=('cmake' 'ninja' 'gcc' 'pkgconf' 'qt6-tools')
+optdepends=('snapper: create a filesystem snapshot before switching drivers')
+source=("${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz")
+sha256sums=('2c9b32896879fdd3e92b90433fa379eb1348a3c66d78e8e7ca8808219d8648bf')
+
+build() {
+  cmake -S "${srcdir}/${pkgname}-${pkgver}" -B "${srcdir}/build" -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DBUILD_TESTING=ON
+  cmake --build "${srcdir}/build"
+}
+
+check() {
+  ctest --test-dir "${srcdir}/build" --output-on-failure
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install "${srcdir}/build"
+}
