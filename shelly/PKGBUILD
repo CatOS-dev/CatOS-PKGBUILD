@@ -30,7 +30,7 @@ prepare() {
   export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   # Preload the verified Zig package from makepkg sources. Zig's own HTTPS
   # resolver cannot fetch this GitHub release inside the rootless chroot.
-  zig fetch "${srcdir}/ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst" >/dev/null
+  zig fetch "${srcdir}/ghostty-gobject-0.9.0-2026-05-22-28-1" >/dev/null
   cd "$srcdir/${_source_dir}"
 
   for component in \
