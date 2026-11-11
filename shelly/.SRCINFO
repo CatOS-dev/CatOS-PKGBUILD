@@ -19,11 +19,13 @@ pkgbase = shelly
 	source = com.shellyorg.shelly.desktop
 	source = com.shellyorg.shelly-notifications.desktop
 	source = shelly-flatpak-integrate
+	source = ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst::https://github.com/ghostty-org/zig-gobject/releases/download/0.9.0-2026-05-22-28-1/ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst
 	sha256sums = fa1e587a69b9d6e63e6835696e2d696f880d6120a023f5c922e260fc023e70af
 	sha256sums = d7adb207c0073b93679ff3b8741a734ab62b48283134465b47844884bd211bb9
 	sha256sums = a86884190d69b483376bf4f7b224483cae7fc5a65b61f98e46e805f838e053ed
 	sha256sums = cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f
 	sha256sums = 07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323
+	sha256sums = ac9bbfc49c6f1683ecbed8323157637935427bd75797ad516913fde4add506ca
 
 pkgname = shelly
 	pkgdesc = Shelly: A Modern Arch Package Manager
