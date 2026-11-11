@@ -8,7 +8,10 @@ pkgbase = catos-pantheon-settings
 	depends = elementary-wallpapers
 	depends = gtk-theme-elementary
 	depends = elementary-icon-theme
+	depends = pantheon-polkit-agent
 	source = 50-catos-pantheon.gschema.override
+	source = io.elementary.desktop.agent-polkit.desktop
 	sha256sums = f1560e6c54b5e34ac516fb3238ddf808c2d659fe33fb268125b68fd9e7467eba
+	sha256sums = 0f8c752254f9ea46d1ea006d32dc1b19819f57c917070c6906019d7db7cb7fde
 
 pkgname = catos-pantheon-settings

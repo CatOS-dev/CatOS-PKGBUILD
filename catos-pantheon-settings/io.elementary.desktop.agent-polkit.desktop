@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Pantheon Authentication Agent
+Exec=/usr/lib/policykit-1-pantheon/io.elementary.desktop.agent-polkit
+OnlyShowIn=Pantheon;
+NoDisplay=true
