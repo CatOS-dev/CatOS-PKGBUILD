@@ -52,14 +52,11 @@ _source_dir="Shelly-ALPM-${pkgver//+/-}"
 prepare() {
   export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   cd "${srcdir}/${_source_dir}/Shelly.Ui.Gtk"
-  local archive
+  local archive root
   for archive in "${srcdir}"/zig-dep-*.tar.gz; do
-    if [[ $archive == */zig-dep-7-gobject.tar.gz ]]; then
-      # Zig expects the single extracted package root for this release asset.
-      zig fetch "${srcdir}/ghostty-gobject-0.11.0-zig-0.17.0-2026-10-02-38-1" >/dev/null
-    else
-      zig fetch "$archive" >/dev/null
-    fi
+    root=$(bsdtar -tf "$archive" | sed -n '1s@/.*@@p')
+    [[ -n $root && -d ${srcdir}/${root} ]] || return 1
+    zig fetch "${srcdir}/${root}" >/dev/null
   done
 }
 
