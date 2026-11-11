@@ -1,18 +1,19 @@
-pkgname=catos-niri-dms
+pkgname=catos-niri-dux
 pkgver=1.2.1
 pkgrel=3
-pkgdesc="Complete CatOS Niri + DMS Profile"
+pkgdesc="Complete CatOS Niri + Dux Profile"
 arch=('any')
-url="https://github.com/CatOS-dev/catos-niri-dms"
+url="https://github.com/CatOS-dev/catos-niri-dux"
 license=('MIT' 'GPL')
 makedepends=('git')
+replaces=('catos-niri-dms')
 depends=(
   'catdot'
   'niri'
   'xdg-desktop-portal-gtk'
   'xdg-desktop-portal-gnome'
   'gnome-keyring'
-  'dms-shell>=1.6.2'
+  'dux-shell'
   'catos-niri-utils'
   'matugen'
   'adw-gtk-theme'
@@ -34,7 +35,7 @@ depends=(
   'tela-circle-icon-theme-all'
   'catos-bibata-cursor'
 )
-source=("git+https://github.com/CatOS-dev/catos-niri-dms.git")
+source=("git+https://github.com/CatOS-dev/catos-niri-dux.git")
 sha256sums=('SKIP')
 
 package() {

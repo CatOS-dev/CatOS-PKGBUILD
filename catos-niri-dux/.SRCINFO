@@ -1,8 +1,8 @@
-pkgbase = catos-niri-dms
-	pkgdesc = Complete CatOS Niri + DMS Profile
+pkgbase = catos-niri-dux
+	pkgdesc = Complete CatOS Niri + Dux Profile
 	pkgver = 1.2.1
 	pkgrel = 3
-	url = https://github.com/CatOS-dev/catos-niri-dms
+	url = https://github.com/CatOS-dev/catos-niri-dux
 	arch = any
 	license = MIT
 	license = GPL
@@ -12,7 +12,7 @@ pkgbase = catos-niri-dms
 	depends = xdg-desktop-portal-gtk
 	depends = xdg-desktop-portal-gnome
 	depends = gnome-keyring
-	depends = dms-shell>=1.6.2
+	depends = dux-shell
 	depends = catos-niri-utils
 	depends = matugen
 	depends = adw-gtk-theme
@@ -33,7 +33,8 @@ pkgbase = catos-niri-dms
 	depends = xwayland-satellite
 	depends = tela-circle-icon-theme-all
 	depends = catos-bibata-cursor
-	source = git+https://github.com/CatOS-dev/catos-niri-dms.git
+	replaces = catos-niri-dms
+	source = git+https://github.com/CatOS-dev/catos-niri-dux.git
 	sha256sums = SKIP
 
-pkgname = catos-niri-dms
+pkgname = catos-niri-dux
