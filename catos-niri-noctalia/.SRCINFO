@@ -1,8 +1,8 @@
-pkgbase = catos-niri-noctaliav5
-	pkgdesc = CatOS Niri desktop profile powered by Noctalia v5
+pkgbase = catos-niri-noctalia
+	pkgdesc = CatOS Niri desktop profile powered by Noctalia
 	pkgver = 1.0.1
 	pkgrel = 1
-	url = https://github.com/CatOS-dev/catos-niri-noctaliav5
+	url = https://github.com/CatOS-dev/catos-niri-noctalia
 	arch = any
 	license = GPL-3.0-only
 	checkdepends = python
@@ -28,7 +28,8 @@ pkgbase = catos-niri-noctaliav5
 	depends = xdg-desktop-portal-gnome
 	depends = xdg-desktop-portal-gtk
 	depends = xwayland-satellite
-	source = git+https://github.com/CatOS-dev/catos-niri-noctaliav5.git
+	replaces = catos-niri-noctaliav5
+	source = git+https://github.com/CatOS-dev/catos-niri-noctalia.git
 	sha256sums = SKIP
 
-pkgname = catos-niri-noctaliav5
+pkgname = catos-niri-noctalia
