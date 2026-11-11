@@ -1,7 +1,7 @@
 # Maintainer: Aromatic <symwww@outlook.com>
 pkgname=catos-niri-utils
 pkgver=0.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc='CatOS command-line utilities for Niri desktops'
 arch=('any')
 url='https://github.com/CatOS-dev/catos-niri-dux'

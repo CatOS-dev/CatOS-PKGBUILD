@@ -1,7 +1,7 @@
 # Maintainer: Aromatic05
 pkgname=catos-hardware-manager
 pkgver=0.2.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Graphical hardware discovery, driver and support profile manager for CatOS'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/catos-hardware-manager'

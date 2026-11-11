@@ -1,7 +1,7 @@
 pkgbase = catos-hardware-manager
 	pkgdesc = Graphical hardware discovery, driver and support profile manager for CatOS
 	pkgver = 0.2.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-hardware-manager
 	arch = x86_64
 	license = unknown

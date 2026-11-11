@@ -1,7 +1,7 @@
 pkgbase = catos-pantheon-settings
 	pkgdesc = Pantheon desktop-only theme and wallpaper defaults for CatOS
 	pkgver = 1.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://catos.info
 	arch = any
 	license = CC0-1.0

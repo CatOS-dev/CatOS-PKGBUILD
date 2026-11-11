@@ -1,7 +1,7 @@
 pkgbase = catos-boot-manager
 	pkgdesc = Graphical boot loader, firmware entry and recovery manager for CatOS
 	pkgver = 0.2.0
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/CatOS-dev/catos-boot-manager
 	arch = x86_64
 	license = unknown
