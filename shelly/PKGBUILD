@@ -2,162 +2,70 @@
 # Maintainer: Caroline Snyder <hirpeng@gmail.com>
 pkgbase=shelly
 pkgname=('shelly' 'shelly-flatpak-backend')
-pkgver=3.1.6
+pkgver=3.2.1
 pkgrel=1
 arch=('x86_64' 'aarch64')
 url="https://github.com/Seafoam-Labs/Shelly-ALPM"
 license=('GPL-3.0-only')
-makedepends=('git' 'pkgconf' 'gtk4' 'clang' 'gettext' 'flatpak' 'ripgrep' 'go-md2man' 'python')
+makedepends=('libarchive' 'curl' 'sqlite' 'gnupg' 'git' 'pkgconf' 'gtk4' 'zig=0.17.1' 'clang' 'gettext' 'flatpak' 'ripgrep' 'go-md2man')
+
+# Keep package metadata tied to the compiled native backend variant.
+_shelly_libalpm=${SHELLY_LIBALPM:-true}
+case $_shelly_libalpm in
+  true) _shelly_native_depends=('pacman'); _shelly_native_optdepends=() ;;
+  false) _shelly_native_depends=(); _shelly_native_optdepends=('pacman: package-owner lookup for pacfile merging') ;;
+  *) printf 'SHELLY_LIBALPM must be true or false\n' >&2; return 1 ;;
+esac
+makedepends+=('binutils' "${_shelly_native_depends[@]}")
 
 # Source tarball from GitHub release
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Seafoam-Labs/Shelly-ALPM/archive/v${pkgver}.tar.gz"
         'shellybuild.conf'
         'com.shellyorg.shelly.desktop'
         'com.shellyorg.shelly-notifications.desktop'
-        'shelly-flatpak-integrate'
-        'ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst::https://github.com/ghostty-org/zig-gobject/releases/download/0.9.0-2026-05-22-28-1/ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst'
-        'goose-387de965800bf0f6116d51f45a9412cba0801975.tar.gz::https://github.com/luxluth/goose/archive/387de965800bf0f6116d51f45a9412cba0801975.tar.gz'
-        'zig-time-ea9fb647bb5d855b3e6a20c302a41ebd2d74478b.tar.gz::https://github.com/deatil/zig-time/archive/ea9fb647bb5d855b3e6a20c302a41ebd2d74478b.tar.gz'
-        'zig-xml-6a446191d2509788959766b60a13b8626d9ad078.tar.gz::https://github.com/ianprime0509/zig-xml/archive/6a446191d2509788959766b60a13b8626d9ad078.tar.gz'
-        'zig-toml-8685923e32e8b8a795eb2715684236975a70faed.tar.gz::https://github.com/sam701/zig-toml/archive/8685923e32e8b8a795eb2715684236975a70faed.tar.gz'
-        'zsn-1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7.tar.gz::https://github.com/Seafoam-Labs/zsn/archive/1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7.tar.gz'
-        'zeit-b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc.tar.gz::https://github.com/rockorager/zeit/archive/b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc.tar.gz'
-        'conch-65c2e4e5b3edeaf645235bcc78e74886939c15c8.tar.gz::https://github.com/Seafoam-Labs/conch/archive/65c2e4e5b3edeaf645235bcc78e74886939c15c8.tar.gz'
-        'goose-zsn-fd9c8abae643198dd4fdabc72938521a108109e7.tar.gz::https://github.com/luxluth/goose/archive/fd9c8abae643198dd4fdabc72938521a108109e7.tar.gz'
-        'goose-conch-1f41eb10cc7073e338a07f165c6c4655ac.tar.gz::https://github.com/caroberrie/goose/archive/1f41eb10cc7073e338a07f165c6c4655ac.tar.gz')
+        'shelly-flatpak-integrate')
 
-sha256sums=('fa1e587a69b9d6e63e6835696e2d696f880d6120a023f5c922e260fc023e70af'
-            'd7adb207c0073b93679ff3b8741a734ab62b48283134465b47844884bd211bb9'
-            'a86884190d69b483376bf4f7b224483cae7fc5a65b61f98e46e805f838e053ed'
+sha256sums=('5ab6361d4546910f1618dfe56643854746e849523cfe4780afa905599e9f4005'
+            '4126da205e91a3ba3b15453c2aeade92f67e16e3386a52aae32fbd3f2e4af9cc'
+            '4b7cb0e42eb322de9eb616d22ca05823f91d178db5b8b67497d497ed495aca9c'
             'cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f'
-            '07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323'
-            'ac9bbfc49c6f1683ecbed8323157637935427bd75797ad516913fde4add506ca'
-            '9a85321e870721496b33606eeefe434ced59d540c96bc13c656a33cf332750d4'
-            '4ec56b442788f7d64f9471efc16b99948440c0a1f472b6cc40379faf042dcdfd'
-            '14d731abece9649ef8158942f259e5cf2cccfda5413db0bf1f909da645c18439'
-            'b1b1eab2dfe5335005a4b1e833f97398d4af9a5e6edd174a6a75c7c515cd9346'
-            '3411db519ecf6ce31e7bdf2c88735bf362ea65271a2db7496baa7f47a850f633'
-            'f4ca38e3cee03a4de8696d136cee79e4bbcda7307cc3386118b6979db9bbaead'
-            '48a48b714244e37c2ad432642f13e0d444342cb45d7e29236767216949da9970'
-            'a0891e2705f59008cd8ccd728df6625618586d60c57bbb0365db8341d4a8c766'
-            '7926e402ac70ae62acf224888143b63055bc61005e5a75cb0f54b67f2b88f754')
-# Shelly 3.1.6 uses Zig 0.16 APIs removed in the Arch Zig 0.17 toolchain.
-# Fetch a SHA256-pinned build-only compiler; leave the system Zig unchanged.
-_zigver=0.16.0
-source_x86_64=("zig-x86_64-linux-${_zigver}.tar.xz::https://ziglang.org/download/${_zigver}/zig-x86_64-linux-${_zigver}.tar.xz")
-sha256sums_x86_64=('70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00')
-source_aarch64=("zig-aarch64-linux-${_zigver}.tar.xz::https://ziglang.org/download/${_zigver}/zig-aarch64-linux-${_zigver}.tar.xz")
-sha256sums_aarch64=('ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17')
-
+            '07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323')
 # GitHub replaces "+" with "-" in archive top-level directory names.
 _source_dir="Shelly-ALPM-${pkgver//+/-}"
 
-prepare() {
-  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
-  export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
-  # Preload the verified Zig package from makepkg sources. Zig's own HTTPS
-  # resolver cannot fetch this GitHub release inside the rootless chroot.
-  cd "$srcdir/${_source_dir}"
-
-  # Zig 0.16's bundled LLD cannot link GCC 16's .sframe PC64 relocations.
-  # Preserve the ABI and native parity tests using the system linker.
-  sed -i \
-    -e '/const run_abi_tests = b.addRunArtifact(abi_tests);/i\    abi_tests.use_lld = false;' \
-    -e '/const run_parity_tests = b.addRunArtifact(parity_tests);/i\    parity_tests.use_lld = false;' \
-    Shelly.Flatpak.Backend/build.zig
-
-  (cd Shelly.Ui.Gtk && zig fetch "${srcdir}/ghostty-gobject-0.9.0-2026-05-22-28-1") >/dev/null
-  # Pin original Zig Git dependencies to makepkg-verified local sources.
-  # Keep the existing tests and manifests' dependency identities intact.
-  python3 - "${srcdir}" "$PWD" <<'PYZIG'
-from pathlib import Path
-import os
-import re
-import sys
-
-src = Path(sys.argv[1])
-project = Path(sys.argv[2])
-manifests = [
-    project / "Shelly.PackageManager/build.zig.zon",
-    project / "Shelly.Notifications.Zig/build.zig.zon",
-    src / "conch-1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7/build.zig.zon",
-    src / "conch-65c2e4e5b3edeaf645235bcc78e74886939c15c8/build.zig.zon",
-]
-directories = {
-    "387de965800bf0f6116d51f45a9412cba0801975": "goose-387de965800bf0f6116d51f45a9412cba0801975",
-    "ea9fb647bb5d855b3e6a20c302a41ebd2d74478b": "zig-time-ea9fb647bb5d855b3e6a20c302a41ebd2d74478b",
-    "6a446191d2509788959766b60a13b8626d9ad078": "zig-xml-6a446191d2509788959766b60a13b8626d9ad078",
-    "8685923e32e8b8a795eb2715684236975a70faed": "zig-toml-8685923e32e8b8a795eb2715684236975a70faed",
-    "1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7": "conch-1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7",
-    "b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc": "zeit-b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc",
-    "65c2e4e5b3edeaf645235bcc78e74886939c15c8": "conch-65c2e4e5b3edeaf645235bcc78e74886939c15c8",
-    "fd9c8abae643198dd4fdabc72938521a108109e7": "goose-fd9c8abae643198dd4fdabc72938521a108109e7",
-    "1f41eb10cc7073e338a07f165c6c4655ac7b3a5c": "goose-1f41eb10cc7073e338a07f165c6c4655ac7b3a5c",
-}
-pattern = re.compile(
-    r'\.url = "git\+https://github\.com/[^"]+#([0-9a-f]{40})",\s*\.hash = "[^"]+",'
-)
-updated = 0
-for manifest in manifests:
-    contents = manifest.read_text()
-    def local_path(match):
-        revision = match.group(1)
-        relative = os.path.relpath(src / directories[revision], manifest.parent)
-        return '.path = "' + Path(relative).as_posix() + '",'
-    contents, count = pattern.subn(local_path, contents)
-    updated += count
-    manifest.write_text(contents)
-if updated != len(directories):
-    raise RuntimeError(f"Expected {len(directories)} pinned Zig dependencies, got {updated}")
-PYZIG
-
-  for component in \
-    Shelly.Flatpak.Backend \
-    Shelly.Ui.Gtk \
-    Shelly.Cli.Zig \
-    Shelly.Key \
-    Shelly.Notifications.Zig \
-    Shelly.PackageManager; do
-    (cd "$component" && zig build --fetch \
-      --cache-dir "${srcdir}/zig-cache")
-  done
-}
-
 build() {
-  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
-  export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   cd "$srcdir/${_source_dir}"
 
-  (cd Shelly.Flatpak.Backend && zig build --verbose \
+  (cd Shelly.Flatpak.Backend && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build --verbose \
     --prefix "${srcdir}/${_source_dir}/out-flatpak-backend" \
     --cache-dir "${srcdir}/zig-cache" \
     -Dcpu=baseline \
-    -Doptimize=ReleaseSafe)
+    -Doptimize=safe)
 
-  (cd Shelly.Ui.Gtk && zig build --verbose \
+  (cd Shelly.Ui.Gtk && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build --verbose \
     --prefix "${srcdir}/${_source_dir}/out" \
     --cache-dir "${srcdir}/zig-cache" \
     -Dflatpak-backend-package=shelly-flatpak-backend \
     -Dcpu=baseline \
-    -Doptimize=ReleaseSafe)
+    -Doptimize=safe)
 
-  (cd Shelly.Cli.Zig && zig build --verbose \
+  (cd Shelly.Cli.Zig && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build -Dlibalpm="${_shelly_libalpm}" --verbose \
     --prefix "${srcdir}/${_source_dir}/out-cli" \
     --cache-dir "${srcdir}/zig-cache" \
     -Dcpu=baseline \
-    -Doptimize=ReleaseSmall)
+    -Doptimize=small)
 
-  (cd Shelly.Key && zig build --verbose \
+  (cd Shelly.Key && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build --verbose \
     --prefix "${srcdir}/${_source_dir}/out-key" \
     --cache-dir "${srcdir}/zig-cache" \
     -Dcpu=baseline \
-    -Doptimize=ReleaseSmall)
+    -Doptimize=small)
 
-   (cd Shelly.Notifications.Zig && zig build --verbose \
+   (cd Shelly.Notifications.Zig && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build --verbose \
      --prefix "${srcdir}/${_source_dir}/out-notifications" \
      --cache-dir "${srcdir}/zig-cache" \
      -Dcpu=baseline \
-     -Doptimize=ReleaseSmall)
+     -Doptimize=small)
 
   ./out-cli/bin/shelly utility --completions bash > shelly.bash
   ./out-cli/bin/shelly utility --completions fish > shelly.fish
@@ -181,15 +89,13 @@ build() {
 }
 
 check() {
-  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
-  export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   cd "$srcdir/${_source_dir}"
 
-  (cd Shelly.Flatpak.Backend && zig build test abi-test integration-test \
+  (cd Shelly.Flatpak.Backend && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build test abi-test integration-test \
     --cache-dir "${srcdir}/zig-cache")
-  (cd Shelly.PackageManager && zig build flatpak-test \
+  (cd Shelly.PackageManager && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build -Dlibalpm="${_shelly_libalpm}" flatpak-test \
     --cache-dir "${srcdir}/zig-cache")
-  (cd Shelly.Cli.Zig && zig build test \
+  (cd Shelly.Cli.Zig && ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache" zig build -Dlibalpm="${_shelly_libalpm}" test \
     --cache-dir "${srcdir}/zig-cache")
 }
 
@@ -199,7 +105,7 @@ package_shelly() {
   conflicts=('shelly-git' 'shelly-bin')
   backup=('etc/shellybuild.conf')
   depends=(
-      'pacman'
+      "${_shelly_native_depends[@]}"
       'gtk4'
       'glib2'
       'sudo'
@@ -210,12 +116,15 @@ package_shelly() {
       'dbus'
       'glibc'
       'libarchive'
+    'curl'
+    'sqlite'
       'dconf'
       'gnupg'
       'zstd'
       'json-glib'
   )
   optdepends=(
+      "${_shelly_native_optdepends[@]}"
       'fish: Fish shell completions'
       'zsh: Zsh shell completions'
       'libstarfish: dependency viewer for arch packages'
@@ -228,6 +137,17 @@ package_shelly() {
   install -Dm755 out-notifications/bin/shelly-notifications "$pkgdir/usr/bin/shelly-notifications"
   install -Dm755 out/bin/Shelly_Ui_Gtk "$pkgdir/usr/bin/shelly-ui"
   install -Dm755 out-cli/bin/shelly "$pkgdir/usr/bin/shelly"
+  local shelly_dynamic
+  shelly_dynamic=$(LC_ALL=C readelf -d "$pkgdir/usr/bin/shelly") || return 1
+  if [[ $shelly_dynamic != *'Shared library: [libsqlite3.so.0]'* ]]; then
+    printf 'Shelly CLI must directly depend on libsqlite3.so.0 (#2059)\n' >&2
+    return 1
+  fi
+  if [[ $_shelly_libalpm == true && $shelly_dynamic != *libalpm.so* ]] ||
+     [[ $_shelly_libalpm == false && $shelly_dynamic == *libalpm.so* ]]; then
+    printf 'Shelly binary does not match SHELLY_LIBALPM package metadata\n' >&2
+    return 1
+  fi
   install -Dm755 out-key/bin/shelly-key "$pkgdir/usr/bin/shelly-key"
   install -Dm644 "$srcdir/shellybuild.conf" "$pkgdir/etc/shellybuild.conf"
 

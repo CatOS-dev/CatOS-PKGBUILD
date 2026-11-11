@@ -1,53 +1,35 @@
 pkgbase = shelly
-	pkgver = 3.1.6
+	pkgver = 3.2.1
 	pkgrel = 1
 	url = https://github.com/Seafoam-Labs/Shelly-ALPM
 	arch = x86_64
 	arch = aarch64
 	license = GPL-3.0-only
+	makedepends = libarchive
+	makedepends = curl
+	makedepends = sqlite
+	makedepends = gnupg
 	makedepends = git
 	makedepends = pkgconf
 	makedepends = gtk4
+	makedepends = zig=0.17.1
 	makedepends = clang
 	makedepends = gettext
 	makedepends = flatpak
 	makedepends = ripgrep
 	makedepends = go-md2man
-	makedepends = python
-	source = shelly-3.1.6.tar.gz::https://github.com/Seafoam-Labs/Shelly-ALPM/archive/v3.1.6.tar.gz
+	makedepends = binutils
+	makedepends = pacman
+	source = shelly-3.2.1.tar.gz::https://github.com/Seafoam-Labs/Shelly-ALPM/archive/v3.2.1.tar.gz
 	source = shellybuild.conf
 	source = com.shellyorg.shelly.desktop
 	source = com.shellyorg.shelly-notifications.desktop
 	source = shelly-flatpak-integrate
-	source = ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst::https://github.com/ghostty-org/zig-gobject/releases/download/0.9.0-2026-05-22-28-1/ghostty-gobject-0.9.0-2026-05-22-28-1.tar.zst
-	source = goose-387de965800bf0f6116d51f45a9412cba0801975.tar.gz::https://github.com/luxluth/goose/archive/387de965800bf0f6116d51f45a9412cba0801975.tar.gz
-	source = zig-time-ea9fb647bb5d855b3e6a20c302a41ebd2d74478b.tar.gz::https://github.com/deatil/zig-time/archive/ea9fb647bb5d855b3e6a20c302a41ebd2d74478b.tar.gz
-	source = zig-xml-6a446191d2509788959766b60a13b8626d9ad078.tar.gz::https://github.com/ianprime0509/zig-xml/archive/6a446191d2509788959766b60a13b8626d9ad078.tar.gz
-	source = zig-toml-8685923e32e8b8a795eb2715684236975a70faed.tar.gz::https://github.com/sam701/zig-toml/archive/8685923e32e8b8a795eb2715684236975a70faed.tar.gz
-	source = zsn-1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7.tar.gz::https://github.com/Seafoam-Labs/zsn/archive/1d771e10e68021cb9e0a5c61fb3b8cd155aa8ce7.tar.gz
-	source = zeit-b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc.tar.gz::https://github.com/rockorager/zeit/archive/b1c1c2fcbc71fd7799a316bbcf0ff88d06d80ccc.tar.gz
-	source = conch-65c2e4e5b3edeaf645235bcc78e74886939c15c8.tar.gz::https://github.com/Seafoam-Labs/conch/archive/65c2e4e5b3edeaf645235bcc78e74886939c15c8.tar.gz
-	source = goose-zsn-fd9c8abae643198dd4fdabc72938521a108109e7.tar.gz::https://github.com/luxluth/goose/archive/fd9c8abae643198dd4fdabc72938521a108109e7.tar.gz
-	source = goose-conch-1f41eb10cc7073e338a07f165c6c4655ac.tar.gz::https://github.com/caroberrie/goose/archive/1f41eb10cc7073e338a07f165c6c4655ac.tar.gz
-	sha256sums = fa1e587a69b9d6e63e6835696e2d696f880d6120a023f5c922e260fc023e70af
-	sha256sums = d7adb207c0073b93679ff3b8741a734ab62b48283134465b47844884bd211bb9
-	sha256sums = a86884190d69b483376bf4f7b224483cae7fc5a65b61f98e46e805f838e053ed
+	sha256sums = 5ab6361d4546910f1618dfe56643854746e849523cfe4780afa905599e9f4005
+	sha256sums = 4126da205e91a3ba3b15453c2aeade92f67e16e3386a52aae32fbd3f2e4af9cc
+	sha256sums = 4b7cb0e42eb322de9eb616d22ca05823f91d178db5b8b67497d497ed495aca9c
 	sha256sums = cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f
 	sha256sums = 07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323
-	sha256sums = ac9bbfc49c6f1683ecbed8323157637935427bd75797ad516913fde4add506ca
-	sha256sums = 9a85321e870721496b33606eeefe434ced59d540c96bc13c656a33cf332750d4
-	sha256sums = 4ec56b442788f7d64f9471efc16b99948440c0a1f472b6cc40379faf042dcdfd
-	sha256sums = 14d731abece9649ef8158942f259e5cf2cccfda5413db0bf1f909da645c18439
-	sha256sums = b1b1eab2dfe5335005a4b1e833f97398d4af9a5e6edd174a6a75c7c515cd9346
-	sha256sums = 3411db519ecf6ce31e7bdf2c88735bf362ea65271a2db7496baa7f47a850f633
-	sha256sums = f4ca38e3cee03a4de8696d136cee79e4bbcda7307cc3386118b6979db9bbaead
-	sha256sums = 48a48b714244e37c2ad432642f13e0d444342cb45d7e29236767216949da9970
-	sha256sums = a0891e2705f59008cd8ccd728df6625618586d60c57bbb0365db8341d4a8c766
-	sha256sums = 7926e402ac70ae62acf224888143b63055bc61005e5a75cb0f54b67f2b88f754
-	source_x86_64 = zig-x86_64-linux-0.16.0.tar.xz::https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz
-	sha256sums_x86_64 = 70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00
-	source_aarch64 = zig-aarch64-linux-0.16.0.tar.xz::https://ziglang.org/download/0.16.0/zig-aarch64-linux-0.16.0.tar.xz
-	sha256sums_aarch64 = ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17
 
 pkgname = shelly
 	pkgdesc = Shelly: A Modern Arch Package Manager
@@ -62,6 +44,8 @@ pkgname = shelly
 	depends = dbus
 	depends = glibc
 	depends = libarchive
+	depends = curl
+	depends = sqlite
 	depends = dconf
 	depends = gnupg
 	depends = zstd
@@ -79,8 +63,8 @@ pkgname = shelly
 
 pkgname = shelly-flatpak-backend
 	pkgdesc = Optional native Flatpak backend for Shelly
-	depends = shelly=3.1.6
+	depends = shelly=3.2.1
 	depends = flatpak
-	provides = shelly-flatpak-backend=3.1.6
+	provides = shelly-flatpak-backend=3.2.1
 	conflicts = shelly-flatpak-backend-git
 	conflicts = shelly-flatpak-backend-bin
