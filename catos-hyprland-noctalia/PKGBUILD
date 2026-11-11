@@ -1,11 +1,12 @@
-pkgname=catos-hyprland-noctaliav5
+pkgname=catos-hyprland-noctalia
 pkgver=1.0.0
 pkgrel=1
-pkgdesc="CatOS Hyprland desktop profile powered by Noctalia v5"
+pkgdesc="CatOS Hyprland desktop profile powered by Noctalia"
 arch=('any')
-url="https://github.com/CatOS-dev/catos-hyprland-noctaliav5"
+url="https://github.com/CatOS-dev/catos-hyprland-noctalia"
 license=('MIT')
 makedepends=('git')
+replaces=('catos-hyprland-noctaliav5')
 checkdepends=('python')
 depends=(
   'adw-gtk-theme'
@@ -34,7 +35,7 @@ depends=(
   'xdg-desktop-portal-gtk'
   'xdg-desktop-portal-hyprland'
 )
-source=("${pkgname}::git+https://github.com/CatOS-dev/catos-hyprland-noctaliav5.git")
+source=("${pkgname}::git+https://github.com/CatOS-dev/catos-hyprland-noctalia.git")
 sha256sums=('SKIP')
 
 check() {
