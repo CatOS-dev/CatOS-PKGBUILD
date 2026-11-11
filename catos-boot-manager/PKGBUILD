@@ -30,6 +30,19 @@ sha256sums=('aac85fb29f26c358c38d2d25ebceab35108721683a644bff9ca8ee8c8dac57f7'
 prepare() {
   cd "${srcdir}/limine-tool-${_limine_commit}"
   patch -Np1 -i "${srcdir}/0001-limine-document-json-api.patch"
+
+  # Fetch locked Cargo dependencies in the source phase, where network access
+  # is available. The build/check phases run offline in the rootless chroot.
+  local preload="${srcdir}/limine-menu-cargo-preload"
+  install -d "$preload"
+  sed -e "s|@LIMINE_TOOL_SOURCE@|${srcdir}/limine-tool-${_limine_commit}|g" \
+      -e "s|@CMAKE_CURRENT_SOURCE_DIR@|${srcdir}/${pkgname}-${pkgver}|g" \
+    "${srcdir}/${pkgname}-${pkgver}/tools/limine-menu/Cargo.toml.in" \
+    > "$preload/Cargo.toml"
+  install -m644 "${srcdir}/${pkgname}-${pkgver}/tools/limine-menu/Cargo.lock" \
+    "$preload/Cargo.lock"
+  CARGO_HOME="${srcdir}/cargo-home" cargo fetch --locked \
+    --manifest-path "$preload/Cargo.toml"
 }
 
 build() {
