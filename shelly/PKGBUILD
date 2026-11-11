@@ -54,7 +54,12 @@ prepare() {
   cd "${srcdir}/${_source_dir}/Shelly.Ui.Gtk"
   local archive
   for archive in "${srcdir}"/zig-dep-*.tar.gz; do
-    zig fetch "$archive" >/dev/null
+    if [[ $archive == */zig-dep-7-gobject.tar.gz ]]; then
+      # Zig expects the single extracted package root for this release asset.
+      zig fetch "${srcdir}/ghostty-gobject-0.11.0-zig-0.17.0-2026-10-02-38-1" >/dev/null
+    else
+      zig fetch "$archive" >/dev/null
+    fi
   done
 }
 
