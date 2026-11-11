@@ -40,6 +40,14 @@ prepare() {
   # Preload the verified Zig package from makepkg sources. Zig's own HTTPS
   # resolver cannot fetch this GitHub release inside the rootless chroot.
   cd "$srcdir/${_source_dir}"
+
+  # Zig 0.16's bundled LLD cannot link GCC 16's .sframe PC64 relocations.
+  # Preserve the ABI and native parity tests using the system linker.
+  sed -i \
+    -e '/const run_abi_tests = b.addRunArtifact(abi_tests);/i\    abi_tests.use_lld = false;' \
+    -e '/const run_parity_tests = b.addRunArtifact(parity_tests);/i\    parity_tests.use_lld = false;' \
+    Shelly.Flatpak.Backend/build.zig
+
   (cd Shelly.Ui.Gtk && zig fetch "${srcdir}/ghostty-gobject-0.9.0-2026-05-22-28-1") >/dev/null
 
   for component in \
