@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=CatOS Hyprland (Dux)
+Comment=Hyprland session configured for Dux Shell
+Exec=/usr/bin/catos-hyprland-dux-session
+TryExec=/usr/bin/start-hyprland
+Type=Application
+DesktopNames=Hyprland
+Keywords=tiling;wayland;compositor;dux;

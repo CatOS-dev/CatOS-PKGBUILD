@@ -1,10 +1,10 @@
 schema = 4
-name = "CatOS Hyprland DMS"
-description = "CatOS Hyprland session with Dank Material Shell and Ghostty"
+name = "CatOS Hyprland Dux"
+description = "CatOS Hyprland session with Dux Shell and Ghostty"
 
 packages = [
   "hyprland",
-  "dms-shell-hyprland",
+  "dux-shell",
   "xdg-desktop-portal-gtk",
   "xdg-desktop-portal-hyprland",
   "ghostty",

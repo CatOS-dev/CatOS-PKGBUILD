@@ -1,18 +1,19 @@
-pkgbase = catos-hyprland-dms
-	pkgdesc = CatOS Catdot Profile: Hyprland + DMS + Ghostty
+pkgbase = catos-hyprland-dux
+	pkgdesc = CatOS Catdot Profile: Hyprland + Dux + Ghostty
 	pkgver = 1.0
 	pkgrel = 6
 	url = https://www.catos.info/
 	arch = any
 	license = MIT
 	depends = catdot
-	depends = dms-shell>=1.6.2
+	depends = dux-shell
 	depends = hyprland>=0.55
 	depends = xdg-desktop-portal-gtk
 	depends = xdg-desktop-portal-hyprland
 	depends = ghostty
 	depends = matugen
 	provides = catos-dms-preset
+	replaces = catos-hyprland-dms
 	source = profile.toml
 	source = hyprland.lua
 	source = hypr-colors.lua
@@ -27,10 +28,10 @@ pkgbase = catos-hyprland-dms
 	source = ghostty.conf
 	source = ghostty-colors.conf
 	source = hyprland-session.target
-	source = catos-hyprland-dms-session
-	source = catos-hyprland-dms.desktop
+	source = catos-hyprland-dux-session
+	source = catos-hyprland-dux.desktop
 	source = LICENSE-DMS
-	sha256sums = a3a2b3fd32c2032c2a48dd1a8f0028d9b3abd9f71613c37c8b909f08b4131dbb
+	sha256sums = 1d396eda074d3d20a782d26a22a4dd5845e2071c5aa82776c33d8f21e999993e
 	sha256sums = be5714b20db20e74175d71ceac5fa32604f87cbbf6560e2676b3781a0bc7a89c
 	sha256sums = f475de7859b9fd5c1905ce7b91fd816bece986b2ad2cb83cece126c1fd9e1bd4
 	sha256sums = b7988f0fccce700aff14207e5f3f42a3b0da2051acc82bfb7dafa6c7b7f92642
@@ -45,7 +46,7 @@ pkgbase = catos-hyprland-dms
 	sha256sums = 67a2587d2bf6f564f1b6f7889d4579ea8a7d9e73ed61654e935af3ef75180399
 	sha256sums = 2d6b3e7d71802cb57a060239c7461b54e059a34437a21c97f0779d98a564c255
 	sha256sums = 6383c091904db90d664866e3ce6dcfba5404b0e101257ac41e112d0d4037c17b
-	sha256sums = cb72a64b29eaacae389b9c1a3952ed0a1de5c56c53043dae743569c8bf946cdf
+	sha256sums = 4e2450a8123528c0eae82ca7c7057a22e6e1469375a003c7d35c7b442dcc8119
 	sha256sums = 4cee96286c5b7da9763a4694868bb1853b33bb1558821e0c609ad2eabd426bfa
 
-pkgname = catos-hyprland-dms
+pkgname = catos-hyprland-dux
