@@ -23,15 +23,40 @@ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Seafoam-Labs/Shelly-ALP
         'shellybuild.conf'
         'com.shellyorg.shelly.desktop'
         'com.shellyorg.shelly-notifications.desktop'
-        'shelly-flatpak-integrate')
+        'shelly-flatpak-integrate'
+        'zig-dep-1-goose.tar.gz::https://codeload.github.com/luxluth/goose/tar.gz/8e24c3c864a27d26d8cf6f9dfee92951eb47a7a7'
+        'zig-dep-2-zig_time.tar.gz::https://codeload.github.com/deatil/zig-time/tar.gz/2cb1717067ba31114f89f37464880dd392c74003'
+        'zig-dep-3-xml.tar.gz::https://codeload.github.com/ianprime0509/zig-xml/tar.gz/4beab29d68ab308af4bd12a4fc4187c24fdad0d6'
+        'zig-dep-4-toml.tar.gz::https://codeload.github.com/sam701/zig-toml/tar.gz/4a13e49ce7d19ac2df8b87962d9f23c0f5dd5bdd'
+        'zig-dep-5-zeit.tar.gz::https://codeload.github.com/rockorager/zeit/tar.gz/06bb7b462b4218770fb5438ebe6b0c0c5ef18888'
+        'zig-dep-6-conch.tar.gz::https://codeload.github.com/Seafoam-Labs/conch/tar.gz/d29b2a15ac827e7b45221a311fc1da47ed773c17'
+        'zig-dep-7-gobject.tar.gz::https://github.com/ghostty-org/zig-gobject/releases/download/0.11.0-zig-0.17.0-2026-10-02-38-1/ghostty-gobject-0.11.0-zig-0.17.0-2026-10-02-38-1.tar.gz')
 
 sha256sums=('5ab6361d4546910f1618dfe56643854746e849523cfe4780afa905599e9f4005'
             '4126da205e91a3ba3b15453c2aeade92f67e16e3386a52aae32fbd3f2e4af9cc'
             '4b7cb0e42eb322de9eb616d22ca05823f91d178db5b8b67497d497ed495aca9c'
             'cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f'
-            '07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323')
+            '07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323'
+            'd64a7d564a35b6a445a08bf1738cf71b01b12fe1d5eba5073a18971dce5d88c4'
+            'f2e7af5be61d8f1b1feae5279af21e7f295fd5aecacbd7a2fafa8a53a9fd94bb'
+            '11f6ee5d988e1bc1feb8191dc7a571428f5a72dee95328aff676a4b62fda9ab7'
+            '0ee0222435fef8ea951ab19d81a7ba9b5a480e738ab43b57b269505774520ad6'
+            '64a21f518f48c95523756ba9fdee1f40d40f767ff70a1f1c06140104859f7e79'
+            '58082589f153a9553406cf68ecf6f8b260cb2e19b094ad89b119879d0d75209a'
+            '9e25b13b759c506aca8c09640146c904499b53cda181db120d2f93bfd2209afc')
 # GitHub replaces "+" with "-" in archive top-level directory names.
 _source_dir="Shelly-ALPM-${pkgver//+/-}"
+
+# The rootless build has no network access. Download Zig dependencies as
+# checksum-verified makepkg sources, then seed Zig's normal global cache.
+prepare() {
+  export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
+  cd "${srcdir}/${_source_dir}/Shelly.Ui.Gtk"
+  local archive
+  for archive in "${srcdir}"/zig-dep-*.tar.gz; do
+    zig fetch "$archive" >/dev/null
+  done
+}
 
 build() {
   cd "$srcdir/${_source_dir}"
