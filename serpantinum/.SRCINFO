@@ -1,7 +1,7 @@
 pkgbase = serpantinum
 	pkgdesc = Wayland desktop Shell powered by Quickshell
 	pkgver = 2.4.1
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/ilyamiro/serpantinum
 	install = serpantinum.install
 	arch = x86_64

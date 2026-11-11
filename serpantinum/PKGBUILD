@@ -2,7 +2,7 @@
 # Deliberately does not replace global MIME handlers or XDG portal defaults.
 pkgname=serpantinum
 pkgver=2.4.1
-pkgrel=1
+pkgrel=2
 pkgdesc='Wayland desktop Shell powered by Quickshell'
 arch=('x86_64')
 url='https://github.com/ilyamiro/serpantinum'
@@ -82,6 +82,10 @@ EOF
 
   # The release archives place their helper executables under usr/.
   cp -a "$srcdir/usr/." "$pkgdir/usr/"
+
+  # Nautilus already owns this standard D-Bus activator. Shipping two
+  # owners makes the Niri Serpantinum profile uninstallable.
+  rm -- "$pkgdir/usr/share/dbus-1/services/org.freedesktop.FileManager1.service"
 
   # Unlike upstream's AUR package, do not set global portal, MIME
   # application, or environment defaults. Catdot owns user-local settings.
