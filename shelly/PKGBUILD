@@ -7,7 +7,7 @@ pkgrel=1
 arch=('x86_64' 'aarch64')
 url="https://github.com/Seafoam-Labs/Shelly-ALPM"
 license=('GPL-3.0-only')
-makedepends=('git' 'pkgconf' 'gtk4' 'zig>=0.16' 'clang' 'gettext' 'flatpak' 'ripgrep' 'go-md2man')
+makedepends=('git' 'pkgconf' 'gtk4' 'clang' 'gettext' 'flatpak' 'ripgrep' 'go-md2man')
 
 # Source tarball from GitHub release
 source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Seafoam-Labs/Shelly-ALPM/archive/v${pkgver}.tar.gz"
@@ -23,10 +23,19 @@ sha256sums=('fa1e587a69b9d6e63e6835696e2d696f880d6120a023f5c922e260fc023e70af'
             'cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f'
             '07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323'
             'ac9bbfc49c6f1683ecbed8323157637935427bd75797ad516913fde4add506ca')
+# Shelly 3.1.6 uses Zig 0.16 APIs removed in the Arch Zig 0.17 toolchain.
+# Fetch a SHA256-pinned build-only compiler; leave the system Zig unchanged.
+_zigver=0.16.0
+source_x86_64=("zig-x86_64-linux-${_zigver}.tar.xz::https://ziglang.org/download/${_zigver}/zig-x86_64-linux-${_zigver}.tar.xz")
+sha256sums_x86_64=('70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00')
+source_aarch64=("zig-aarch64-linux-${_zigver}.tar.xz::https://ziglang.org/download/${_zigver}/zig-aarch64-linux-${_zigver}.tar.xz")
+sha256sums_aarch64=('ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17')
+
 # GitHub replaces "+" with "-" in archive top-level directory names.
 _source_dir="Shelly-ALPM-${pkgver//+/-}"
 
 prepare() {
+  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
   export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   # Preload the verified Zig package from makepkg sources. Zig's own HTTPS
   # resolver cannot fetch this GitHub release inside the rootless chroot.
@@ -38,13 +47,15 @@ prepare() {
     Shelly.Ui.Gtk \
     Shelly.Cli.Zig \
     Shelly.Key \
-    Shelly.Notifications.Zig; do
+    Shelly.Notifications.Zig \
+    Shelly.PackageManager; do
     (cd "$component" && zig build --fetch \
       --cache-dir "${srcdir}/zig-cache")
   done
 }
 
 build() {
+  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
   export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   cd "$srcdir/${_source_dir}"
 
@@ -101,6 +112,7 @@ build() {
 }
 
 check() {
+  export PATH="${srcdir}/zig-${CARCH}-linux-${_zigver}:${PATH}"
   export ZIG_GLOBAL_CACHE_DIR="${srcdir}/zig-global-cache"
   cd "$srcdir/${_source_dir}"
 

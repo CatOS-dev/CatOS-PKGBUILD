@@ -8,7 +8,6 @@ pkgbase = shelly
 	makedepends = git
 	makedepends = pkgconf
 	makedepends = gtk4
-	makedepends = zig>=0.16
 	makedepends = clang
 	makedepends = gettext
 	makedepends = flatpak
@@ -26,6 +25,10 @@ pkgbase = shelly
 	sha256sums = cf0dc0a6d1865b9010054b36941e7bf4d445c3e7549219889f07ab08283c5c0f
 	sha256sums = 07bca40395c180578450c523ea052b036aa8197d8a871efcce55f937c101c323
 	sha256sums = ac9bbfc49c6f1683ecbed8323157637935427bd75797ad516913fde4add506ca
+	source_x86_64 = zig-x86_64-linux-0.16.0.tar.xz::https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz
+	sha256sums_x86_64 = 70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00
+	source_aarch64 = zig-aarch64-linux-0.16.0.tar.xz::https://ziglang.org/download/0.16.0/zig-aarch64-linux-0.16.0.tar.xz
+	sha256sums_aarch64 = ea4b09bfb22ec6f6c6ceac57ab63efb6b46e17ab08d21f69f3a48b38e1534f17
 
 pkgname = shelly
 	pkgdesc = Shelly: A Modern Arch Package Manager
