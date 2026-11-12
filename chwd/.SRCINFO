@@ -1,6 +1,6 @@
 pkgbase = chwd
 	pkgdesc = CatOS hardware detection tool
-	pkgver = 1.24.1
+	pkgver = 1.25.0
 	pkgrel = 1
 	url = https://github.com/CatOS-dev/chwd
 	arch = x86_64

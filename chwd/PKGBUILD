@@ -2,7 +2,7 @@
 # Contributor: Vasiliy Stelmachenok <ventureo@yandex.ru>
 
 pkgname=chwd
-pkgver=1.24.1
+pkgver=1.25.0
 pkgrel=1
 pkgdesc="CatOS hardware detection tool"
 arch=(x86_64)
