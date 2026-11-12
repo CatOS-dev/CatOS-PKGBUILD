@@ -28,5 +28,5 @@ package() {
   cp -a "${srcdir}/${_pkgname}/wallpaper/wallpapers/." "${wallpaper_dir}/"
 
   cd "${srcdir}/${_pkgname}"
-  ./install.sh -t all -c light dark -d "${theme_dir}" --tweaks macos nord float colorful darker
+  DESTDIR="${pkgdir}" ./install.sh -t all -c light dark -d "${theme_dir}" --tweaks macos nord float colorful darker
 }
