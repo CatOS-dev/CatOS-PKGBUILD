@@ -9,6 +9,7 @@ pkgbase = plasma6-applets-panel-colorizer
 	makedepends = extra-cmake-modules
 	makedepends = gettext
 	depends = libplasma
+	depends = layer-shell-qt
 	depends = python
 	depends = python-dbus
 	optdepends = spectacle: take preset preview support
