@@ -1,5 +1,5 @@
 pkgname=noctalia
-pkgver=5.0.0_beta.5
+pkgver=5.5.0
 pkgrel=1
 pkgdesc="A sleek, customizable desktop shell crafted for Wayland"
 arch=('x86_64')
@@ -20,8 +20,11 @@ depends=(
     'harfbuzz'
     'hicolor-icon-theme'
     'libglvnd'
+    'libical'
+    'libjxl'
     'libqalculate'
     'libsecret'
+    'libsndfile'
     'libsodium'
     'libwebp'
     'libxkbcommon'
@@ -53,20 +56,13 @@ optdepends=(
     'upower: battery and power-device information'
 )
 
-_tag=v5.0.0-beta.5
 source=(
-    "$pkgname-$pkgver.tar.gz::https://github.com/noctalia-dev/noctalia/archive/refs/tags/$_tag.tar.gz"
-    'disable-source-tree-assets.patch'
+    "$pkgname-$pkgver.tar.gz::https://github.com/noctalia-dev/noctalia/archive/refs/tags/v$pkgver.tar.gz"
 )
-sha256sums=('1460781135969e9a8985c2c7343131df69f5b8595e8428cfdc416f85585b9447'
-            '3f9e6c29198fda20845831f22ef29141f8f66a05f182dcfe40762cea85c63895')
-
-prepare() {
-    patch -d "noctalia-${_tag#v}" -Np1 -i "$srcdir/disable-source-tree-assets.patch"
-}
+sha256sums=('f3fe8a1f1d4306280413e04f934400b787dba212d296d97dfd638bcb55c78262')
 
 build() {
-    arch-meson "noctalia-${_tag#v}" build \
+    arch-meson "noctalia-$pkgver" build \
         --buildtype=release \
         -Dtests=disabled \
         -Dnative_optimizations=false \
@@ -76,6 +72,6 @@ build() {
 
 package() {
     meson install -C build --destdir "$pkgdir"
-    install -Dm644 "noctalia-${_tag#v}/LICENSE" \
+    install -Dm644 "noctalia-$pkgver/LICENSE" \
         "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
