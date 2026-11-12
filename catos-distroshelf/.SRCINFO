@@ -1,7 +1,7 @@
 pkgbase = catos-distroshelf
 	pkgdesc = A GUI for Distrobox containers
-	pkgver = 1.3.0
-	pkgrel = 4
+	pkgver = 1.5.2
+	pkgrel = 1
 	url = https://github.com/Aromatic05/DistroShelf
 	arch = x86_64
 	license = GPL-3.0-or-later
@@ -12,9 +12,9 @@ pkgbase = catos-distroshelf
 	depends = libadwaita
 	depends = vte4
 	depends = which
-	source = DistroShelf-1.3.0.tar.gz::https://github.com/Aromatic05/DistroShelf/archive/refs/tags/1.3.0.tar.gz
+	source = DistroShelf-1.5.2.tar.gz::https://github.com/Aromatic05/DistroShelf/archive/refs/tags/1.5.2.tar.gz
 	source = linuxbox.menu
-	sha256sums = 836d2cb94d6b7932ac715ec2ab57f8c4a36263ff96845af677479f45c62cff2e
+	sha256sums = 131e95ec675eaedb8c3da5970aa354a4553a18fa504a5e4846ab592ef5d6a990
 	sha256sums = abe871bac17c4a384b631f517db57d1b28da43e9fb56fec13d22a89eecce3f52
 
 pkgname = catos-distroshelf
