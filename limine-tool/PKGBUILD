@@ -1,8 +1,8 @@
 # Maintainer: Aromatic05
 
 pkgname=limine-tool
-pkgver=0.1.0
-pkgrel=4
+pkgver=1.1.0
+pkgrel=1
 pkgdesc='Rust multicall Limine entry, install, and mkinitcpio integration tool'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/limine-tool'
@@ -38,7 +38,8 @@ conflicts=('limine-entry-tool' 'limine-mkinitcpio-hook')
 replaces=('limine-entry-tool' 'limine-mkinitcpio-hook')
 backup=('etc/limine-entry-tool.conf')
 options=('!debug')
-source=('git+https://github.com/CatOS-dev/limine-tool.git')
+_source_commit=227deeb2b2d709d75fd50be33fa9a9f1541ac0e3
+source=("git+https://github.com/CatOS-dev/limine-tool.git#commit=${_source_commit}")
 sha256sums=('SKIP')
 
 prepare() {

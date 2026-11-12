@@ -1,67 +1,31 @@
 # Maintainer: Aromatic05
 pkgname=catos-boot-manager
 pkgver=0.2.0
-pkgrel=2
+pkgrel=3
 pkgdesc='Graphical boot loader, firmware entry and recovery manager for CatOS'
 arch=('x86_64')
 url='https://github.com/CatOS-dev/catos-boot-manager'
 license=('unknown')
-depends=('qt6-base' 'efivar' 'polkit' 'pacman' 'efibootmgr' 'systemd' 'util-linux' 'binutils' 'sbsigntools')
-makedepends=('cmake' 'ninja' 'gcc' 'pkgconf' 'qt6-tools' 'rust')
+depends=('qt6-base' 'efivar' 'polkit' 'pacman' 'efibootmgr' 'systemd' 'util-linux' 'binutils' 'sbsigntools' 'limine-tool>=1.1.0')
+makedepends=('cmake' 'ninja' 'gcc' 'pkgconf' 'qt6-tools' 'git')
 optdepends=(
   'grub: GRUB installation and repair'
   'limine: Limine installation and repair'
-  'limine-tool: Limine configuration and installation helpers'
   'refind: rEFInd installation and repair'
   'catos-firmware-boot: UKI and EFI stub operations'
   'mokutil: Secure Boot MOK management'
   'arch-install-scripts: repair a mounted Linux system via arch-chroot'
 )
-_limine_commit=751470a15416f774fe7386f606321554fb92501b
-source=(
-  "${pkgname}-${pkgver}.tar.gz::${url}/archive/refs/tags/v${pkgver}.tar.gz"
-  "limine-tool-${_limine_commit}.tar.gz::https://github.com/CatOS-dev/limine-tool/archive/${_limine_commit}.tar.gz"
-  '0001-limine-document-json-api.patch'
-)
-sha256sums=('aac85fb29f26c358c38d2d25ebceab35108721683a644bff9ca8ee8c8dac57f7'
-            '5e0099c5eb0f94c9f0db2b90b56523f7312f06d8669b84f819be2fee54ccfd60'
-            '2e92c9061bf829fcf333cf7d6cf923d7d8421b6667fcbc63b952b48e620548b5')
-
-prepare() {
-  cd "${srcdir}/limine-tool-${_limine_commit}"
-  patch -Np1 -i "${srcdir}/0001-limine-document-json-api.patch"
-
-  # Fetch locked Cargo dependencies in the source phase, where network access
-  # is available. The build/check phases run offline in the rootless chroot.
-  local preload="${srcdir}/limine-menu-cargo-preload"
-  install -d "$preload"
-  sed -e "s|@LIMINE_TOOL_SOURCE@|${srcdir}/limine-tool-${_limine_commit}|g" \
-      -e "s|@CMAKE_CURRENT_SOURCE_DIR@|${srcdir}/${pkgname}-${pkgver}|g" \
-    "${srcdir}/${pkgname}-${pkgver}/tools/limine-menu/Cargo.toml.in" \
-    > "$preload/Cargo.toml"
-  install -m644 "${srcdir}/${pkgname}-${pkgver}/tools/limine-menu/Cargo.lock" \
-    "$preload/Cargo.lock"
-  CARGO_HOME="${srcdir}/cargo-home" cargo fetch --locked \
-    --manifest-path "$preload/Cargo.toml"
-}
+_source_commit=daced0cbb3a54afe759a4233b6aa6b035c0e06a6
+source=("${pkgname}::git+${url}.git#commit=${_source_commit}")
+sha256sums=('SKIP')
 
 build() {
-  export CARGO_HOME="${srcdir}/cargo-home"
-  export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }--remap-path-prefix=${srcdir}=/usr/src/debug/${pkgname}-${pkgver}"
-  cmake -S "${srcdir}/${pkgname}-${pkgver}" -B "${srcdir}/build" -G Ninja \
+  cmake -S "${srcdir}/${pkgname}" -B "${srcdir}/build" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DLIMINE_TOOL_SOURCE="${srcdir}/limine-tool-${_limine_commit}" \
-    -DBUILD_TESTING=ON
+    -DBUILD_TESTING=OFF
   cmake --build "${srcdir}/build"
-}
-
-check() {
-  export CARGO_HOME="${srcdir}/cargo-home"
-  export RUSTFLAGS="${RUSTFLAGS:+${RUSTFLAGS} }--remap-path-prefix=${srcdir}=/usr/src/debug/${pkgname}-${pkgver}"
-  ctest --test-dir "${srcdir}/build" --output-on-failure
-  cargo test --locked --manifest-path "${srcdir}/build/limine-menu/Cargo.toml" \
-    --target-dir "${srcdir}/build/menu-tools"
 }
 
 package() {

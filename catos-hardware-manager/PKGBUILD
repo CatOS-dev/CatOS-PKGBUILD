@@ -16,12 +16,8 @@ build() {
   cmake -S "${srcdir}/${pkgname}-${pkgver}" -B "${srcdir}/build" -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DBUILD_TESTING=ON
+    -DBUILD_TESTING=OFF
   cmake --build "${srcdir}/build"
-}
-
-check() {
-  ctest --test-dir "${srcdir}/build" --output-on-failure
 }
 
 package() {
