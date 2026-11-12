@@ -16,8 +16,7 @@ optdepends=(
   'mokutil: Secure Boot MOK management'
   'arch-install-scripts: repair a mounted Linux system via arch-chroot'
 )
-_source_commit=daced0cbb3a54afe759a4233b6aa6b035c0e06a6
-source=("${pkgname}::git+${url}.git#commit=${_source_commit}")
+source=("${pkgname}::git+https://github.com/CatOS-dev/catos-boot-manager.git")
 sha256sums=('SKIP')
 
 build() {

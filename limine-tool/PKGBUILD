@@ -38,8 +38,7 @@ conflicts=('limine-entry-tool' 'limine-mkinitcpio-hook')
 replaces=('limine-entry-tool' 'limine-mkinitcpio-hook')
 backup=('etc/limine-entry-tool.conf')
 options=('!debug')
-_source_commit=227deeb2b2d709d75fd50be33fa9a9f1541ac0e3
-source=("git+https://github.com/CatOS-dev/limine-tool.git#commit=${_source_commit}")
+source=('git+https://github.com/CatOS-dev/limine-tool.git')
 sha256sums=('SKIP')
 
 prepare() {

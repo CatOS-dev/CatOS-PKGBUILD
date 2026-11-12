@@ -27,7 +27,7 @@ pkgbase = catos-boot-manager
 	optdepends = catos-firmware-boot: UKI and EFI stub operations
 	optdepends = mokutil: Secure Boot MOK management
 	optdepends = arch-install-scripts: repair a mounted Linux system via arch-chroot
-	source = catos-boot-manager::git+https://github.com/CatOS-dev/catos-boot-manager.git#commit=daced0cbb3a54afe759a4233b6aa6b035c0e06a6
+	source = catos-boot-manager::git+https://github.com/CatOS-dev/catos-boot-manager.git
 	sha256sums = SKIP
 
 pkgname = catos-boot-manager
