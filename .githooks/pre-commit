@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Reject staged additions, copies, modifications, renames or type changes
+# whose filenames or parent directories contain "test" (including "tests").
+# Deleted paths are allowed so unwanted files can be removed.
+rejected=0
+while IFS= read -r -d '' path; do
+    if [[ "${path,,}" == *test* ]]; then
+        printf 'CatOS-PKGBUILD: forbidden staged path containing test/tests: %q\n' "$path" >&2
+        rejected=1
+    fi
+done < <(git diff --cached --name-only --diff-filter=ACMRT -z)
+
+exit "$rejected"
