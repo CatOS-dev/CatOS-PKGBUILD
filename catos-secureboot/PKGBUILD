@@ -3,7 +3,7 @@ pkgver=0.3.2
 pkgrel=1
 pkgdesc="CatOS Secure Boot key, MOK, EFI image and external module lifecycle manager"
 arch=('x86_64')
-url="https://github.com/CatOS-dev/CatOS-PKGBUILD/tree/main/catos-secureboot"
+url="https://github.com/CatOS-dev/catos-secureboot"
 license=('GPL-3.0-or-later' 'BSD-2-Clause-Patent')
 depends=('python' 'openssl' 'mokutil' 'sbsigntools' 'binutils' 'kmod' 'zstd' 'xz' 'gzip'
          'mkinitcpio' 'efibootmgr' 'util-linux')
@@ -16,11 +16,13 @@ optdepends=('linux-headers: sign external modules for the linux kernel'
 backup=('etc/catos/secureboot.conf')
 options=('!strip')
 _fedora_shim_version=16.1-5
-source=("shim-x64-16.1-5.x86_64.rpm::https://dl.fedoraproject.org/pub/fedora/linux/releases/44/Everything/x86_64/os/Packages/s/shim-x64-16.1-5.x86_64.rpm")
-sha256sums=('a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917')
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/CatOS-dev/catos-secureboot/archive/refs/tags/v${pkgver}.tar.gz"
+        "shim-x64-16.1-5.x86_64.rpm::https://dl.fedoraproject.org/pub/fedora/linux/releases/44/Everything/x86_64/os/Packages/s/shim-x64-16.1-5.x86_64.rpm")
+sha256sums=('2002b61c1f327d76ba629833612485cd9cfcfa82c1c4e365f642245f220035cd'
+            'a1bbabaca8e4398b2483c678240f4be4803e91390b512a7b618da3bc88e49917')
 
 package() {
-    cd "$startdir"
+    cd "$srcdir/$pkgname-$pkgver"
     install -Dm755 packaging/catos-secureboot "$pkgdir/usr/bin/catos-secureboot"
     install -d "$pkgdir/usr/lib/catos-secureboot/catos_secureboot"
     install -Dm644 python/catos_secureboot/*.py \

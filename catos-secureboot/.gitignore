@@ -3,3 +3,5 @@ __pycache__/
 /pkg/
 /src/
 *.pkg.tar.*
+*.tar.gz
+*.rpm
