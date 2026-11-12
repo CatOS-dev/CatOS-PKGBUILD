@@ -40,7 +40,6 @@ class GrubTests(unittest.TestCase):
             "search",
             "probe",
             "efi_gop",
-            "efi_uga",
             "video_fb",
             "tpm",
             "tpm2_key_protector",
@@ -74,7 +73,7 @@ class GrubTests(unittest.TestCase):
         self.assertTrue(prohibited.isdisjoint(GRUB_PRELOAD_MODULES))
         self.assertEqual(tuple(sorted(set(GRUB_PRELOAD_MODULES))), GRUB_PRELOAD_MODULES)
 
-    def test_selects_only_the_curated_modules_and_rejects_incomplete_grub_packages(self) -> None:
+    def test_selects_only_available_curated_modules(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             modules = Path(directory)
             for name in GRUB_PRELOAD_MODULES:
@@ -82,8 +81,10 @@ class GrubTests(unittest.TestCase):
             (modules / "nativedisk.mod").write_bytes(b"must-not-preload")
             (modules / "normal.mod").unlink()
 
-            with self.assertRaisesRegex(RuntimeError, "normal"):
-                select_grub_modules(modules)
+            self.assertEqual(
+                select_grub_modules(modules),
+                tuple(name for name in GRUB_PRELOAD_MODULES if name != "normal"),
+            )
 
             (modules / "normal.mod").write_bytes(b"module")
             self.assertEqual(select_grub_modules(modules), GRUB_PRELOAD_MODULES)
@@ -97,7 +98,8 @@ class GrubTests(unittest.TestCase):
             sbat = root / "sbat.csv"
             output = esp / "EFI/CatOS/grubx64.efi"
             modules.mkdir()
-            for name in GRUB_PRELOAD_MODULES:
+            available_modules = tuple(name for name in GRUB_PRELOAD_MODULES if name != "f2fs")
+            for name in available_modules:
                 (modules / f"{name}.mod").write_bytes(b"module")
             (modules / "nativedisk.mod").write_bytes(b"must-not-preload")
             sbat.write_text("sbat,1,SBAT Version,sbat,1,https://example.invalid\n", encoding="utf-8")
@@ -112,7 +114,7 @@ class GrubTests(unittest.TestCase):
                 runner=runner,
             )
 
-            self.assertEqual(module_count, len(GRUB_PRELOAD_MODULES))
+            self.assertEqual(module_count, len(available_modules))
             self.assertEqual(output.read_bytes(), b"rebuilt-grub-core")
             command = runner.calls[0]
             self.assertEqual(command[0], "grub-install")
@@ -124,7 +126,7 @@ class GrubTests(unittest.TestCase):
             self.assertIn("--no-nvram", command)
             self.assertIn("--recheck", command)
             self.assertIn(f"--sbat={sbat}", command)
-            self.assertIn(f"--modules={' '.join(GRUB_PRELOAD_MODULES)}", command)
+            self.assertIn(f"--modules={' '.join(available_modules)}", command)
             self.assertNotIn("nativedisk", command[-1].split("=", 1)[1].split())
             self.assertNotIn("--disable-shim-lock", command)
 

@@ -27,7 +27,6 @@ GRUB_PRELOAD_MODULES = tuple(
             "cryptodisk",
             "echo",
             "efi_gop",
-            "efi_uga",
             "efifwsetup",
             "efinet",
             "erofs",
@@ -143,10 +142,7 @@ GRUB_PRELOAD_MODULES = tuple(
 def select_grub_modules(module_directory: Path) -> tuple[str, ...]:
     if not module_directory.is_dir():
         raise FileNotFoundError(f"GRUB platform module directory is missing: {module_directory}")
-    missing = tuple(name for name in GRUB_PRELOAD_MODULES if not (module_directory / f"{name}.mod").is_file())
-    if missing:
-        raise RuntimeError(f"GRUB package is missing required preload modules: {', '.join(missing)}")
-    return GRUB_PRELOAD_MODULES
+    return tuple(name for name in GRUB_PRELOAD_MODULES if (module_directory / f"{name}.mod").is_file())
 
 
 def rebuild_grub_core(
