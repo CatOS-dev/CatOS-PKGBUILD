@@ -1,7 +1,7 @@
 pkgbase = catos-hello
 	pkgdesc = CatOS Hello welcome application
-	pkgver = 0.1.2
-	pkgrel = 2
+	pkgver = 0.1.3
+	pkgrel = 1
 	url = https://github.com/CatOS-dev/catos-hello
 	arch = x86_64
 	license = GPL
@@ -16,7 +16,8 @@ pkgbase = catos-hello
 	depends = lshw
 	depends = inxi
 	depends = lsb-release
-	source = catos-hello::git+https://github.com/CatOS-dev/catos-hello.git
+	depends = xterm
+	source = catos-hello::git+https://github.com/CatOS-dev/catos-hello.git#commit=bb5c908ed043a1515994959263b70d490ac92da6
 	sha256sums = SKIP
 
 pkgname = catos-hello
